@@ -1,0 +1,13 @@
+.logoLink {
+    display: flex;
+    width: 100%;
+    padding: 40px 0 36px;
+    justify-content: center;
+  }
+  
+  .logoImage {
+    width: 117px;
+    max-width: 100%;
+    aspect-ratio: 5.85;
+    object-fit: contain;
+  }

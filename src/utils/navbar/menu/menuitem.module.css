@@ -1,0 +1,48 @@
+.menuItem {
+  margin-bottom: 1px;
+}
+
+.menuLink {
+  display: flex;
+  align-items: center;
+  padding: 10px 6px;
+  text-decoration: none;
+  color: var(--techzaa-getappui-com-manatee, #9097a7);
+  font: 400 15px/1 Play, sans-serif;
+  transition: color 0.3s ease;
+}
+
+.menuLink:hover,
+.active .menuLink {
+  color: var(--techzaa-getappui-com-white, #fff);
+}
+
+.active .menuLink {
+  border-left: 3px solid var(--techzaa-getappui-com-burning-orange, #ff6c2f);
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  margin-right: 12px;
+}
+
+.icon {
+  width: 100%;
+  height: auto;
+}
+
+.label {
+  flex-grow: 1;
+}
+
+.submenuIndicator {
+  margin-left: auto;
+}
+
+.submenuIcon {
+  width: 19px;
+  height: auto;
+}

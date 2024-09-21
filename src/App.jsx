@@ -1,9 +1,10 @@
 // import React from 'react';
-import './App.css'; //hata dena base style hai
+import Sidebar from './utils/navbar/sidebar'; 
 function App() {
   return (
     <div className="app-container">
-      <h1>Welcome to Khaitan Admin</h1>
+      <Sidebar/>
+      
     </div>
   );
 }
