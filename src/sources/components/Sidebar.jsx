@@ -3,10 +3,10 @@ import PropTypes from 'prop-types';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const categories = [
-    { name: 'Category 1', subcategories: ['Subcat 1.1', 'Subcat 1.2', 'Subcat 1.3'] },
-    { name: 'Category 2', subcategories: ['Subcat 2.1', 'Subcat 2.2'] },
-    { name: 'Category 3', subcategories: ['Subcat 3.1', 'Subcat 3.2', 'Subcat 3.3', 'Subcat 3.4'] },
-    { name: 'Category 4', subcategories: ['Subcat 4.1'] },
+    { name: 'GENERAL', subcategories: ['Dashboard', 'Products', 'Category','Inventory', 'Orders','Purchases', 'Deals', 'Invoices', 'Settings'] },
+    { name: 'USERS', subcategories: ['Profile', 'Roles', 'Permissions', 'Customers', 'Warehouses'] },
+    { name: 'OTHER', subcategories: ['Coupons', 'Reviews'] },
+    { name: 'OTHER APPS', subcategories: ['Chat','Email','Calender','Todo'] },
   ];
   
   return (
@@ -37,11 +37,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 <div className="font-bold text-lg group-hover:text-blue-400 cursor-pointer">
                   {category.name}
                 </div>
-                <ul className="pl-4 mt-2 space-y-1">
+                <ul className="pl-4 mt-4 space-y-1">
                   {category.subcategories.map((subcat, subIndex) => (
                     <li 
                       key={subIndex} 
-                      className="text-sm text-gray-400 hover:text-white cursor-pointer transition-colors"
+                      className="text-base text-gray-400 hover:text-white cursor-pointer transition-colors"
                     >
                       {subcat}
                     </li>
