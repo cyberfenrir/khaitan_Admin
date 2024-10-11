@@ -159,7 +159,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
         md:translate-x-0 bg-[#262D34] text-white overflow-y-auto
       `}>
         <div className="p-4 pt-8 md:pt-4">
-          <h2 className="text-xl font-bold mb-6">My App</h2>
+        <img src="/khaitan.gif" alt="My App Logo" className="mb-9 w-32 mx-auto" />
           <ul className="space-y-6">
             {categories.map((category, categoryIndex) => (
               <li key={categoryIndex} className="group">
@@ -193,6 +193,11 @@ Sidebar.propTypes = {
   setIsOpen: PropTypes.func.isRequired,
   selectedItem: PropTypes.string.isRequired,
   setSelectedItem: PropTypes.func.isRequired,
+  isSubItem: PropTypes.bool,
+};
+
+Sidebar.defaultProps = {
+  isSubItem: false,
 };
 
 export default Sidebar;

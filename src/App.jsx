@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
+import Header from './sources/header/header';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -21,7 +22,6 @@ function App() {
         return <h1 className="text-2xl font-bold mb-6">Products Management</h1>;
       case 'Orders':
         return <h1 className="text-2xl font-bold mb-6">Orders Overview</h1>;
-      // Add cases for other menu items as needed
       default:
         return (
           <>
@@ -34,6 +34,12 @@ function App() {
 
   return (
     <div className="flex min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="fixed w-full z-10 bg-white shadow">
+        <Header />
+      </div>
+
+      {/* Sidebar */}
       <Sidebar 
         isOpen={isSidebarOpen} 
         setIsOpen={setIsSidebarOpen}
@@ -43,8 +49,8 @@ function App() {
       
       {/* Main Content */}
       <main className={`
-        flex-1 transition-all duration-300
-        md:ml-[250px]
+        flex-1 transition-all duration-300 
+        md:ml-[250px] pt-[80px] 
       `}>
         <div className="p-8">
           {renderContent()}
