@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Users, ShoppingCart, DollarSign, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AnalyticsCard from './AnalyticsCard';
+import RecentOrders from './RecentOrders';
 
 const Dashboard = () => {
   const [salesData, setSalesData] = useState([]);
@@ -55,10 +56,10 @@ const Dashboard = () => {
         setIsLoading(true);
         // Simulating API call with setTimeout
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         // const response = await fetch('/api/sales-data');
         // const data = await response.json();
-        
+
         const mockData = [
           { month: 'Jan', sales: 4000 },
           { month: 'Feb', sales: 3000 },
@@ -68,7 +69,7 @@ const Dashboard = () => {
           { month: 'Jun', sales: 2390 },
           { month: 'Jul', sales: 3490 },
         ];
-        
+
         setSalesData(mockData);
       } catch (error) {
         console.error('Error fetching sales data:', error);
@@ -100,7 +101,7 @@ const Dashboard = () => {
             ))}
           </div>
         </div>
-        
+
         {/* Sales Chart Container */}
         <div className="w-full lg:w-1/2 bg-white rounded-lg shadow p-4">
           <h3 className="text-lg font-semibold mb-4">Monthly Sales</h3>
@@ -127,6 +128,11 @@ const Dashboard = () => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Recent Orders Table Full Width at the Bottom */}
+      <div className="w-full mt-6">
+        <RecentOrders />
       </div>
     </div>
   );

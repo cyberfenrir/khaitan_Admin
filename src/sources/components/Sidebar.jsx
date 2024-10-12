@@ -1,8 +1,9 @@
 import { Menu, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
 
-const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const [openSubcategories, setOpenSubcategories] = useState({});
 
   const categories = [
@@ -11,15 +12,15 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
       subcategories: [
         { 
           name: 'Dashboard',
-          items: ['Analytics', 'Sales Overview', 'Traffic']
+          items: ['analytics', 'sales-overview', 'traffic']
         },
         { 
           name: 'Products',
-          items: ['Add Product', 'Product List', 'Categories']
+          items: ['add-product', 'product-list', 'categories']
         },
         { 
           name: 'Orders',
-          items: ['New Orders', 'Order History', 'Returns']
+          items: ['new-orders', 'order-history', 'returns']
         },
         'Inventory',
         'Purchases',
@@ -33,11 +34,11 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
       subcategories: [
         {
           name: 'Profile',
-          items: ['View Profile', 'Edit Profile', 'Security']
+          items: ['view-profile', 'edit-profile', 'security']
         },
         {
           name: 'Roles',
-          items: ['Admin', 'Manager', 'Employee']
+          items: ['admin', 'manager', 'employee']
         },
         'Permissions',
         'Customers',
@@ -53,7 +54,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
       subcategories: [
         {
           name: 'Chat',
-          items: ['Direct Messages', 'Groups', 'Channels']
+          items: ['direct-messages', 'groups', 'channels']
         },
         'Email',
         'Calendar',
@@ -72,46 +73,34 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
     });
   };
 
-  const handleItemClick = (item, isSubItem = false) => {
-    setSelectedItem(item);
-    if (window.innerWidth < 768) {
-      setIsOpen(false);
-    }
-  };
-  
   const renderSubcategory = (subcategory, categoryIndex, subcategoryIndex) => {
     if (typeof subcategory === 'string') {
       return (
-        <li 
-          key={subcategoryIndex}
-          onClick={() => handleItemClick(subcategory)}
-          className={`
-            text-base cursor-pointer transition-colors py-2
-            ${selectedItem === subcategory 
-              ? 'text-blue-400 font-medium' 
-              : 'text-gray-400 hover:text-white'}
-          `}
-        >
-          {subcategory}
+        <li key={subcategoryIndex}>
+          {/* Use NavLink for routing */}
+          <NavLink 
+            to={`/${subcategory.toLowerCase().replace(/\s+/g, '-')}`}
+            className={({ isActive }) => `
+              text-base cursor-pointer transition-colors py-2
+              ${isActive ? 'text-blue-400 font-medium' : 'text-gray-400 hover:text-white'}
+            `}
+          >
+            {subcategory}
+          </NavLink>
         </li>
       );
     }
 
     const isOpen = openSubcategories[`${categoryIndex}-${subcategoryIndex}`];
-    
+
     return (
       <li key={subcategoryIndex}>
         <div 
           className={`
             flex items-center justify-between cursor-pointer transition-colors py-2
-            ${selectedItem === subcategory.name 
-              ? 'text-blue-400 font-medium' 
-              : 'text-gray-400 hover:text-white'}
+            text-gray-400 hover:text-white
           `}
-          onClick={() => {
-            toggleSubcategory(categoryIndex, subcategoryIndex);
-            handleItemClick(subcategory.name);
-          }}
+          onClick={() => toggleSubcategory(categoryIndex, subcategoryIndex)}
         >
           <span>{subcategory.name}</span>
           {isOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -119,17 +108,17 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
         {isOpen && subcategory.items && (
           <ul className="pl-4 mt-1 space-y-1">
             {subcategory.items.map((item, itemIndex) => (
-              <li 
-                key={itemIndex}
-                onClick={() => handleItemClick(`${subcategory.name}-${item}`, true)}
-                className={`
-                  text-sm cursor-pointer transition-colors py-1
-                  ${selectedItem === `${subcategory.name}-${item}`
-                    ? 'text-blue-400 font-medium' 
-                    : 'text-gray-500 hover:text-white'}
-                `}
-              >
-                {item}
+              <li key={itemIndex}>
+                {/* Use NavLink for subcategory items */}
+                <NavLink
+                  to={`/${subcategory.name.toLowerCase().replace(/\s+/g, '-')}/${item.toLowerCase().replace(/\s+/g, '-')}`}
+                  className={({ isActive }) => `
+                    text-sm cursor-pointer transition-colors py-1
+                    ${isActive ? 'text-blue-400 font-medium' : 'text-gray-500 hover:text-white'}
+                  `}
+                >
+                  {item}
+                </NavLink>
               </li>
             ))}
           </ul>
@@ -149,7 +138,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
           <Menu className="h-6 w-6" />
         </button>
       </div>
-      
+
       {/* Sidebar */}
       <aside className={`
         fixed top-0 left-0 z-40 h-full 
@@ -159,7 +148,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
         md:translate-x-0 bg-[#262D34] text-white overflow-y-auto
       `}>
         <div className="p-4 pt-8 md:pt-4">
-        <img src="/khaitan.gif" alt="My App Logo" className="mb-9 w-32 mx-auto" />
+          <img src="/khaitan.gif" alt="My App Logo" className="mb-9 w-32 mx-auto" />
           <ul className="space-y-6">
             {categories.map((category, categoryIndex) => (
               <li key={categoryIndex} className="group">
@@ -176,7 +165,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
           </ul>
         </div>
       </aside>
-      
+
       {/* Overlay for mobile */}
       {isOpen && (
         <div 
@@ -190,14 +179,7 @@ const Sidebar = ({ isOpen, setIsOpen, selectedItem, setSelectedItem }) => {
 
 Sidebar.propTypes = {
   isOpen: PropTypes.bool.isRequired,
-  setIsOpen: PropTypes.func.isRequired,
-  selectedItem: PropTypes.string.isRequired,
-  setSelectedItem: PropTypes.func.isRequired,
-  isSubItem: PropTypes.bool,
-};
-
-Sidebar.defaultProps = {
-  isSubItem: false,
+  setIsOpen: PropTypes.func.isRequired
 };
 
 export default Sidebar;
