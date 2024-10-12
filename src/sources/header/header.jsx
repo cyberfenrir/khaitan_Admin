@@ -1,11 +1,15 @@
 import PropTypes from 'prop-types';
+import sleep from '../../assets/icons/sleep.svg';
+import settings from '../../assets/icons/settigs.svg';
+import time from '../../assets/icons/time.svg';
+import profile from '../../assets/icons/profile.png';
 
 const Header = () => {
   const icons = [
-    { src: "./src/assets/icons/sleep.svg", alt: "Icon 1" },
-    { src: "./src/assets/icons/settigs.svg", alt: "Icon 2" },
-    { src: "./src/assets/icons/time.svg", alt: "Icon 3" },
-    { src: "./src/assets/icons/profile.png", alt: "User profile" },
+    { src: sleep, alt: "Icon 1" },
+    { src: settings, alt: "Icon 2" },
+    { src: time, alt: "Icon 3" },
+    { src: profile, alt: "User profile" },
   ];
 
   return (

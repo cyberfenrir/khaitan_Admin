@@ -12,15 +12,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         { 
           name: 'Dashboard',
-          items: ['analytics', 'sales-overview', 'traffic']
+          items: ['Analytics', 'Sales-overview', 'Traffic']
         },
         { 
           name: 'Products',
-          items: ['add-product', 'product-list', 'categories']
+          items: ['Add-product', 'Product-list', 'Categories']
         },
         { 
           name: 'Orders',
-          items: ['new-orders', 'order-history', 'returns']
+          items: ['New-orders', 'Order-history', 'Returns']
         },
         'Inventory',
         'Purchases',
@@ -34,11 +34,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         {
           name: 'Profile',
-          items: ['view-profile', 'edit-profile', 'security']
+          items: ['View-profile', 'Edit-profile', 'Security']
         },
         {
           name: 'Roles',
-          items: ['admin', 'manager', 'employee']
+          items: ['Admin', 'Manager', 'Employee']
         },
         'Permissions',
         'Customers',
@@ -54,7 +54,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         {
           name: 'Chat',
-          items: ['direct-messages', 'groups', 'channels']
+          items: ['Direct-messages', 'Groups', 'Channels']
         },
         'Email',
         'Calendar',
@@ -76,7 +76,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const renderSubcategory = (subcategory, categoryIndex, subcategoryIndex) => {
     if (typeof subcategory === 'string') {
       return (
-        <li key={subcategoryIndex}>
+        <li key={subcategoryIndex} className='mt-2 mb-2 pt-2 pb-2'>
           {/* Use NavLink for routing */}
           <NavLink 
             to={`/${subcategory.toLowerCase().replace(/\s+/g, '-')}`}

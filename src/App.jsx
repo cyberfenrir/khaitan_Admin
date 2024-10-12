@@ -12,32 +12,6 @@ import CreateProduct from './pages/Products/CreateProduct';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState('');
-
-  const renderContent = () => {
-    switch (selectedItem) {
-      case 'Dashboard':
-        return (
-          <>
-            <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
-            <div className="mb-8">
-              <Dashboard />
-            </div>
-          </>
-        );
-      case 'Products':
-        return <h1 className="text-2xl font-bold mb-6">Products Management</h1>;
-      case 'Orders':
-        return <h1 className="text-2xl font-bold mb-6">Orders Overview</h1>;
-      default:
-        return (
-          <>
-            <h1 className="text-2xl font-bold mb-6">Welcome to the Admin Panel</h1>
-            <p className="text-gray-600">Select a category from the sidebar to get started.</p>
-          </>
-        );
-    }
-  };
 
   return (
     <Router>
@@ -59,7 +33,7 @@ function App() {
             {/* Routes for different sections */}
             <Routes>
               {/* <Route path="/" element={<Welcome />} /> */}
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}

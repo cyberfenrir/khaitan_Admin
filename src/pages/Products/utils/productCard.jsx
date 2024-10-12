@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import f1 from './duPics/f1.png';
 
 function FanProduct() {
   const sizes = ['17.0', '10.5', '19.5', '12', '21', '24'];
@@ -9,7 +10,7 @@ function FanProduct() {
       <div className="flex flex-col p-6">
         <img 
           loading="lazy" 
-          src="./src/pages/Products/utils/duPics/f1.png" 
+          src={f1}
           alt="Fan type #1" 
           className="object-contain w-80 max-w-full aspect-[1.13]" 
         />
