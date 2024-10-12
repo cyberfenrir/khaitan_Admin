@@ -12,7 +12,7 @@ function App() {
       case 'Dashboard':
         return (
           <>
-            <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1>
+            {/* <h1 className="text-2xl font-bold mb-6">Dashboard Overview</h1> */}
             <div className="mb-8">
               <Dashboard />
             </div>
