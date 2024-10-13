@@ -4,6 +4,8 @@ import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
 import CategoryPage from './pages/Categories/CategoryPage';
+
+import ReusableTable from './pages/test';
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
 // import Welcome from './sources/components/Welcome';
@@ -37,6 +39,7 @@ function App() {
               <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
+              <Route path="/test" element={<ReusableTable />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
