@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
+import CategoryPage from './pages/Categories/CategoryPage';
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
 // import Welcome from './sources/components/Welcome';
@@ -35,6 +36,7 @@ function App() {
               {/* <Route path="/" element={<Welcome />} /> */}
               <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
+              <Route path="/products/categories" element={<CategoryPage />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
