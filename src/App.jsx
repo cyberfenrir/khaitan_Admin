@@ -5,20 +5,21 @@ import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
 import CategoryPage from './pages/Categories/CategoryPage';
 
-import ReusableTable from './pages/test';
+// import ReusableTable from './pages/test';
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
 // import Welcome from './sources/components/Welcome';
 import Footer from './sources/footer/footer'; 
 
 import CreateProduct from './pages/Products/CreateProduct';
+import UsersPage from './sources/components/UsersPage';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
     <Router>
-      <div className="flex flex-col min-h-screen bg-gray-100"> {/* Change to flex-col to allow footer to stick at the bottom */}
+      <div className="flex flex-col min-h-screen bg-gray-100"> 
         {/* Header */}
         <div className="fixed w-full z-10 bg-white shadow">
           <Header />
@@ -39,7 +40,8 @@ function App() {
               <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
-              <Route path="/test" element={<ReusableTable />} />
+              <Route path="/customers" element={<UsersPage />} />
+              {/* <Route path="/test" element={<ReusableTable />} /> */}
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
