@@ -4,6 +4,7 @@ import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
 import CategoryPage from './pages/Categories/CategoryPage';
+import OrderList from './pages/Orders/OrderList';
 
 import ReusableTable from './pages/test';
 // import Products from './sources/components/Products';
@@ -40,6 +41,7 @@ function App() {
               <Route path="/products/add-product" element={<CreateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
               <Route path="/test" element={<ReusableTable />} />
+              <Route path="/orders/order-history" element={<OrderList />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
