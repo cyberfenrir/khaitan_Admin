@@ -20,13 +20,15 @@ const Header = () => {
       <nav className="flex items-center gap-4">
         <div className="flex gap-4 items-center">
           {icons.map((icon, index) => (
-            <IconButton key={index} src={icon.src} alt={icon.alt} />
-          ))}
-          <div className="relative flex items-center">
-            <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
-              3
+            <div key={index} className="relative">
+              <IconButton src={icon.src} alt={icon.alt} />
+              {index === icons.length - 1 && (
+                <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
+                  3
+                </div>
+              )}
             </div>
-          </div>
+          ))}
         </div>
         <SearchBar />
       </nav>
