@@ -13,6 +13,7 @@ import ReusableTable from './pages/test';
 import Footer from './sources/footer/footer'; 
 
 import CreateProduct from './pages/Products/CreateProduct';
+import ProfilePage from './pages/Profile/utils/ProfilePage';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,6 +43,7 @@ function App() {
               <Route path="/products/categories" element={<CategoryPage />} />
               <Route path="/test" element={<ReusableTable />} />
               <Route path="/orders/order-history" element={<OrderList />} />
+              <Route path="/profile/view-profile" element={<ProfilePage />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
