@@ -111,19 +111,33 @@ const ProductTableRow = ({ product }) => {
 
 const ProductTable = ({ productsList }) => {
   return (
-    <section className="flex flex-col w-full bg-white rounded-lg border border-slate-200">
-      <div role="table" className="grid grid-cols-[59px_minmax(240px,1fr)_120px_120px_160px_140px_140px]">
-        <ProductTableHeader />
-        <div role="rowgroup" className="contents">
-          {productsList.map((product) => (
-            <ProductTableRow 
-              key={product.id} 
-              product={product}
-            />
-          ))}
+    <div className="w-full bg-white rounded-lg border border-slate-200">
+      {/* Outer container with shadow effect for scroll indication */}
+      <div className="relative">
+        {/* Left shadow */}
+        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent pointer-events-none z-10 hidden md:block" />
+        {/* Right shadow */}
+        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 hidden md:block" />
+        
+        {/* Scrollable container */}
+        <div className="overflow-auto">
+          {/* Min-width ensures the table doesn't collapse too much */}
+          <div className="min-w-[980px]">
+            <div role="table" className="grid grid-cols-[59px_minmax(240px,1fr)_120px_120px_160px_140px_140px]">
+              <ProductTableHeader />
+              <div role="rowgroup" className="contents">
+                {productsList.map((product) => (
+                  <ProductTableRow 
+                    key={product.id} 
+                    product={product}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
