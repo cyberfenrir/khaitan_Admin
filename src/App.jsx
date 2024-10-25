@@ -5,8 +5,9 @@ import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
 import CategoryPage from './pages/Categories/CategoryPage';
 import OrderList from './pages/Orders/OrderList';
-
-import ReusableTable from './pages/test';
+import UsersPage from './pages/Users/UsersPage';
+// import ReusableTable from './pages/test';
+import ProductList from "./pages/Products/ProductList";
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
 // import Welcome from './sources/components/Welcome';
@@ -40,8 +41,10 @@ function App() {
               <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
-              <Route path="/test" element={<ReusableTable />} />
+              {/* <Route path="/test" element={<ReusableTable />} /> */}
               <Route path="/orders/order-history" element={<OrderList />} />
+              <Route path="/customers" element={<UsersPage />} />
+              <Route path="/products/product-list" element={<ProductList />} />
               {/* <Route path="/products" element={<Products />} /> */}
               {/* <Route path="/orders" element={<Orders />} /> */}
             </Routes>
