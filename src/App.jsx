@@ -10,10 +10,18 @@ import UsersPage from './pages/Users/UsersPage';
 import ProductList from "./pages/Products/ProductList";
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
-// import Welcome from './sources/components/Welcome';
-import Footer from './sources/footer/footer'; 
+import DashboardStats from './pages/Roles/DashboardStatus';
+import Footer from './sources/footer/footer';
+
+import WarehouseDashboard from './pages/Warehouse/warehouseDashBoard';
+
+import SettingsPage from './pages/settings/settings';
 
 import CreateProduct from './pages/Products/CreateProduct';
+
+import RolesInformation from './pages/Roles/create/RolesInformation';
+
+import OrderDetails from'./pages/Orders/OrderDetails/orderdetails';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -45,8 +53,13 @@ function App() {
               <Route path="/orders/order-history" element={<OrderList />} />
               <Route path="/customers" element={<UsersPage />} />
               <Route path="/products/product-list" element={<ProductList />} />
-              {/* <Route path="/products" element={<Products />} /> */}
-              {/* <Route path="/orders" element={<Orders />} /> */}
+
+              <Route path="/warehouses" element={<WarehouseDashboard />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/roles/admin" element={<DashboardStats />} />
+              <Route path="/roles/create-role" element={<RolesInformation />} />
+
+              <Route path="/orders/randid" element={<OrderDetails />} />
             </Routes>
           </div>
         </main>

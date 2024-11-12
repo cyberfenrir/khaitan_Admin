@@ -1,7 +1,9 @@
 import { Menu, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
+import { NavLink } from 'react-router-dom'; 
+
+
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [openSubcategories, setOpenSubcategories] = useState({});
@@ -38,7 +40,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
         {
           name: 'Roles',
-          items: ['Admin', 'Manager', 'Employee']
+          items: ['Admin', 'Create Role', 'Manager View']
         },
         'Permissions',
         'Customers',
