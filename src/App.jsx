@@ -5,15 +5,33 @@ import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
 import CategoryPage from './pages/Categories/CategoryPage';
 import OrderList from './pages/Orders/OrderList';
-
-import ReusableTable from './pages/test';
+import UsersPage from './pages/Users/UsersPage';
+// import ReusableTable from './pages/test';
+import ProductList from "./pages/Products/ProductList";
 // import Products from './sources/components/Products';
 // import Orders from './sources/components/Orders';
-// import Welcome from './sources/components/Welcome';
-import Footer from './sources/footer/footer'; 
+import DashboardStats from './pages/Roles/DashboardStatus';
+import Footer from './sources/footer/footer';
+
+import Inventory from './pages/Pro/inventory';
+
+import WarehouseDashboard from './pages/Warehouse/warehouseDashBoard';
+
+import SettingsPage from './pages/settings/settings';
 
 import CreateProduct from './pages/Products/CreateProduct';
+
+import RolesInformation from './pages/Roles/create/RolesInformation';
+
+import OrderDetails from'./pages/Orders/OrderDetails/orderdetails';
+
 import ProfilePage from './pages/Profile/utils/ProfilePage';
+
+import Chat from './pages/Pro/chat';
+import Calendar from './pages/Pro/calendar';
+import Purchases from './pages/Pro/purchases';
+import Deals from './pages/Pro/deals';
+import Reviews from './pages/Pro/reviews';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,11 +59,27 @@ function App() {
               <Route path="/dashboard/analytics" element={<Dashboard />} />
               <Route path="/products/add-product" element={<CreateProduct />} />
               <Route path="/products/categories" element={<CategoryPage />} />
-              <Route path="/test" element={<ReusableTable />} />
+              {/* <Route path="/test" element={<ReusableTable />} /> */}
               <Route path="/orders/order-history" element={<OrderList />} />
+              <Route path="/customers" element={<UsersPage />} />
+              <Route path="/products/product-list" element={<ProductList />} />
+
+              <Route path="/warehouses" element={<WarehouseDashboard />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="/roles/admin" element={<DashboardStats />} />
+              <Route path="/roles/create-role" element={<RolesInformation />} />
+
+              <Route path="/orders/randid" element={<OrderDetails />} />
+
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/deals" element={<Deals />} />
+              <Route path="/purchases" element={<Purchases />} />
+              <Route path="/calendar" element={<Calendar />} />
               <Route path="/profile/view-profile" element={<ProfilePage />} />
-              {/* <Route path="/products" element={<Products />} /> */}
-              {/* <Route path="/orders" element={<Orders />} /> */}
+      
+
             </Routes>
           </div>
         </main>

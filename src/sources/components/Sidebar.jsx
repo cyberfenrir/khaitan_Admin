@@ -1,7 +1,9 @@
 import { Menu, ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
-import { NavLink } from 'react-router-dom'; // Import NavLink for navigation
+import { NavLink } from 'react-router-dom'; 
+
+
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [openSubcategories, setOpenSubcategories] = useState({});
@@ -25,7 +27,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         'Inventory',
         'Purchases',
         'Deals',
-        'Invoices',
         'Settings'
       ]
     },
@@ -34,11 +35,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         {
           name: 'Profile',
-          items: ['View-profile', 'Edit-profile', 'Security']
+          // items: ['View-profile', 'Edit-profile', 'Security']
+          items: ['View-profile']
         },
         {
           name: 'Roles',
-          items: ['Admin', 'Manager', 'Employee']
+          items: ['Admin', 'Create Role', 'Manager View']
         },
         'Permissions',
         'Customers',
@@ -47,18 +49,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     },
     { 
       name: 'OTHER', 
-      subcategories: ['Coupons', 'Reviews'] 
+      subcategories: ['Reviews'] 
     },
     { 
       name: 'OTHER APPS', 
       subcategories: [
-        {
-          name: 'Chat',
-          items: ['Direct-messages', 'Groups', 'Channels']
-        },
+        'Chat',
         'Email',
         'Calendar',
-        'Todo'
       ] 
     },
   ];
