@@ -13,6 +13,8 @@ import ProductList from "./pages/Products/ProductList";
 import DashboardStats from './pages/Roles/DashboardStatus';
 import Footer from './sources/footer/footer';
 
+import Inventory from './pages/Pro/inventory';
+
 import WarehouseDashboard from './pages/Warehouse/warehouseDashBoard';
 
 import SettingsPage from './pages/settings/settings';
@@ -22,6 +24,14 @@ import CreateProduct from './pages/Products/CreateProduct';
 import RolesInformation from './pages/Roles/create/RolesInformation';
 
 import OrderDetails from'./pages/Orders/OrderDetails/orderdetails';
+
+import ProfilePage from './pages/Profile/utils/ProfilePage';
+
+import Chat from './pages/Pro/chat';
+import Calendar from './pages/Pro/calendar';
+import Purchases from './pages/Pro/purchases';
+import Deals from './pages/Pro/deals';
+import Reviews from './pages/Pro/reviews';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -60,6 +70,16 @@ function App() {
               <Route path="/roles/create-role" element={<RolesInformation />} />
 
               <Route path="/orders/randid" element={<OrderDetails />} />
+
+              <Route path="/inventory" element={<Inventory />} />
+              <Route path="/reviews" element={<Reviews />} />
+              <Route path="/chat" element={<Chat />} />
+              <Route path="/deals" element={<Deals />} />
+              <Route path="/purchases" element={<Purchases />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/profile/view-profile" element={<ProfilePage />} />
+      
+
             </Routes>
           </div>
         </main>

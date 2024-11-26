@@ -27,7 +27,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         'Inventory',
         'Purchases',
         'Deals',
-        'Invoices',
         'Settings'
       ]
     },
@@ -36,7 +35,8 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         {
           name: 'Profile',
-          items: ['View-profile', 'Edit-profile', 'Security']
+          // items: ['View-profile', 'Edit-profile', 'Security']
+          items: ['View-profile']
         },
         {
           name: 'Roles',
@@ -49,18 +49,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     },
     { 
       name: 'OTHER', 
-      subcategories: ['Coupons', 'Reviews'] 
+      subcategories: ['Reviews'] 
     },
     { 
       name: 'OTHER APPS', 
       subcategories: [
-        {
-          name: 'Chat',
-          items: ['Direct-messages', 'Groups', 'Channels']
-        },
+        'Chat',
         'Email',
         'Calendar',
-        'Todo'
       ] 
     },
   ];
