@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, UserCheck, UserMinus } from 'lucide-react';
-import CustomerPage from './Utils/CustomerPage'; // Adjust path if needed
 import PropTypes from 'prop-types';
-// Simple Card components with PropTypes remain the same
+import { Users, UserPlus, UserCheck, UserMinus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import ReusableTable from '../../Utils/table'; // Adjust the import path as necessary
+
+// Simple Card components with PropTypes
 const Card = ({ children, className }) => (
   <div className={`bg-white shadow-md rounded-lg p-4 ${className}`}>
     {children}
@@ -44,7 +46,8 @@ CardContent.propTypes = {
 };
 
 const UsersPage = () => {
-  const [customerData, setCustomerData] = useState([]);
+  const [rowData, setRowData] = useState([]);
+  const navigate = useNavigate();
 
   const analyticsData = [
     { title: 'Total Users', value: '10,234', icon: Users, color: 'text-blue-500' },
@@ -53,44 +56,55 @@ const UsersPage = () => {
     { title: 'Inactive Users', value: '1,665', icon: UserMinus, color: 'text-red-500' },
   ];
 
+  const columnDefs = [
+    { headerName: 'User Name', field: 'name' },
+    { headerName: 'User ID', field: 'id' },
+    { headerName: 'Email', field: 'email' },
+    { headerName: 'Registration Date', field: 'registrationDate' },
+    {
+      headerName: 'Actions',
+      cellRenderer: (params) => (
+        <div>
+          <button 
+            onClick={() => handleEdit(params.data.id)}
+            className="bg-blue-500 text-white px-2 py-1 rounded mr-2"
+          >
+            Edit
+          </button>
+          <button 
+            onClick={() => handleDelete(params.data.id)}
+            className="bg-red-500 text-white px-2 py-1 rounded"
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   useEffect(() => {
-    // Fetch customer data here
+    // Fetch user data here
     const fetchData = async () => {
       // Replace this with actual API call
       const mockData = [
-        {
-          id: "CUS001",
-          name: "John Doe",
-          email: "john.doe@example.com",
-          registrationDate: "2024-01-15",
-          status: "Active",
-          location: "New York, USA",
-          avatar: "/api/placeholder/40/40"
-        },
-        {
-          id: "CUS002",
-          name: "Jane Smith",
-          email: "jane.smith@example.com",
-          registrationDate: "2024-02-01",
-          status: "Active",
-          location: "Los Angeles, USA",
-          avatar: "/api/placeholder/40/40"
-        },
-        {
-          id: "CUS003",
-          name: "Mike Johnson",
-          email: "mike.j@example.com",
-          registrationDate: "2024-02-15",
-          status: "Inactive",
-          location: "Chicago, USA",
-          avatar: "/api/placeholder/40/40"
-        }
+        { id: 1, name: 'John Doe', email: 'john@example.com', registrationDate: '2023-01-15' },
+        { id: 2, name: 'Jane Smith', email: 'jane@example.com', registrationDate: '2023-02-20' },
+        // Add more mock data as needed
       ];
-      setCustomerData(mockData);
+      setRowData(mockData);
     };
 
     fetchData();
   }, []);
+
+  const handleEdit = (userId) => {
+    navigate(`/user/${userId}`);
+  };
+
+  const handleDelete = (userId) => {
+    // Implement delete logic here
+    console.log(`Delete user with id: ${userId}`);
+  };
 
   return (
     <div className="p-6">
@@ -111,10 +125,13 @@ const UsersPage = () => {
         ))}
       </div>
 
-      {/* Customer Table */}
-      <div className="bg-white rounded-lg shadow">
-        <CustomerPage customersList={customerData} />
-      </div>
+      {/* ReusableTable */}
+      <ReusableTable
+        columnDefs={columnDefs}
+        rowData={rowData}
+        paginationPageSize={10}
+        height={400}
+      />
     </div>
   );
 };
