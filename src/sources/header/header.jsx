@@ -3,14 +3,20 @@ import sleep from '../../assets/icons/sleep.svg';
 import settings from '../../assets/icons/settigs.svg';
 import time from '../../assets/icons/time.svg';
 import profile from '../../assets/icons/profile.png';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const icons = [
     { src: sleep, alt: "Icon 1" },
     { src: settings, alt: "Icon 2" },
     { src: time, alt: "Icon 3" },
-    { src: profile, alt: "User profile" },
   ];
+
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate('/login');
+  }
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -21,14 +27,15 @@ const Header = () => {
         <div className="flex gap-4 items-center">
           {icons.map((icon, index) => (
             <div key={index} className="relative">
-              <IconButton src={icon.src} alt={icon.alt} />
-              {index === icons.length - 1 && (
-                <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
-                  3
-                </div>
-              )}
+              <IconButton src={icon.src} alt={icon.alt}/>
             </div>
           ))}
+          <div className='relative'>
+            <IconButton src = {profile} alt = "Profile" onClick = {handleClick}/>
+            <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
+              3
+            </div>
+          </div>
         </div>
         <SearchBar />
       </nav>
@@ -58,9 +65,9 @@ const SearchBar = () => {
   );
 };
 
-const IconButton = ({ src, alt }) => {
+const IconButton = ({ src, alt, onClick }) => {
   return (
-    <button className="flex justify-center items-center w-10 min-h-[40px]">
+    <button className="flex justify-center items-center w-10 min-h-[40px]" onClick={onClick}>
       <img
         loading="lazy"
         src={src}
@@ -75,6 +82,7 @@ const IconButton = ({ src, alt }) => {
 IconButton.propTypes = {
   src: PropTypes.string.isRequired,
   alt: PropTypes.string.isRequired,
+  onClick: PropTypes.func,
 };
 
 Header.propTypes = {

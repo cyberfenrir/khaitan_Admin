@@ -63,7 +63,7 @@ const CreateColor = () => {
               required
             />
           </div>
-          <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded-lg">
+          <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Add Color
           </button>
         </form>

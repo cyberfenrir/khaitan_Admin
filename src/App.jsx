@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
@@ -47,68 +47,80 @@ import CreateAttributesPage from './pages/Categories/CreateAttributesPage';
 
 
 import CreateColor from './pages/Colors/CreateColor';
+import LoginPage from './pages/Login/LoginPage';
+import SignInPage from './pages/Login/SignInPage';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  return (
-    <Router>
-      <div className="flex flex-col min-h-screen bg-gray-100"> {/* Change to flex-col to allow footer to stick at the bottom */}
-        {/* Header */}
-        <div className="fixed w-full z-10 bg-white shadow">
-          <Header />
-        </div>
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
 
-        {/* Sidebar */}
-        <Sidebar 
-          isOpen={isSidebarOpen} 
-          setIsOpen={setIsSidebarOpen}
-        />
-        
-        {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300 md:ml-[250px] pt-[80px]`}>
-          <div className="p-8">
-            {/* Routes for different sections */}
+  useEffect(() => {
+    const token = localStorage.getItem('data');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
-            <ProductProvider>
-              <Routes>
-                <Route path="/dashboard/analytics" element={<Dashboard />} />
-                <Route path="/products/add-product" element={<ProductInformationPage />} />
-                <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
-                <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />
-                <Route path="/products/edit-product/:slug" element={<EditProduct />} />
-                <Route path="/products/categories" element={<CategoryPage />} />
-                <Route path="/orders/order-history" element={<OrderList />} />
-                <Route path="/customers" element={<UsersPage />} />
-                <Route path="/products/product-list" element={<ProductList />} />
-                <Route path="/warehouses" element={<WarehouseDashboard />} />
-                <Route path="/settings" element={<SettingsPage />} />
-                <Route path="/roles/admin" element={<DashboardStats />} />
-                <Route path="/roles/create-role" element={<RolesInformation />} />
-                <Route path="/orders/randid" element={<OrderDetails />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/reviews" element={<Reviews />} />
-                <Route path="/chat" element={<Chat />} />
-                <Route path="/deals" element={<Deals />} />
-                <Route path="/purchases" element={<Purchases />} />
-                <Route path="/calendar" element={<Calendar />} />
-                <Route path="/profile/view-profile" element={<ProfilePage />} />
-                <Route path="/category/create-category/" element={<CreateCategoryPage />} />
-                <Route path="/category/create-attributes/" element={<CreateAttributesPage />} />
-                <Route path="colors/colors" element={<ColorsPage />} />
-                <Route path="colors/all-colors" element={<ColorsPage />} />
-                <Route path="/colors/create" element={<CreateColor />} />
-                <Route path="/colors/add-color" element={<CreateColor />} />
-              </Routes>
-            </ProductProvider>
-          </div>
-        </main>
-
-        {/* Footer */}
-        <Footer />
+return (
+  <Router>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <div className="fixed w-full z-10 bg-white shadow">
+        <Header />
       </div>
-    </Router>
-  );
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <main className={`flex-1 transition-all duration-300 md:ml-[250px] pt-[80px]`}>
+        <div className="p-8">
+          <ProductProvider>
+          <Routes>
+  {/* Public Routes */}
+  <Route path="/login" element={<LoginPage />} />
+  <Route path="/signin" element={<SignInPage />} />
+
+  {/* Protected Routes */}
+  {isLoggedIn ? (
+    <>
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/analytics" element={<Dashboard />} />
+      <Route path="/products/add-product" element={<ProductInformationPage />} />
+      <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
+      <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />
+      <Route path="/products/edit-product/:slug" element={<EditProduct />} />
+      <Route path="/products/categories" element={<CategoryPage />} />
+      <Route path="/orders/order-history" element={<OrderList />} />
+      <Route path="/customers" element={<UsersPage />} />
+      <Route path="/products/product-list" element={<ProductList />} />
+      <Route path="/warehouses" element={<WarehouseDashboard />} />
+      <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/roles/admin" element={<DashboardStats />} />
+      <Route path="/roles/create-role" element={<RolesInformation />} />
+      <Route path="/orders/randid" element={<OrderDetails />} />
+      <Route path="/inventory" element={<Inventory />} />
+      <Route path="/reviews" element={<Reviews />} />
+      <Route path="/chat" element={<Chat />} />
+      <Route path="/deals" element={<Deals />} />
+      <Route path="/purchases" element={<Purchases />} />
+      <Route path="/calendar" element={<Calendar />} />
+      <Route path="/profile/view-profile" element={<ProfilePage />} />
+      <Route path="/category/create-category/" element={<CreateCategoryPage />} />
+      <Route path="/category/create-attributes/" element={<CreateAttributesPage />} />
+      <Route path="colors/colors" element={<ColorsPage />} />
+      <Route path="colors/all-colors" element={<ColorsPage />} />
+      <Route path="/colors/create" element={<CreateColor />} />
+      <Route path="/colors/add-color" element={<CreateColor />} />
+    </>
+  ) : (
+    <Route path="*" element={<Navigate to="/login" replace />} />
+  )}
+</Routes>
+
+          </ProductProvider>
+        </div>
+      </main>
+      <Footer />
+    </div>
+  </Router>
+);
 }
 
 export default App;

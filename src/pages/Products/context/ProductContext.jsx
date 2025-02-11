@@ -5,7 +5,7 @@ export const ProductContext = createContext();
 export const ProductProvider = ({ children }) => {
   const [productInfo, setProductInfo] = useState({});
   const [pricing, setPricing] = useState({});
-  const [image, setImage] = useState(null);
+  const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
   const [selectedColor, setSelectedColor] = useState('#000000');
 
   return (
@@ -15,8 +15,8 @@ export const ProductProvider = ({ children }) => {
         setProductInfo,
         pricing,
         setPricing,
-        image,
-        setImage,
+        imageData,
+        setImageData,
         selectedColor,
         setSelectedColor,
       }}

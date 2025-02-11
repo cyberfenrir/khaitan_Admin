@@ -105,9 +105,6 @@ const RecentOrders = () => {
     <div className="ag-theme-alpine" style={{ height: 500, width: '100%' }}>
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Recent Orders</h2>
-        <button className="bg-orange-500 text-white py-2 px-4 rounded-lg">
-          Create Order
-        </button>
       </div>
       <AgGridReact
         rowData={rowData}

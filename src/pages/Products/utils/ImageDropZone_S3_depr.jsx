@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Upload } from 'lucide-react';
+import AWS from 'aws-sdk';
 
-const ImageDropZone = ({ onImageUpload }) => {
+const ImageDropZone = ({ onUpload }) => {
   const [image, setImage] = useState(null);
-  const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
+  const [fileInfo, setFileInfo] = useState({ filePath: '', fileType: '' });
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -13,17 +14,39 @@ const ImageDropZone = ({ onImageUpload }) => {
 
   const handleFile = (file) => {
     if (file && file.type.substr(0, 5) === "image") {
-      const filePath = URL.createObjectURL(file);
-      const imageType = file.type;
-      setImage(filePath);
-      setImageData({ filePath, imageType });
-      if (onImageUpload) {
-        onImageUpload({ filePath, imageType });
-      }
+      setImage(URL.createObjectURL(file));
+      setFileInfo({ filePath: file.name, fileType: file.type });
+      uploadToS3(file);
     } else {
       setImage(null);
-      setImageData({ filePath: '', imageType: '' });
+      setFileInfo({ filePath: '', fileType: '' });
     }
+  };
+
+  const uploadToS3 = (file) => {
+    const s3 = new AWS.S3({
+      accessKeyId: process.env.REACT_APP_AWS_ACCESS_KEY_ID,
+      secretAccessKey: process.env.REACT_APP_AWS_SECRET_ACCESS_KEY,
+      region: process.env.REACT_APP_AWS_REGION,
+    });
+
+    const params = {
+      Bucket: process.env.REACT_APP_S3_BUCKET_NAME,
+      Key: file.name,
+      Body: file,
+      ContentType: file.type,
+    };
+
+    s3.upload(params, (err, data) => {
+      if (err) {
+        console.error('Error uploading file:', err);
+      } else {
+        console.log('File uploaded successfully:', data);
+        if (onUpload) {
+          onUpload(data.Location, file.type);
+        }
+      }
+    });
   };
 
   return (

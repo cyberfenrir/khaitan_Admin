@@ -134,7 +134,13 @@ const ProductInformation = () => {
               }
               </>))}
         </div>
-    <button className="bg-blue-600 px-6 py-2 rounded text-white">Submit</button>
+    {/* <button className="bg-blue-600 px-6 py-2 rounded text-white">Submit</button> */}
+    <div className="flex justify-end w-[50%]">
+    <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center w-1/4">
+        Submit
+      </button>
+    </div>
+   
       </form>
           {/* <pre>{ JSON.stringify(submittedEntries)}</pre> */}
     </div>
