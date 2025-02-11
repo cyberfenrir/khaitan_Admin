@@ -14,7 +14,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       subcategories: [
         { 
           name: 'Dashboard',
-          items: ['Analytics', 'Sales-overview', 'Traffic']
+          items: ['Analytics']
         },
         { 
           name: 'Products',
@@ -22,7 +22,11 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
         { 
           name: 'Orders',
-          items: ['New-orders', 'Order-history', 'Returns']
+          items: ['Order-history']
+        },
+        { 
+          name: 'Colors',
+          items: ['Colors', 'Add Color']
         },
         'Inventory',
         'Purchases',
@@ -40,7 +44,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
         {
           name: 'Roles',
-          items: ['Admin', 'Create Role', 'Manager View']
+          items: ['Admin', 'Create Role']
         },
         'Permissions',
         'Customers',
