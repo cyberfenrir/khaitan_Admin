@@ -14,6 +14,7 @@ function ProductImagePage() {
       try {
         const colorsData = await fetchColors();
         setColors(colorsData);
+        console.log(colorsData);
       } catch (error) {
         console.error('Failed to fetch colors:', error);
       }
@@ -43,30 +44,7 @@ function ProductImagePage() {
     <div className="flex flex-col p-1">
       <h1 className="text-2xl font-bold mb-4 text-slate-600">Product Image</h1>
       <ImageDropZone setImage={setImageData} onImageUpload={handleImageUpload} />
-      <div className="mt-4">
-        <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
-          Color
-        </label>
-        <div className="flex items-center gap-3">
-          <select
-            id="color"
-            value={selectedColor}
-            onChange={(e) => setSelectedColor(e.target.value)}
-            className="w-full p-2 border border-gray-300 rounded"
-          >
-            <option value="" disabled>Select a color</option>
-            {colors.map((color) => (
-              <option key={color.id} value={color.hexCode}>
-                {color.name}
-              </option>
-            ))}
-          </select>
-          <div
-            className="w-12 h-8 border rounded"
-            style={{ backgroundColor: selectedColor }}
-          ></div>
-        </div>
-      </div>
+     
       <div className="flex justify-end w-[55%] px-3 pt-6">
         <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center w-1/4" onClick={handleSubmit}>
           Submit

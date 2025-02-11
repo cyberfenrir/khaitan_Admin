@@ -4,9 +4,9 @@ import ColorsTable from './ColorsTable';
 
 const ColorsPage = () => {
   const [colorsData, setColorsData] = useState([
-    { id: '1', name: 'Red', hexCode: '#FF0000', place: 'Header' },
-    { id: '2', name: 'Green', hexCode: '#00FF00', place: 'Footer' },
-    { id: '3', name: 'Blue', hexCode: '#0000FF', place: 'Sidebar' },
+    { id: '1', name: 'Red', hexCode: '#FF0000' },
+    { id: '2', name: 'Green', hexCode: '#00FF00' },
+    { id: '3', name: 'Blue', hexCode: '#0000FF' },
   ]);
 
   const navigate = useNavigate();

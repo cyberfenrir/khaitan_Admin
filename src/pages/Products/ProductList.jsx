@@ -7,7 +7,7 @@ export default function ProductList({ products, currentPage, totalPages, onPageC
   return (
     <main className="flex flex-col px-3">
       <section className="flex flex-col w-full bg-white rounded-xl shadow-sm">
-        <ProductHeader title="All Product List" addButtonText="Add Product" filterButtonText="This Month" />
+        <ProductHeader title="All Product List" addButtonText="Add Product" />
         <ProductPage products={products} />
         <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
       </section>

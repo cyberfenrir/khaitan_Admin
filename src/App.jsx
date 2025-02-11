@@ -23,11 +23,11 @@ import SettingsPage from './pages/settings/settings';
 
 import ColorsPage from './pages/Colors/ColorsPage';
 
-// import CreateProduct from './pages/Products/CreateProduct';
+import CreateProduct from './pages/Products/CreateProduct';
 
-import ProductInformationPage from './pages/Products/ProductInformationPage';
-import ProductPricingPage from './pages/Products/ProductPricingPage'; 
-import ProductImagePage from './pages/Products/ProductImagePage';
+// import ProductInformationPage from './pages/Products/ProductInformationPage';
+// import ProductPricingPage from './pages/Products/ProductPricingPage'; 
+// import ProductImagePage from './pages/Products/ProductImagePage';
 import EditProduct from './pages/Products/EditProduct';
 
 import RolesInformation from './pages/Roles/create/RolesInformation';
@@ -49,6 +49,7 @@ import CreateAttributesPage from './pages/Categories/CreateAttributesPage';
 import CreateColor from './pages/Colors/CreateColor';
 import LoginPage from './pages/Login/LoginPage';
 import SignInPage from './pages/Login/SignInPage';
+// import CreateProduct from './pages/Products/CreateProduct';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -82,10 +83,11 @@ return (
     <>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard/analytics" element={<Dashboard />} />
-      <Route path="/products/add-product" element={<ProductInformationPage />} />
-      <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
-      <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />
-      <Route path="/products/edit-product/:slug" element={<EditProduct />} />
+      <Route path="/products/add-product" element={<CreateProduct />} />
+      {/* <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
+      <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />*/}
+      <Route path="/products/edit-product/:slug" element={<EditProduct />} /> 
+      
       <Route path="/products/categories" element={<CategoryPage />} />
       <Route path="/orders/order-history" element={<OrderList />} />
       <Route path="/customers" element={<UsersPage />} />

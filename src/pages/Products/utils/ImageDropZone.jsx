@@ -1,14 +1,25 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import { Upload } from 'lucide-react';
 
-const ImageDropZone = ({ onImageUpload }) => {
+
+
+const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
+
+  const [selectedColor, setSelectedColor] = useState('#000000');
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
 
+  
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     handleFile(file);
+  };
+
+  const handleSave = () => {
+    setSelectedColor(selectedColor);
+    nextColor(selectedColor);
   };
 
   const handleFile = (file) => {
@@ -24,9 +35,12 @@ const ImageDropZone = ({ onImageUpload }) => {
       setImage(null);
       setImageData({ filePath: '', imageType: '' });
     }
+
+    console.log(imageData);
   };
 
   return (
+    <div>
     <div 
       className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer"
       onDrop={handleDrop}
@@ -56,7 +70,54 @@ const ImageDropZone = ({ onImageUpload }) => {
         </>
       )}
     </div>
+
+    <div className="mt-4">
+        <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
+          Color
+        </label>
+        <div className="flex items-center gap-3">
+          <select
+            id="color"
+            value={selectedColor}
+            onChange={(e) => setSelectedColor(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded"
+          >
+            <option value="" disabled>Select a color</option>
+            {colors.data?.map((color) => (
+              <option key={color.id} value={color.colorHex}>
+                {color.colorName}
+              </option>
+            ))}
+          </select>
+          <div
+            className="w-12 h-8 border rounded"
+            style={{ backgroundColor: selectedColor }}
+          ></div>
+
+          <div className="flex justify-end w-[55%] px-3 pt-6">
+            <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center w-1/4" onClick={handleSave}>
+              Save
+            </button>
+         </div>
+
+        </div>
+      </div>
+
+    </div>
+    
   );
+};
+
+
+ImageDropZone.propTypes = {
+  onImageUpload: PropTypes.func,
+  colors: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      hexCode: PropTypes.string.isRequired,
+    })
+  ).isRequired,
 };
 
 export default ImageDropZone;

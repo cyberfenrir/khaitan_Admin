@@ -8,7 +8,7 @@ const ColorsTable = ({ colorsList }) => {
       <div className="relative">
         <div className="overflow-auto">
           <div className="min-w-[1080px]">
-            <div role="table" className="grid grid-cols-[59px_minmax(240px,1fr)_120px_200px_160px]">
+            <div role="table" className="grid grid-cols-4 flex justify-between">
               <ColorsTableHeader />
               <div role="rowgroup" className="contents">
                 {colorsList.map((color) => (
@@ -29,7 +29,6 @@ ColorsTable.propTypes = {
       id: PropTypes.string.isRequired,
       name: PropTypes.string.isRequired,
       hexCode: PropTypes.string.isRequired,
-      place: PropTypes.string.isRequired,
     })
   ).isRequired,
 };

@@ -28,24 +28,17 @@ const ColorsTableRow = ({ color }) => {
   };
 
   return (
-    <div role="row" className="contents group">
-      <div className="flex justify-center py-4 px-5 border-b border-slate-200 group-hover:bg-slate-50">
-        <input
-          type="checkbox"
-          className="w-4 h-4 bg-white rounded border border-black border-opacity-20"
-          aria-label={`Select ${color.name}`}
-        />
+    <div role="row" className="contents group flex justify-between">
+      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
+        <span className="text-sm text-slate-600">{color.id}</span>
       </div>
-      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
         <span className="text-sm text-slate-600">{color.name}</span>
       </div>
-      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
         <span className="text-sm text-slate-600">{color.hexCode}</span>
       </div>
-      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
-        <span className="text-sm text-slate-600">{color.place}</span>
-      </div>
-      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 space-x-2">
+      <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 space-x-2 flex justify-center">
         {actionIcons.map((icon) => (
           <Action
             key={icon.action}
@@ -65,7 +58,6 @@ ColorsTableRow.propTypes = {
     id: PropTypes.string.isRequired,
     name: PropTypes.string.isRequired,
     hexCode: PropTypes.string.isRequired,
-    place: PropTypes.string.isRequired,
   }).isRequired,
 };
 
