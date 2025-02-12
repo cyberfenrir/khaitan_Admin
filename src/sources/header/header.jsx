@@ -1,9 +1,12 @@
 import PropTypes from 'prop-types';
+import { useState } from 'react';
+import { getAuth, signOut } from 'firebase/auth';
 import sleep from '../../assets/icons/sleep.svg';
 import settings from '../../assets/icons/settigs.svg';
 import time from '../../assets/icons/time.svg';
 import profile from '../../assets/icons/profile.png';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../AuthContext';
 
 const Header = () => {
   const icons = [
@@ -12,11 +15,36 @@ const Header = () => {
     { src: time, alt: "Icon 3" },
   ];
 
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
+  const auth = getAuth();
+  const { isAuthenticated } = useAuth();
 
-  const handleClick = () => {
-    navigate('/login');
-  }
+  // Function to handle logout
+  const handleLogout = async () => {
+    try {
+      navigate('/login');
+      await signOut(auth);
+      localStorage.clear(); // Optional: Clear any saved data
+      closeModal();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  // Function to open the confirmation modal
+  const handleProfileClick = () => {
+    if (!isAuthenticated) {
+      alert('please login first');
+      return <Navigate to="/login" />;
+    }
+    setShowLogoutModal(true);
+  };
+
+  // Function to close the modal
+  const closeModal = () => {
+    setShowLogoutModal(false);
+  };
 
   return (
     <header className="flex justify-between items-center p-4 bg-white shadow-md">
@@ -27,11 +55,11 @@ const Header = () => {
         <div className="flex gap-4 items-center">
           {icons.map((icon, index) => (
             <div key={index} className="relative">
-              <IconButton src={icon.src} alt={icon.alt}/>
+              <IconButton src={icon.src} alt={icon.alt} />
             </div>
           ))}
-          <div className='relative'>
-            <IconButton src = {profile} alt = "Profile" onClick = {handleClick}/>
+          <div className="relative">
+            <IconButton src={profile} alt="Profile" onClick={handleProfileClick} />
             <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
               3
             </div>
@@ -39,6 +67,29 @@ const Header = () => {
         </div>
         <SearchBar />
       </nav>
+
+      {showLogoutModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-lg font-bold mb-4">Confirm Logout</h2>
+            <p className="mb-6">Are you sure you want to log out?</p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                onClick={handleLogout}
+              >
+                Yes, Logout
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg"
+                onClick={closeModal}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

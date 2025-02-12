@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import GoogleLogo from './assets/GoogleLogo.png';
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '../../firebase'
 import { login } from '../../Middlewares/data/authapi';
 
 const LoginPage = () => {
@@ -12,19 +14,25 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const { data, role, error } = await login(email, password);
-      localStorage.setItem('data', data);
-      localStorage.setItem('role', role);
-      localStorage.setItem('error', error);
-      navigate('/dashboard');
+      const data = await signInWithEmailAndPassword(auth, email, password);
+      console.log(data);
+      navigate('/dashboard/analytics');
     } catch (error) {
-      console.error('Login failed:', error);
-      localStorage.setItem('error', error);
+      console.error('Login failed:', error.message);
+      alert('Login failed: ' + error.message);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = 'http://localhost:3001/api/v1/auth/google';
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const data = await signInWithPopup(auth, provider);
+      console.log(data);
+      navigate('/dashboard/analytics');
+    } catch (error) {
+      console.error('Google sign-in failed:', error.message);
+      alert('Google sign-in failed: ' + error.message);
+    }
   };
 
   return (

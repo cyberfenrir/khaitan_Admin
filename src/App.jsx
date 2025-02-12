@@ -51,10 +51,14 @@ import SignInPage from './pages/Login/LoginPage';
 import CreateAccountPage from './pages/Login/SignInPage';
 import CreateProduct from './pages/Products/CreateProduct';
 
+import ProtectedLayout from './ProtectedLayout';
+import { AuthProvider } from './AuthContext';
+
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
+    <AuthProvider>
     <Router>
       <div className="flex flex-col min-h-screen bg-gray-100"> {/* Change to flex-col to allow footer to stick at the bottom */}
         {/* Header */}
@@ -75,6 +79,7 @@ function App() {
 
             <ProductProvider>
               <Routes>
+              <Route element={<ProtectedLayout />}>
                 <Route path="/dashboard/analytics" element={<Dashboard />} />
                 <Route path="/products/add-product" element={<CreateProduct/>} />
                 <Route path="/products/edit-product/:slug" element={<EditProduct />} />
@@ -100,6 +105,8 @@ function App() {
                 <Route path="colors/all-colors" element={<ColorsPage />} />
                 <Route path="/colors/create" element={<CreateColor />} />
                 <Route path="/colors/add-color" element={<CreateColor />} />
+                </Route>
+                <Route path="/" element={<SignInPage />} />
                 <Route path="/login" element={<SignInPage />} />
                 <Route path="/signin" element={<CreateAccountPage />} />
               </Routes>
@@ -111,6 +118,7 @@ function App() {
         <Footer />
       </div>
     </Router>
+    </AuthProvider>
   );
 }
 

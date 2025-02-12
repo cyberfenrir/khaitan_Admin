@@ -40,9 +40,10 @@ const SignInPage = () => {
         const { token, role } = await signUp(name, email, password);
         localStorage.setItem('jwt', token);
         localStorage.setItem('role', role);
-        navigate('/dashboard');
+        navigate('/dashboard/analytics');
       } catch (error) {
         console.error('Sign-in failed:', error);
+        alert(error);
       }
     }
   };
