@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CreateAttributesPage from './CreateAttributesPage';
 import { X } from 'lucide-react';
 import { createCategory } from '../../Middlewares/data/categoriesapi';
+import {addData} from '../../Utils/service';
 
 const FormField = ({ label, value, placeholder, onChange }) => (
   <div className="flex flex-col flex-1 px-3 text-sm text-slate-500 w-full">
@@ -109,6 +110,7 @@ function CreateCategoryPage() {
     };
     console.log(categoryData);
     await createCategory(categoryData);
+    await addData(categoryData, 'categories');
   };
 
   return (

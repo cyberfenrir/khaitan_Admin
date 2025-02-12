@@ -49,6 +49,7 @@ import CreateAttributesPage from './pages/Categories/CreateAttributesPage';
 import CreateColor from './pages/Colors/CreateColor';
 import SignInPage from './pages/Login/LoginPage';
 import CreateAccountPage from './pages/Login/SignInPage';
+import CreateProduct from './pages/Products/CreateProduct';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -75,9 +76,7 @@ function App() {
             <ProductProvider>
               <Routes>
                 <Route path="/dashboard/analytics" element={<Dashboard />} />
-                <Route path="/products/add-product" element={<ProductInformationPage />} />
-                <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
-                <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />
+                <Route path="/products/add-product" element={<CreateProduct/>} />
                 <Route path="/products/edit-product/:slug" element={<EditProduct />} />
                 <Route path="/products/categories" element={<CategoryPage />} />
                 <Route path="/orders/order-history" element={<OrderList />} />
