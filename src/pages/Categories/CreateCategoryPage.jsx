@@ -1,33 +1,18 @@
 import { useState } from 'react';
+import CreateAttributesPage from './CreateAttributesPage';
+import { X } from 'lucide-react';
+import { createCategory } from '../../Middlewares/data/categoriesapi';
 
-const FormField = ({ label, value }) => (
+const FormField = ({ label, value, placeholder, onChange }) => (
   <div className="flex flex-col flex-1 px-3 text-sm text-slate-500 w-full">
     <label className="mb-2">{label}</label>
     <input
       type="text"
       value={value}
-      readOnly
+      onChange={onChange}
+      placeholder={placeholder}
       className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
     />
-  </div>
-);
-
-const ComboBox = ({ label, value }) => (
-  <div className="flex flex-col flex-1 px-3 w-full">
-    <label className="mb-2 text-sm text-slate-500">{label}</label>
-    <div className="relative">
-      <select
-        value={value}
-        className="w-full px-4 py-2.5 bg-white rounded-lg border border-zinc-200 text-sm text-slate-500 appearance-none"
-      >
-        <option value={value}>{value}</option>
-      </select>
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </div>
-    </div>
   </div>
 );
 
@@ -89,9 +74,16 @@ const StatusToggle = ({ label, checked, onChange }) => (
 );
 
 function CreateCategoryPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [tags, setTags] = useState(['Data', 'Manager']);
   const [isActive, setIsActive] = useState(true);
-
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryDescription, setCategoryDescription] = useState('');
+  
+  const handleClose = () => {
+    setIsDialogOpen(false);
+  };
+  
   const handleRemoveTag = (indexToRemove, newTag = null) => {
     if (newTag) {
       setTags([...tags, newTag]);
@@ -101,8 +93,22 @@ function CreateCategoryPage() {
   };
 
   const handleCreateAttribute = () => {
-    // Replace with your navigation logic, e.g., React Router's useNavigate()
+    setIsDialogOpen(true);
     console.log("Redirecting to create attribute page...");
+  };
+
+  const handleSaveAttributes = (newAttribute) => {
+    setTags([...tags, newAttribute]);
+    setIsDialogOpen(false);
+  };
+
+  const handleSaveCategory = async () => {
+    const categoryData = {
+      name: categoryName,
+      description: categoryDescription,
+    };
+    console.log(categoryData);
+    await createCategory(categoryData);
   };
 
   return (
@@ -113,8 +119,8 @@ function CreateCategoryPage() {
         </header>
         <main className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <FormField label="Category Name" value="Workspace Manager" />
-            <ComboBox label="Select Display Image" value="Facebook" />
+            <FormField label="Category Name" value={categoryName} placeholder="Category Name" onChange={(e) => setCategoryName(e.target.value)} />
+            <FormField label="Category Description" value={categoryDescription} placeholder="Description" onChange={(e) => setCategoryDescription(e.target.value)} />
             <TagInput label="Attributes" tags={tags} onRemoveTag={handleRemoveTag} onCreateAttribute={handleCreateAttribute} />
           </div>
           <div className="mt-6">
@@ -133,12 +139,20 @@ function CreateCategoryPage() {
             </div>
           </div>
         </main>
-        <footer className="px-6 py-5 border-t border-slate-200">
-          <button className="w-full px-4 py-2.5 bg-orange-500 text-white rounded-xl border border-orange-500 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
+        <footer className="px-6 py-5 border-t border-slate-200 flex justify-center ">
+          <button onClick={handleSaveCategory} className="w-1/3 px-4 py-2.5 bg-orange-500 text-white rounded-xl border border-orange-500 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
             Save Changes
           </button>
         </footer>
       </div>
+      {isDialogOpen == true && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className='bg-white rounded-lg p-6 flex flex-col'>
+            <div className='flex justify-end' onClick={handleClose}><X/></div>
+            <CreateAttributesPage onSave={handleSaveAttributes} categoryName={categoryName} />
+          </div>
+        </div>
+      )}
     </section>
   );
 }
