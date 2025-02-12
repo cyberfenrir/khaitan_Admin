@@ -1,84 +1,131 @@
-import { useState, useEffect } from 'react';
-import ImageDropZone from './utils/ImageDropZone';
-import ProductInformation from './utils/ProductInformation';
-import ProductPricing from './utils/ProductPricing';
-import { fetchColors } from '../../Middlewares/data/colorsapi';
+import { useState, useEffect } from "react";
+import PropTypes from 'prop-types';
+import { fetchCategories } from '../../Middlewares/data/categoriesapi';
+import { createProduct } from '../../Middlewares/data/productsapi';
 
-function CreateProduct() {
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [colors, setColors] = useState([]);
-  const [image, setImage] = useState(null);
-  const [productInfo, setProductInfo] = useState({});
-  const [pricing, setPricing] = useState({});
-  const [screen, setScreen] = useState('details');
+const ProductInformation = ({ onNext }) => {
+    const [categories, setCategories] = useState([]);
+    const [formData, setFormData] = useState({
+        title: '',
+        description: '',
+        price: '',
+        categoryId: ''
+    });
 
-  useEffect(() => {
-    const getColors = async () => {
-      try {
-        const colorsData = await fetchColors();
-        setColors(colorsData);
-      } catch (error) {
-        console.error('Failed to fetch colors:', error);
-      }
+    useEffect(() => {
+        let isMounted = true; // Track if the component is mounted
+
+        const getCategories = async () => {
+            try {
+                const categoriesData = await fetchCategories();
+                if (isMounted) {
+                    setCategories(categoriesData.data);
+                    console.log(categoriesData);
+                }
+            } catch (error) {
+                console.error('Failed to fetch categories:', error);
+            }
+        };
+
+        getCategories();
+
+        return () => {
+            isMounted = false; // Cleanup function to set isMounted to false
+        };
+    }, []);
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
-    getColors();
-  }, []);
-
-  const handleColorNext = (data) => {
-    setSelectedColor(data);
-  };
-
-  const handleNext = (data) => {
-    setProductInfo(data);
-    setScreen('pricing');
-  };
-
-  const handlePricingNext = (data) => {
-    setPricing(data);
-    setScreen('image');
-  };
-
-  const handleSubmit = () => {
-    const productData = {
-      image,
-      productInfo,
-      pricing,
-      selectedColor,
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await createProduct(formData);
+            onNext(formData);
+        } catch (error) {
+            console.error('Failed to create product:', error);
+        }
     };
 
-    // Send productData to the API
-    console.log(productData);
-    // Example: axios.post('/api/products', productData);
-  };
-
-  return (
-    <div className="flex flex-col p-1">
-      <h1 className="text-2xl font-bold mb-4 text-slate-600">CREATE PRODUCT</h1>
-      <div className="w-full flex flex-col gap-6 pl-5 pr-4 pb-5">
-        {screen === 'details' && (
-          <div className='bg-white rounded-lg'>
-            <ProductInformation setProductInfo={setProductInfo} onNext={handleNext} />
-          </div>
-        )}
-        {screen === 'pricing' && (
-          <div className='bg-white rounded-lg'>
-            <ProductPricing setPricing={setPricing} productInfo={productInfo} onNext={handlePricingNext} />
-          </div>
-        )}
-        {screen === 'image' && (
-          <div className='bg-white rounded-lg'>
-            <ImageDropZone setImage={setImage} productInfo={productInfo} pricing={pricing} colors={colors} nextColor={handleColorNext} />
-          </div>
-        )}
-        <div className="flex justify-end w-[55%] px-3 pt-6">
-          <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center w-1/4" onClick={handleSubmit}>
-            Submit
-          </button>
+    return (
+        <div className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Product Information</h2>
+            <form className="space-y-4" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                            Title
+                        </label>
+                        <input
+                            id="title"
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            placeholder="Enter product title"
+                            className="w-full px-3 py-2 border rounded-md"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
+                            Product Categories
+                        </label>
+                        <select 
+                            id="categoryId"
+                            name="categoryId"
+                            value={formData.categoryId}
+                            onChange={handleChange}
+                            placeholder="Select product category"
+                            className="w-full px-3 py-2 border rounded-md"
+                        >
+                            <option value="" disabled>Select a category</option>
+                            {Array.isArray(categories) && categories.map((category) => (
+                                <option value={category.id} key={category.id}>{category.name}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                        </label>
+                        <textarea
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            placeholder="Enter product description"
+                            className="w-full px-3 py-2 border rounded-md"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                            Price
+                        </label>
+                        <input 
+                            id="price"
+                            type="number" 
+                            name="price"
+                            value={formData.price}
+                            onChange={handleChange}
+                            placeholder="Enter price" 
+                            className="w-full px-3 py-2 border rounded-md" 
+                        />
+                    </div>
+                </div>
+                <div className="flex justify-end w-[100%]">
+                    <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
+                </div>
+            </form>
         </div>
-      </div>
-    </div>
-  );
-}
+    );
+};
 
-export default CreateProduct;
+ProductInformation.propTypes = {
+    onNext: PropTypes.func.isRequired,
+};
+
+export default ProductInformation;
