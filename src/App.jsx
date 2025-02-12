@@ -79,7 +79,7 @@ function App() {
                 <Route path="/products/add-product/pricing/:product_id" element={<ProductPricingPage />} />
                 <Route path="/products/add-product/:product_id/image" element={<ProductImagePage />} />
                 <Route path="/products/edit-product/:slug" element={<EditProduct />} />
-                <Route path="/products/category" element={<CategoryPage />} />
+                <Route path="/products/categories" element={<CategoryPage />} />
                 <Route path="/orders/order-history" element={<OrderList />} />
                 <Route path="/customers" element={<UsersPage />} />
                 <Route path="/products/product-list" element={<ProductList />} />
