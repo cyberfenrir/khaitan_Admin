@@ -2,22 +2,20 @@ import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { fetchCategories } from '../../../Middlewares/data/categoriesapi';
 import { createProduct } from '../../../Middlewares/data/productsapi';
+import { addData } from '../../../Utils/service';
 
 const ProductInformation = ({ onNext }) => {
+
+
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         price: '',
-        categoryId: '' 
+        categoryId: ''
     });
-    useEffect(() => {
-        // Update formData to use categoryId instead of category
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            categoryId: prevFormData.category
-        }));
-    }, [formData.category]);
+
+
     useEffect(() => {
         let isMounted = true; // Track if the component is mounted
 
@@ -25,7 +23,7 @@ const ProductInformation = ({ onNext }) => {
             try {
                 const categoriesData = await fetchCategories();
                 if (isMounted) {
-                    setCategories(categoriesData);
+                    setCategories(categoriesData.data);
                     console.log(categoriesData);
                 }
             } catch (error) {
@@ -42,18 +40,19 @@ const ProductInformation = ({ onNext }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevFormData) => ({
-            ...prevFormData,
-            [name === 'category' ? 'categoryId' : name]: value,
-        }));
+        setFormData({ ...formData, [name]: value });
     };
-    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await createProduct(formData);
-            onNext(formData);
+            const firebaseResponse  = await addData(formData, 'products');
+            console.log(firebaseResponse);
+            const response = await createProduct(formData);
+            const productData = { ...formData, productId: firebaseResponse.id };
+            localStorage.setItem('productData', JSON.stringify(productData));
+            console.log(productData);
+            onNext(productData);
         } catch (error) {
             console.error('Failed to create product:', error);
         }
@@ -79,12 +78,12 @@ const ProductInformation = ({ onNext }) => {
                         />
                     </div>
                     <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="categoryId" className="block text-sm font-medium text-gray-700 mb-1">
                             Product Categories
                         </label>
                         <select 
-                            id="category"
-                            name="category"
+                            id="categoryId"
+                            name="categoryId"
                             value={formData.categoryId}
                             onChange={handleChange}
                             placeholder="Select product category"
@@ -127,7 +126,7 @@ const ProductInformation = ({ onNext }) => {
                     </div>
                 </div>
                 <div className="flex justify-end w-[100%]">
-                    <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
+                    <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg" onClick={handleSubmit}>Next</button>
                 </div>
             </form>
         </div>

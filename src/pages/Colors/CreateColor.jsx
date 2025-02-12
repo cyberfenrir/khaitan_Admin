@@ -5,12 +5,12 @@ import { createColor } from '../../Middlewares/data/colorsapi';
 const CreateColor = () => {
   const [name, setName] = useState('');
   const [hexCode, setHexCode] = useState('#000000');
-  const [place, setPlace] = useState('');
+ 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newColor = { name, hexCode, place };
+    const newColor = { name, hexCode };
     try {
       await createColor(newColor);
       navigate('/colors');
@@ -50,19 +50,7 @@ const CreateColor = () => {
               required
             />
           </div>
-          <div className="mb-4">
-            <label htmlFor="place" className="block text-sm font-medium text-gray-700 mb-1">
-              Place
-            </label>
-            <input
-              type="text"
-              id="place"
-              value={place}
-              onChange={(e) => setPlace(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-          </div>
+         
           <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Add Color
           </button>

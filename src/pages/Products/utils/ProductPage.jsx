@@ -1,4 +1,5 @@
 import ProductTable from './ProductTable';
+import PropTypes from 'prop-types';
 
 const products = [
     {
@@ -14,12 +15,20 @@ const products = [
     // Add more products as needed
 ];
 
-const ProductPage = () => {
+const ProductPage = ({ allProducts = [] }) => {
   return (
     <div className="p-6">
-      <ProductTable productsList={products} />
+      {allProducts.length === 0 ? (
+        <p>No products available.</p>
+      ) : (
+        <ProductTable productsList={allProducts} />
+      )}
     </div>
   );
+};
+
+ProductPage.propTypes = {
+  allProducts: PropTypes.array,
 };
 
 export default ProductPage;

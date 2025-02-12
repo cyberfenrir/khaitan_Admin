@@ -1,113 +1,74 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { fetchAttributesofCategory } from '../../../Middlewares/data/categoriesapi';
+import { bulkAddAttributesToProduct } from '../../../Middlewares/data/productsapi';
+import { addData, getAttributesbyCategory, getData } from '../../../Utils/service';
 
-const ProductPricing = ({ onNext }) => {
-  const [category, setCategory] = useState('fan');
-  const productCategories = [
-    { value: "fan", label: "Fan" },
-    { value: "light", label: "Light" },
-  ];
-
-  const attributes = [
-    {
-      slug: "fan",
-      attributes: [
-        {
-          label: "Brand",
-          type: "text",
-          placeholder: "Enter Brand Name",
-          cols: 1
-        },
-        {
-          label: "Weight",
-          type: "text",
-          placeholder: "Enter Fan Weight",
-          cols: 2
-        },
-        {
-          label: "Blades",
-          type: "number",
-          placeholder: "Enter no. of blades",
-          cols: 1
-        }
-      ]
-    },
-    {
-      slug: "light",
-      attributes: [
-        {
-          label: "Brand",
-          type: "text",
-          cols: 1,
-          placeholder: "Enter Brand Name",
-        },
-        {
-          label: "Light Type",
-          type: "select",
-          placeholder: "Select Light Type",
-          options: [{ value: "LED", label: "LED" }, { value: "CFL", label: "CFL" }],
-          cols: 1
-        }
-      ]
-    }
-  ];
-
-  const [currentAttributes, setCurrentAttributes] = useState({});
-
-  const handleCategoryChange = () => {
-    setCurrentAttributes(attributes.find((attr) => attr.slug === category));
-  };
+const ProductPricing = ({ productId, categoryId, onNext }) => {
+  const [attributes, setAttributes] = useState([]);
+  const [formData, setFormData] = useState({});
 
   useEffect(() => {
-    handleCategoryChange(category);
-  }, [category]);
+    const getAttributes = async () => {
+      try {
+        // const attributesData = await fetchAttributesofCategory(categoryId);
+        const attributesData = await getAttributesbyCategory(categoryId);
+        setAttributes(attributesData);
+      } catch (error) {
+        console.error('Failed to fetch attributes:', error);
+      }
+    };
 
-  const handleSubmit = (e) => {
+    getAttributes();
+  }, [categoryId]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    onNext(data);
+    const payload = attributes.map(attribute => ({
+      productId,
+      attributeId: attribute.id,
+      value: formData[attribute.id] || ''
+    }));
+
+    try {
+      const response = await addData(payload, 'attributes');
+      console.log(response);
+      await bulkAddAttributesToProduct(productId, payload);
+      onNext();
+    } catch (error) {
+      console.error('Failed to add attributes:', error);
+    }
   };
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Product Pricing</h2>
+      <h2 className="text-xl font-semibold mb-4">Product Attributes</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {currentAttributes.attributes && currentAttributes.attributes.map((attr) => (
-            <>
-              {attr.type !== "select" && (
-                <div className={`flex flex-col col-span-${attr.cols}`}>
-                  <label htmlFor={attr.label}>{attr.label}</label>
-                  <input 
-                    id={attr.label} 
-                    name={attr.label} 
-                    placeholder={attr.placeholder} 
-                    type={attr.type || "text"}
-                    className="w-full px-3 py-2 border rounded-md"
-                  />
-                </div>
-              )}
-              {attr.type === "select" && (
-                <div className={`flex flex-col col-span-${attr.cols}`}>
-                  <label htmlFor={attr.label}>{attr.label}</label>
-                  <select 
-                    id={attr.label} 
-                    name={attr.label} 
-                    placeholder={attr.placeholder}
-                    className="w-full px-3 py-2 border rounded-md"
-                  >
-                    {attr.options.map((option) => (
-                      <option value={option.value} key={option.value}>{option.label}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </>
+          {attributes.map(attribute => (
+            <div key={attribute.id} className="flex flex-col">
+              <label htmlFor={attribute.id} className="block text-sm font-medium text-gray-700 mb-1">
+                {attribute.name}
+              </label>
+              <input
+                id={attribute.id}
+                name={attribute.id}
+                type="text"
+                value={formData[attribute.id] || ''}
+                onChange={handleChange}
+                placeholder={`Enter ${attribute.name}`}
+                className="w-full px-3 py-2 border rounded-md"
+              />
+            </div>
           ))}
         </div>
         <div className="flex justify-end w-[100%]">
-          <button type="submit" className="bg-orange-500 px-6 py-2 rounded text-white mt-4">Next</button>
+          <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
         </div>
       </form>
     </div>
@@ -115,6 +76,8 @@ const ProductPricing = ({ onNext }) => {
 };
 
 ProductPricing.propTypes = {
+  productId: PropTypes.string.isRequired,
+  categoryId: PropTypes.string.isRequired,
   onNext: PropTypes.func.isRequired,
 };
 

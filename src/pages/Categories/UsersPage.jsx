@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Users, UserPlus, UserCheck, UserMinus } from 'lucide-react';
-import CustomerPage from './Utils/CustomerPage'; // Adjust path if needed
+import CustomerPage from './Utils/CustomerPage';
 import PropTypes from 'prop-types';
-// Simple Card components with PropTypes remain the same
+
 const Card = ({ children, className }) => (
   <div className={`bg-white shadow-md rounded-lg p-4 ${className}`}>
     {children}

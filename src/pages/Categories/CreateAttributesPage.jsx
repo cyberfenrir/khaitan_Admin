@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 function CreateAttributesPage({ onSave, categoryName }) {
   const [attributes, setAttributes] = useState([]);
   const [attributeName, setAttributeName] = useState('');
+  const [attributeType, setAttributeType] = useState('');
+  const [attributeUnit, setAttributeUnit] = useState('');
 
 
   const handleSave = () => {
@@ -29,6 +31,22 @@ function CreateAttributesPage({ onSave, categoryName }) {
               onChange={(e) => setAttributeName(e.target.value)}
               className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
               placeholder="Enter attribute name..."
+            />
+            <label className="mb-2 text-sm text-slate-500">Attribute DataType</label>
+            <input
+              type="text"
+              value={attributeType}
+              onChange={(e) => setAttributeType(e.target.value)}
+              className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
+              placeholder="Enter attribute type..."
+            />
+            <label className="mb-2 text-sm text-slate-500">Attribute Value</label>
+            <input
+              type="text"
+              value={attributeUnit}
+              onChange={(e) => setAttributeUnit(e.target.value)}
+              className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
+              placeholder="Enter attribute Value..."
             />
           </div>
         </main>

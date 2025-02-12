@@ -25,9 +25,6 @@ import ColorsPage from './pages/Colors/ColorsPage';
 
 // import CreateProduct from './pages/Products/CreateProduct';
 
-import ProductInformationPage from './pages/Products/ProductInformationPage';
-import ProductPricingPage from './pages/Products/ProductPricingPage'; 
-import ProductImagePage from './pages/Products/ProductImagePage';
 import EditProduct from './pages/Products/EditProduct';
 
 import RolesInformation from './pages/Roles/create/RolesInformation';

@@ -27,6 +27,7 @@ export const createProduct = async (productData) => {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/v1/products`, productData);
     console.log('Product created successfully:', response.data);
+    localStorage.setItem('product', JSON.stringify(response.data));
   } catch (error) {
     console.error('Error creating product:', error);
   }
@@ -51,6 +52,7 @@ export const deleteProduct = async (id) => {
     console.error('Error deleting product:', error);
   }
 };
+
 
 // Example usage
 // // const productId = 1;
@@ -131,10 +133,6 @@ export const getProductWithAttributesAndMedia = async (id) => {
     console.error('Error fetching product with attributes and media:', error);
   }
 };
-
-
-
-
 
 
 
