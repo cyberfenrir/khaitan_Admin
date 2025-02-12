@@ -1,5 +1,8 @@
+const API_BASE_URL = 'http://localhost:3001/api/v1/users';
+
+
 export const login = async (email, password) => {
-    const response = await fetch('http://localhost:3001/api/v1/users/signin', {
+    const response = await fetch(`${API_BASE_URL}/signin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -15,7 +18,7 @@ export const login = async (email, password) => {
   };
   
   export const signUp = async (name, email, password, phoneNumber, roleId) => {
-    const response = await fetch('http://localhost:3001/api/v1/users/signup', {
+    const response = await fetch(`${API_BASE_URL}/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
