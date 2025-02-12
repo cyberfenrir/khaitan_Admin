@@ -1,26 +1,37 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { fetchAttributesofCategory } from '../../../Middlewares/data/categoriesapi';
 import { bulkAddAttributesToProduct } from '../../../Middlewares/data/productsapi';
-import { addData, getAttributesbyCategory, getData } from '../../../Utils/service';
+import { addData, getAttributesbyCategory } from '../../../Utils/service';
 
-const ProductPricing = ({ productId, categoryId, onNext }) => {
+const ProductPricing = ({ onNext }) => {
   const [attributes, setAttributes] = useState([]);
   const [formData, setFormData] = useState({});
+  const [productData, setProductData] = useState(null);
+
+  useEffect(() => {
+    // Get product data from localStorage
+    const storedProductData = localStorage.getItem('productData');
+    if (storedProductData) {
+      setProductData(JSON.parse(storedProductData));
+    }
+  }, []);
 
   useEffect(() => {
     const getAttributes = async () => {
+      if (!productData?.categoryId) return;
+      
       try {
-        // const attributesData = await fetchAttributesofCategory(categoryId);
-        const attributesData = await getAttributesbyCategory(categoryId);
-        setAttributes(attributesData);
+        const attributesData = await getAttributesbyCategory(productData.categoryId);
+        if (attributesData.success) {
+          setAttributes(attributesData.data);
+        }
       } catch (error) {
         console.error('Failed to fetch attributes:', error);
       }
     };
 
     getAttributes();
-  }, [categoryId]);
+  }, [productData?.categoryId]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,8 +40,13 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!productData?.productId) {
+      console.error('Product ID not found');
+      return;
+    }
+
     const payload = attributes.map(attribute => ({
-      productId,
+      productId: productData.productId,
       attributeId: attribute.id,
       value: formData[attribute.id] || ''
     }));
@@ -38,12 +54,16 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
     try {
       const response = await addData(payload, 'attributes');
       console.log(response);
-      await bulkAddAttributesToProduct(productId, payload);
+      await bulkAddAttributesToProduct(productData.productId, payload);
       onNext();
     } catch (error) {
       console.error('Failed to add attributes:', error);
     }
   };
+
+  if (!productData) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm">
@@ -67,7 +87,7 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
             </div>
           ))}
         </div>
-        <div className="flex justify-end w-[100%]">
+        <div className="flex justify-end w-[100%] mt-4">
           <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
         </div>
       </form>
@@ -76,8 +96,6 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
 };
 
 ProductPricing.propTypes = {
-  productId: PropTypes.string.isRequired,
-  categoryId: PropTypes.string.isRequired,
   onNext: PropTypes.func.isRequired,
 };
 

@@ -1,12 +1,8 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
-import { fetchCategories } from '../../../Middlewares/data/categoriesapi';
-import { createProduct } from '../../../Middlewares/data/productsapi';
-import { addData } from '../../../Utils/service';
+import { addData, getData } from '../../../Utils/service';
 
 const ProductInformation = ({ onNext }) => {
-
-
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
@@ -15,16 +11,15 @@ const ProductInformation = ({ onNext }) => {
         categoryId: ''
     });
 
-
     useEffect(() => {
-        let isMounted = true; // Track if the component is mounted
+        let isMounted = true;
 
         const getCategories = async () => {
             try {
-                const categoriesData = await fetchCategories();
-                if (isMounted) {
-                    setCategories(categoriesData.data);
-                    console.log(categoriesData);
+                const result = await getData('categories');
+                if (isMounted && result.success) {
+                    setCategories(result.data);
+                    console.log('Categories from Firebase:', result.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -34,7 +29,7 @@ const ProductInformation = ({ onNext }) => {
         getCategories();
 
         return () => {
-            isMounted = false; // Cleanup function to set isMounted to false
+            isMounted = false;
         };
     }, []);
 
@@ -46,9 +41,8 @@ const ProductInformation = ({ onNext }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const firebaseResponse  = await addData(formData, 'products');
+            const firebaseResponse = await addData(formData, 'products');
             console.log(firebaseResponse);
-            const response = await createProduct(formData);
             const productData = { ...formData, productId: firebaseResponse.id };
             localStorage.setItem('productData', JSON.stringify(productData));
             console.log(productData);
@@ -86,7 +80,6 @@ const ProductInformation = ({ onNext }) => {
                             name="categoryId"
                             value={formData.categoryId}
                             onChange={handleChange}
-                            placeholder="Select product category"
                             className="w-full px-3 py-2 border rounded-md"
                         >
                             <option value="" disabled>Select a category</option>
@@ -126,7 +119,7 @@ const ProductInformation = ({ onNext }) => {
                     </div>
                 </div>
                 <div className="flex justify-end w-[100%]">
-                    <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg" onClick={handleSubmit}>Next</button>
+                    <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
                 </div>
             </form>
         </div>
