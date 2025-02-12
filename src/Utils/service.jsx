@@ -19,3 +19,15 @@ export const addData = async (data, collectionName) => {
         return { error: "Error adding document." };
     }
 }
+
+export const getData = async (collectionName) => {
+    const ref = collection(firebase, collectionName);
+    try {
+        const querySnapshot = await getDocs(ref);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return { success: true, data };
+    } catch (e) {
+        console.error("Error fetching documents: ", e);
+        return { error: "Error fetching documents." };
+    }
+}
