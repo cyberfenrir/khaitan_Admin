@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createColor } from '../../Middlewares/data/colorsapi';
+import { addColor } from '../../Utils/service';
 
 const CreateColor = () => {
   const [name, setName] = useState('');
   const [hexCode, setHexCode] = useState('#000000');
- 
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newColor = { name, hexCode };
     try {
-      await createColor(newColor);
-      navigate('/colors');
+      await addColor(newColor);
+      navigate('/colors/colors');
     } catch (error) {
       console.error('Failed to create color:', error);
     }
@@ -50,7 +49,6 @@ const CreateColor = () => {
               required
             />
           </div>
-         
           <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Add Color
           </button>

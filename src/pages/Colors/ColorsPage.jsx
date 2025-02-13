@@ -1,15 +1,44 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ColorsTable from './ColorsTable';
+import { editColor, deleteColor, getAllColors } from '../../Utils/service';
 
 const ColorsPage = () => {
-  const [colorsData, setColorsData] = useState([
-    { id: '1', name: 'Red', hexCode: '#FF0000' },
-    { id: '2', name: 'Green', hexCode: '#00FF00' },
-    { id: '3', name: 'Blue', hexCode: '#0000FF' },
-  ]);
-
+  const [colorsData, setColorsData] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchColors = async () => {
+      const result = await getAllColors();
+      if (result.success) {
+        setColorsData(result.data);
+      } else {
+        console.error(result.error);
+      }
+    };
+
+    fetchColors();
+  }, []);
+
+
+
+  const handleEditColor = async (colorId, colorData) => {
+    const result = await editColor(colorId, colorData);
+    if (result.success) {
+      setColorsData(colorsData.map(color => color.id === colorId ? { id: colorId, ...colorData } : color));
+    } else {
+      console.error(result.error);
+    }
+  };
+
+  const handleDeleteColor = async (colorId) => {
+    const result = await deleteColor(colorId);
+    if (result.success) {
+      setColorsData(colorsData.filter(color => color.id !== colorId));
+    } else {
+      console.error(result.error);
+    }
+  };
 
   return (
     <section className="container mx-auto p-6">
@@ -23,7 +52,11 @@ const ColorsPage = () => {
             Add Color
           </button>
         </header>
-        <ColorsTable colorsList={colorsData} />
+        <ColorsTable
+          colorsList={colorsData}
+          onEditColor={handleEditColor}
+          onDeleteColor={handleDeleteColor}
+        />
       </div>
     </section>
   );

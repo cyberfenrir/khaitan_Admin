@@ -10,17 +10,17 @@ const actionIcons = [
   { src: deleteIcon, bgColor: "bg-red-400 bg-opacity-10", action: "delete" }
 ];
 
-const ColorsTableRow = ({ color }) => {
+const ColorsTableRow = ({ color, onEditColor, onDeleteColor }) => {
   const handleAction = (action) => {
     switch (action) {
       case 'view':
         console.log(`View color ${color.id}`);
         break;
       case 'edit':
-        console.log(`Edit color ${color.id}`);
+        onEditColor(color.id, color);
         break;
       case 'delete':
-        console.log(`Delete color ${color.id}`);
+        onDeleteColor(color.id);
         break;
       default:
         break;
@@ -59,6 +59,8 @@ ColorsTableRow.propTypes = {
     name: PropTypes.string.isRequired,
     hexCode: PropTypes.string.isRequired,
   }).isRequired,
+  onEditColor: PropTypes.func.isRequired,
+  onDeleteColor: PropTypes.func.isRequired,
 };
 
 export default ColorsTableRow;

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import ColorsTableHeader from './ColorsTableHeader';
 import ColorsTableRow from './ColorsTableRow';
 
-const ColorsTable = ({ colorsList }) => {
+const ColorsTable = ({ colorsList, onEditColor, onDeleteColor }) => {
   return (
     <div className="w-full bg-white rounded-lg border border-slate-200">
       <div className="relative">
@@ -12,7 +12,12 @@ const ColorsTable = ({ colorsList }) => {
               <ColorsTableHeader />
               <div role="rowgroup" className="contents">
                 {colorsList.map((color) => (
-                  <ColorsTableRow key={color.id} color={color} />
+                  <ColorsTableRow
+                    key={color.id}
+                    color={color}
+                    onEditColor={onEditColor}
+                    onDeleteColor={onDeleteColor}
+                  />
                 ))}
               </div>
             </div>
@@ -31,6 +36,8 @@ ColorsTable.propTypes = {
       hexCode: PropTypes.string.isRequired,
     })
   ).isRequired,
+  onEditColor: PropTypes.func.isRequired,
+  onDeleteColor: PropTypes.func.isRequired,
 };
 
 export default ColorsTable;
