@@ -42,7 +42,7 @@ const ProductTableRow = ({ product, onDelete }) => {
         console.log(`View product ${product.id}`);
         break;
       case 'edit':
-        window.location.href = `/edit-product/${product.id}`;
+        window.location.href = `/products/edit-product/${product.id}`;
         break;
       case 'delete': {
         deleteProduct(product.id);

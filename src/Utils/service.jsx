@@ -105,8 +105,25 @@ export const uploadImageToStorage = async (file) => {
       return { error: "Error adding media document." };
     }
   };
+
+  export const getProductById = async (productId) => {
+    const ref = collection(firebase, 'products');
+    const q = query(ref, where("id", "==", productId));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        return { success: false, error: "Product not found" };
+      }
+      const product = querySnapshot.docs[0].data();
+      return { success: true, data: product };
+    } catch (error) {
+      console.error("Error fetching product: ", error);
+      return { success: false, error: error.message };
+    }
+  };
   
-  // Function to fetch all media data from Firestore
+  
   export const getAllMedia = async () => {
     const ref = collection(firebase, 'media');
     try {
@@ -116,6 +133,35 @@ export const uploadImageToStorage = async (file) => {
     } catch (e) {
       console.error("Error fetching media documents: ", e);
       return { error: "Error fetching media documents." };
+    }
+  };
+
+  export const updateProduct = async (productId, productData) => {
+    const ref = collection(firebase, 'products');
+    const q = query(ref, where("id", "==", productId));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        return { success: false, error: "Product not found" };
+      }
+      const docRef = querySnapshot.docs[0].ref;
+      await updateDoc(docRef, productData);
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating product: ", error);
+      return { success: false, error: error.message };
+    }
+  };
+  
+  export const updateAttributes = async (attributeId, attributeData) => {
+    const ref = doc(firebase, 'attributes', attributeId);
+    try {
+      await updateDoc(ref, attributeData);
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating attribute: ", error);
+      return { success: false, error: error.message };
     }
   };
 
@@ -257,3 +303,32 @@ export const deleteAttribute = async (attributeId) => {
         };
     }
 }
+
+export const fetchCategoryById = async (categoryId) => {
+    const ref = collection(firebase, 'categories');
+    const q = query(ref, where("id", "==", categoryId));
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      if (querySnapshot.empty) {
+        return { success: false, error: "Category not found" };
+      }
+      const category = querySnapshot.docs[0].data();
+      return { success: true, data: category };
+    } catch (error) {
+      console.error("Error fetching category: ", error);
+      return { success: false, error: error.message };
+    }
+  };
+
+  export const getAllCategories = async () => {
+    const ref = collection(firebase, 'categories');
+    try {
+      const querySnapshot = await getDocs(ref);
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return { success: true, data };
+    } catch (e) {
+      console.error("Error fetching categories: ", e);
+      return { error: "Error fetching categories." };
+    }
+  };
