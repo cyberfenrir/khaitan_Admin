@@ -1,13 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Upload } from 'lucide-react';
-import { uploadImageToStorage, addMedia } from '../../../Utils/service';
+import { useNavigate } from 'react-router-dom';
+import { uploadImageToStorage, addMedia, getAllColors } from '../../../Utils/service';
 
-
-const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
+const ImageDropZone = ({ onImageUpload, nextColor }) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
+  const [colors, setColors] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const getColors = async () => {
+      try {
+        const colorsData = await getAllColors();
+        if (Array.isArray(colorsData?.data)) {
+          console.log('Colors:', colorsData?.data);
+          setColors(colorsData?.data);
+        } else {
+          console.error('Colors data is not an array:', colorsData);
+        }
+      } catch (error) {
+        console.error('Failed to fetch colors:', error);
+      }
+    };
+
+    getColors();
+  }, []);
 
   const handleDrop = (e) => {
     e.preventDefault();
@@ -39,6 +59,8 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
       const response = await addMedia(mediaData);
       console.log('Media uploaded:', response);
       nextColor(selectedColor);
+      alert('Product created');
+      navigate('/products/product-list', { replace: true });
     } catch (error) {
       console.error('Failed to upload media:', error);
     }
@@ -103,9 +125,9 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
             className="w-full p-2 border border-gray-300 rounded"
           >
             <option value="" disabled>Select a color</option>
-            {colors.data?.map((color) => (
-              <option key={color.id} value={color.colorHex}>
-                {color.colorName}
+            {colors.map((color) => (
+              <option key={color.id} value={color.hexCode}>
+                {color.name}
               </option>
             ))}
           </select>
@@ -129,13 +151,7 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
 
 ImageDropZone.propTypes = {
   onImageUpload: PropTypes.func,
-  colors: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      hexCode: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  nextColor: PropTypes.func.isRequired,
 };
 
 export default ImageDropZone;
