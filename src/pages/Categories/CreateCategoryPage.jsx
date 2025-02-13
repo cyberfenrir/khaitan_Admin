@@ -24,11 +24,11 @@ const TagInput = ({ label, tags, onRemoveTag, onCreateAttribute }) => (
       <div className="flex flex-wrap gap-1.5 p-2 bg-white rounded-lg border border-zinc-200 flex-grow">
         {tags.map((tag, index) => (
           <div key={index} className="flex items-center bg-orange-500 text-white rounded-lg px-2 py-1">
-            <span className="text-xs">{tag}</span>
+            <span className="text-xs">{typeof tag === 'object' ? tag.name : tag}</span>
             <button
               onClick={() => onRemoveTag(index)}
               className="ml-2 opacity-75 hover:opacity-100 focus:outline-none"
-              aria-label={`Remove ${tag} tag`}
+              aria-label={`Remove ${typeof tag === 'object' ? tag.name : tag} tag`}
             >
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 3L3 9M3 3L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -53,7 +53,6 @@ const TagInput = ({ label, tags, onRemoveTag, onCreateAttribute }) => (
         className="px-4 py-2 bg-orange-500 text-white rounded-lg text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors"
       >
         Create Attribute
-        
       </button>
     </div>
   </div>
@@ -81,11 +80,12 @@ function CreateCategoryPage() {
   const [isActive, setIsActive] = useState(true);
   const [categoryName, setCategoryName] = useState('');
   const [categoryDescription, setCategoryDescription] = useState('');
-  
+  const [categoryId, setCategoryId] = useState(null);
+
   const handleClose = () => {
     setIsDialogOpen(false);
   };
-  
+
   const handleRemoveTag = (indexToRemove, newTag = null) => {
     if (newTag) {
       setTags([...tags, newTag]);
@@ -100,7 +100,7 @@ function CreateCategoryPage() {
   };
 
   const handleSaveAttributes = (newAttribute) => {
-    setTags([...tags, newAttribute]);
+    setTags(prevTags => [...prevTags, newAttribute]);
     setIsDialogOpen(false);
   };
 
@@ -110,8 +110,10 @@ function CreateCategoryPage() {
       description: categoryDescription,
     };
     console.log(categoryData);
-    await createCategory(categoryData);
-    await addData(categoryData, 'categories');
+    const response = await addData(categoryData, 'categories');
+    if (response.success) {
+      setCategoryId(response.id);
+    }
   };
 
   return (
@@ -126,7 +128,6 @@ function CreateCategoryPage() {
             <FormField label="Category Description" value={categoryDescription} placeholder="Description" onChange={(e) => setCategoryDescription(e.target.value)} />
             <TagInput label="Attributes" tags={tags} onRemoveTag={handleRemoveTag} onCreateAttribute={handleCreateAttribute} />
           </div>
-
         </main>
         <footer className="px-6 py-5 border-t border-slate-200 flex justify-center ">
           <button onClick={handleSaveCategory} className="w-1/3 px-4 py-2.5 bg-orange-500 text-white rounded-xl border border-orange-500 text-sm font-medium hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition-colors">
@@ -134,11 +135,11 @@ function CreateCategoryPage() {
           </button>
         </footer>
       </div>
-      {isDialogOpen == true && (
+      {isDialogOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className='bg-white rounded-lg p-6 flex flex-col'>
             <div className='flex justify-end' onClick={handleClose}><X/></div>
-            <CreateAttributesPage onSave={handleSaveAttributes} categoryName={categoryName} />
+            <CreateAttributesPage onSave={handleSaveAttributes} categoryName={categoryName} categoryId={categoryId} />
           </div>
         </div>
       )}

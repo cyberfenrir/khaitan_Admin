@@ -1,18 +1,36 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { createAttribute } from '../../Utils/service';
 
-function CreateAttributesPage({ onSave, categoryName }) {
+function CreateAttributesPage({ onSave, categoryName, categoryId }) {
   const [attributes, setAttributes] = useState([]);
   const [attributeName, setAttributeName] = useState('');
   const [attributeType, setAttributeType] = useState('');
   const [attributeUnit, setAttributeUnit] = useState('');
 
-
-  const handleSave = () => {
+  const handleSave = async () => {
     if (attributeName.trim()) {
-      setAttributes([...attributes, attributeName.trim()]);
-      onSave(attributeName.trim());
-      setAttributeName('');
+      const attributeData = {
+        name: attributeName.trim(),
+        type: attributeType.trim(),
+        unit: attributeUnit.trim(),
+        categoryId: categoryId
+      };
+      console.log('Attribute Data payload:', attributeData);
+      try {
+        const response = await createAttribute(attributeData);
+        if (response.success) {
+          setAttributes([...attributes, attributeData]);  
+          onSave(attributeData);
+          setAttributeName('');
+          setAttributeType('');
+          setAttributeUnit('');
+        } else {
+          console.error('Failed to create attribute:', response.message);
+        }
+      } catch (error) {
+        console.error('Error creating attribute:', error);
+      }
     }
   };
 
@@ -40,13 +58,13 @@ function CreateAttributesPage({ onSave, categoryName }) {
               className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
               placeholder="Enter attribute type..."
             />
-            <label className="mb-2 text-sm text-slate-500">Attribute Value</label>
+            <label className="mb-2 text-sm text-slate-500">Attribute Unit</label>
             <input
               type="text"
               value={attributeUnit}
               onChange={(e) => setAttributeUnit(e.target.value)}
               className="px-4 py-2 bg-white rounded-lg border border-zinc-200"
-              placeholder="Enter attribute Value..."
+              placeholder="Enter attribute Unit..."
             />
           </div>
         </main>
@@ -63,6 +81,7 @@ function CreateAttributesPage({ onSave, categoryName }) {
 CreateAttributesPage.propTypes = {
   onSave: PropTypes.func.isRequired,
   categoryName: PropTypes.string.isRequired,
+  categoryId: PropTypes.string.isRequired,
 };
 
 export default CreateAttributesPage;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { bulkAddAttributesToProduct } from '../../../Middlewares/data/productsapi';
-import { addData, getAttributesbyCategory } from '../../../Utils/service';
+import { addData, getAttributesbyCategory, bulkAddData } from '../../../Utils/service';
 
 const ProductPricing = ({ onNext }) => {
   const [attributes, setAttributes] = useState([]);
@@ -19,9 +19,17 @@ const ProductPricing = ({ onNext }) => {
   useEffect(() => {
     const getAttributes = async () => {
       if (!productData?.categoryId) return;
+
+      const categoryIdInt = parseInt(productData.categoryId, 10);
+
+      if (isNaN(categoryIdInt)) {
+        console.error('Invalid category ID:', productData.categoryId);
+        return;
+      }
       
       try {
-        const attributesData = await getAttributesbyCategory(productData.categoryId);
+        const attributesData = await getAttributesbyCategory(categoryIdInt);
+        console.log('Attributes:', attributesData);
         if (attributesData.success) {
           setAttributes(attributesData.data);
         }
@@ -45,22 +53,41 @@ const ProductPricing = ({ onNext }) => {
       return;
     }
 
-    const payload = attributes.map(attribute => ({
-      productId: productData.productId,
-      attributeId: attribute.id,
-      value: formData[attribute.id] || ''
-    }));
+    // Filter out any attributes with empty values and ensure all required fields exist
+    const validPayload = attributes
+      .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
+      .map(attribute => ({
+        productId: parseInt(productData.productId),
+        attributeId: attribute.id,
+        value: formData[attribute.id],
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }));
+
+    if (validPayload.length === 0) {
+      console.error('No valid attributes to save');
+      return;
+    }
 
     try {
-      const response = await addData(payload, 'attributes');
-      console.log(response);
-      await bulkAddAttributesToProduct(productData.productId, payload);
+      const response = await bulkAddData(validPayload, 'productAttributes');
+      console.log('Response:', response);
       onNext();
     } catch (error) {
       console.error('Failed to add attributes:', error);
     }
-  };
 
+
+  
+    try {
+      console.log('Submitting payload:', validPayload); // Debug log
+      const response = await addData(validPayload, 'productAttributes');
+      console.log('Response:', response);
+      onNext();
+    } catch (error) {
+      console.error('Failed to add attributes:', error, 'Payload:', validPayload);
+    }
+  };
   if (!productData) {
     return <div>Loading...</div>;
   }
@@ -71,7 +98,7 @@ const ProductPricing = ({ onNext }) => {
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {attributes.map(attribute => (
-            <div key={attribute.id} className="flex flex-col">
+            <div key={attribute.id} className="flex flex-col gap-2 w-full">
               <label htmlFor={attribute.id} className="block text-sm font-medium text-gray-700 mb-1">
                 {attribute.name}
               </label>
@@ -83,7 +110,7 @@ const ProductPricing = ({ onNext }) => {
                 onChange={handleChange}
                 placeholder={`Enter ${attribute.name}`}
                 className="w-full px-3 py-2 border rounded-md"
-              />
+              /> {attribute.unit && <span className="text-sm text-gray-500 whitespace-nowrap">{attribute.unit}</span>}
             </div>
           ))}
         </div>

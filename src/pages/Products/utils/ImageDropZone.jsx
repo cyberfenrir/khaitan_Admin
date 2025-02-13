@@ -1,25 +1,47 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Upload } from 'lucide-react';
-
+import { uploadImageToStorage, addMedia } from '../../../Utils/service';
 
 
 const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
-
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
 
-  
   const handleDrop = (e) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     handleFile(file);
   };
 
-  const handleSave = () => {
-    setSelectedColor(selectedColor);
-    nextColor(selectedColor);
+  const handleSave = async () => {
+    const ProductData = JSON.parse(localStorage.getItem('productData'));
+    const productId = ProductData?.productId;
+
+    if (!productId) {
+      console.error('Product ID not found');
+      return;
+    }
+
+    if (!imageData.filePath) {
+      console.error('No image selected');
+      return;
+    }
+
+    try {
+      const downloadURL = await uploadImageToStorage(imageData.file);
+      const mediaData = {
+        productId,
+        colorId: selectedColor,
+        imageUrl: downloadURL,
+      };
+      const response = await addMedia(mediaData);
+      console.log('Media uploaded:', response);
+      nextColor(selectedColor);
+    } catch (error) {
+      console.error('Failed to upload media:', error);
+    }
   };
 
   const handleFile = (file) => {
@@ -27,7 +49,7 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
       const filePath = URL.createObjectURL(file);
       const imageType = file.type;
       setImage(filePath);
-      setImageData({ filePath, imageType });
+      setImageData({ filePath, imageType, file });
       if (onImageUpload) {
         onImageUpload({ filePath, imageType });
       }
@@ -35,43 +57,41 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
       setImage(null);
       setImageData({ filePath: '', imageType: '' });
     }
-
-    console.log(imageData);
   };
 
   return (
     <div>
-    <div 
-      className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer"
-      onDrop={handleDrop}
-      onDragOver={(e) => e.preventDefault()}
-      onClick={() => document.getElementById('fileInput').click()}
-    >
-      <input
-        id="fileInput"
-        type="file"
-        className="hidden"
-        onChange={(e) => handleFile(e.target.files[0])}
-        accept="image/*"
-      />
-      {image ? (
-        <img src={image} alt="Uploaded" className="max-w-full max-h-full object-contain" />
-      ) : (
-        <>
-          <Upload className="w-12 h-12 text-gray-400 mb-2" />
-          <div>
-            <p className="text-gray-500 font-bold">
-                Drop your images here or <span className="text-orange-500 font-bold">click to browse</span>
-            </p>
-            <p className="text-gray-400 text-sm">
-                Supported formats: JPG, PNG, GIF
-            </p>
-          </div>
-        </>
-      )}
-    </div>
+      <div 
+        className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center cursor-pointer"
+        onDrop={handleDrop}
+        onDragOver={(e) => e.preventDefault()}
+        onClick={() => document.getElementById('fileInput').click()}
+      >
+        <input
+          id="fileInput"
+          type="file"
+          className="hidden"
+          onChange={(e) => handleFile(e.target.files[0])}
+          accept="image/*"
+        />
+        {image ? (
+          <img src={image} alt="Uploaded" className="max-w-full max-h-full object-contain" />
+        ) : (
+          <>
+            <Upload className="w-12 h-12 text-gray-400 mb-2" />
+            <div>
+              <p className="text-gray-500 font-bold">
+                  Drop your images here or <span className="text-orange-500 font-bold">click to browse</span>
+              </p>
+              <p className="text-gray-400 text-sm">
+                  Supported formats: JPG, PNG, GIF
+              </p>
+            </div>
+          </>
+        )}
+      </div>
 
-    <div className="mt-4">
+      <div className="mt-4">
         <label htmlFor="color" className="block text-sm font-medium text-gray-700 mb-1">
           Color
         </label>
@@ -93,7 +113,7 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
             className="w-12 h-8 border rounded"
             style={{ backgroundColor: selectedColor }}
           ></div>
-
+          
           <div className="flex justify-end w-[55%] px-3 pt-6">
             <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center w-1/4" onClick={handleSave}>
               Save
@@ -104,10 +124,8 @@ const ImageDropZone = ({ onImageUpload, colors, nextColor }) => {
       </div>
 
     </div>
-    
   );
 };
-
 
 ImageDropZone.propTypes = {
   onImageUpload: PropTypes.func,
