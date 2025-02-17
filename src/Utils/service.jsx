@@ -299,6 +299,35 @@ export const deleteAttribute = async (attributeId) => {
     }
 }
 
+
+export const deleteCategory = async (categoryId) => {
+  const ref = collection(firebase, 'categories');
+  const q = query(ref, where("id", "==", categoryId));
+  
+  try {
+    // First get the document reference
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return { success: false, error: "Category not found" };
+    }
+
+    // Get the first matching document (assuming 'id' is unique)
+    const docRef = querySnapshot.docs[0].ref;
+    
+    // Delete the document
+    await deleteDoc(docRef);
+    
+    console.log("Category deleted successfully");
+    return { success: true, categoryId };
+    
+  } catch (error) {
+    console.error("Error deleting category: ", error);
+    return { success: false, error: error.message };
+  }
+};
+
+
 export const fetchCategoryById = async (categoryId) => {
     const ref = collection(firebase, 'categories');
     const q = query(ref, where("id", "==", categoryId));

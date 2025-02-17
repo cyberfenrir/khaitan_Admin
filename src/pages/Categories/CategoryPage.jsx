@@ -1,41 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CategoriesTable from './Utils/CategoriesTable';
 import CategoryGrid from './Utils/categoryList';
-import prod1 from './Utils/prod1.png'
-import prod2 from './Utils/prod2.png'
 import { useNavigate } from 'react-router-dom';
+import { getAllCategories } from '../../Utils/service';
+import MessageBox from '../../Utils/message';
 
 const CategoryPage = () => {
-
   const navigate = useNavigate();
+  const [categoriesData, setCategoriesData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const [categoriesData, setCategoriesData] = useState([
-    { 
-      id: 'FS16276', 
-      name: "Fashion Men, Women & Kid's", 
-      description: "Comprehensive fashion collection",
-      created: '2024-01-15',
-      status: 'Active', 
-      productCount: 46233, 
-      icon: prod1
-    },
-    { 
-      id: 'HB73029', 
-      name: 'Women Hand Bag', 
-      description: "Premium handbag collection",
-      created: '2024-02-01',
-      status: 'Active', 
-      productCount: 2739, 
-      icon: prod2
-    },
-  ]);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await getAllCategories();
+        if (response.success) {
+          const categoriesWithDefaults = response.data.map(category => ({
+            ...category,
+            id: category.id.toString(),
+            status: category.status || 'Active'
+          }));
+          setCategoriesData(categoriesWithDefaults);
+          console.log('Categories:', categoriesWithDefaults);
+        } else {
+          setError('Failed to fetch categories');
+        }
+      } catch (error) {
+        setError('Error fetching categories: ' + error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const handleNewCategory = () => {
     navigate('/category/create-category');
   };
 
-  return (   
+  return (
     <section className="container mx-auto p-6">
+      {error && <MessageBox message={error} type="error" onClose={() => setError('')} />}
+      
       {/* Category Grid Section */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold text-slate-700 mb-4">Category Grid</h2>
@@ -49,7 +56,11 @@ const CategoryPage = () => {
           <button className="px-4 py-2 bg-orange-500 text-white rounded-lg" onClick={handleNewCategory}>Add Category</button>
         </header>
         
-        <CategoriesTable categoriesList={categoriesData} />
+        {loading ? (
+          <div className="p-5 text-center">Loading...</div>
+        ) : (
+          <CategoriesTable categoriesList={categoriesData} />
+        )}
       </div>
     </section>
   );
