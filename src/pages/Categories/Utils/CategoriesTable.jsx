@@ -120,11 +120,17 @@ const CategoriesTableRow = ({ category, onDelete }) => {
           <div className="bg-white rounded-lg p-6 w-1/2">
             <h2 className="text-xl font-semibold mb-4">Attributes for {category.name}</h2>
             <ul className="list-disc pl-5">
+            <ul className="list-none">
               {attributes.map(attr => (
-                <li key={attr.id} className="mb-2">
-                  <strong>{attr.name}</strong>: {attr.type} - {attr.unit}
+                <li key={attr.id} className="mb-4">
+                  <ol className="list-decimal pl-5">
+                    <li><strong>Name:</strong> {attr.name}</li>
+                    <li><strong>DataType:</strong> {attr.type}</li>
+                    <li><strong>Unit:</strong> {attr.unit}</li>
+                  </ol>
                 </li>
               ))}
+            </ul>
             </ul>
             <button
               onClick={() => setShowPopup(false)}
