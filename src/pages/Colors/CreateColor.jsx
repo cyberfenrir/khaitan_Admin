@@ -1,14 +1,21 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addColor } from '../../Utils/service';
+import MessageBox from '../../Utils/message';
 
 const CreateColor = () => {
   const [name, setName] = useState('');
   const [hexCode, setHexCode] = useState('#000000');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!name.trim() || !hexCode.trim()) {
+      setErrorMessage('Please fill all fields');
+      return;
+    }
+
     const newColor = { name, hexCode };
     try {
       await addColor(newColor);
@@ -22,6 +29,7 @@ const CreateColor = () => {
     <section className="container mx-auto p-6">
       <div className="bg-white rounded-xl shadow-sm p-6">
         <h1 className="text-2xl font-bold mb-4 text-slate-600">Add New Color</h1>
+        {errorMessage && <MessageBox message={errorMessage} type="error" onClose={() => setErrorMessage('')} />}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
@@ -45,7 +53,7 @@ const CreateColor = () => {
               id="hexCode"
               value={hexCode}
               onChange={(e) => setHexCode(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded"
+              className="w-16 h-10 p-1 border border-gray-300 rounded cursor-pointer"
               required
             />
           </div>

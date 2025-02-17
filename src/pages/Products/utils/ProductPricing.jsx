@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { bulkAddAttributesToProduct } from '../../../Middlewares/data/productsapi';
 import { addData, getAttributesbyCategory, bulkAddData } from '../../../Utils/service';
+import MessageBox from '../../../Utils/message';
 
 const ProductPricing = ({ onNext }) => {
   const [attributes, setAttributes] = useState([]);
   const [formData, setFormData] = useState({});
   const [productData, setProductData] = useState(null);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
 
   useEffect(() => {
     // Get product data from localStorage
@@ -53,6 +56,16 @@ const ProductPricing = ({ onNext }) => {
       return;
     }
 
+    // Validate that all attribute values are numbers/integers
+    for (const attribute of attributes) {
+      const value = formData[attribute.id];
+      if (value !== undefined && value !== '' && isNaN(value)) {
+        setMessage(`Value for ${attribute.name} must be a number.`);
+        setMessageType('error');
+        return;
+      }
+    }
+
     // Filter out any attributes with empty values and ensure all required fields exist
     const validPayload = attributes
       .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
@@ -65,7 +78,8 @@ const ProductPricing = ({ onNext }) => {
       }));
 
     if (validPayload.length === 0) {
-      console.error('No valid attributes to save');
+      setMessage('No valid attributes to save.');
+      setMessageType('error');
       return;
     }
 
@@ -75,19 +89,16 @@ const ProductPricing = ({ onNext }) => {
       onNext();
     } catch (error) {
       console.error('Failed to add attributes:', error);
-    }
-
-
-  
-    try {
-      console.log('Submitting payload:', validPayload); // Debug log
-      const response = await addData(validPayload, 'productAttributes');
-      console.log('Response:', response);
-      onNext();
-    } catch (error) {
-      console.error('Failed to add attributes:', error, 'Payload:', validPayload);
+      setMessage('Failed to add attributes.');
+      setMessageType('error');
     }
   };
+
+  const handleCloseMessage = () => {
+    setMessage('');
+    setMessageType('');
+  };
+
   if (!productData) {
     return <div>Loading...</div>;
   }
@@ -118,6 +129,11 @@ const ProductPricing = ({ onNext }) => {
           <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
         </div>
       </form>
+      {message && (
+        <div className="mt-4">
+          <MessageBox message={message} type={messageType} onClose={handleCloseMessage} />
+        </div>
+      )}
     </div>
   );
 };

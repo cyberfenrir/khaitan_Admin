@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { addData, getData } from '../../../Utils/service';
+import MessageBox from '../../../Utils/message';
 
 const ProductInformation = ({ onNext }) => {
     const [categories, setCategories] = useState([]);
@@ -10,6 +11,8 @@ const ProductInformation = ({ onNext }) => {
         price: '',
         categoryId: ''
     });
+    const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState('');
 
     useEffect(() => {
         let isMounted = true;
@@ -40,6 +43,16 @@ const ProductInformation = ({ onNext }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!formData.title || !formData.description || !formData.price || !formData.categoryId) {
+            setMessage('Please fill all the fields.');
+            setMessageType('error');
+            return;
+        }
+        if (isNaN(formData.price)) {
+            setMessage('Price must be a number.');
+            setMessageType('error');
+            return;
+        }
         try {
             const firebaseResponse = await addData(formData, 'products');
             console.log(firebaseResponse);
@@ -49,7 +62,14 @@ const ProductInformation = ({ onNext }) => {
             onNext(productData);
         } catch (error) {
             console.error('Failed to create product:', error);
+            setMessage('Failed to create product.');
+            setMessageType('error');
         }
+    };
+
+    const handleCloseMessage = () => {
+        setMessage('');
+        setMessageType('');
     };
 
     return (
@@ -122,6 +142,11 @@ const ProductInformation = ({ onNext }) => {
                     <button type="submit" className="bg-orange-500 text-white py-2 px-4 rounded-lg">Next</button>
                 </div>
             </form>
+            {message && (
+                <div className="mt-4">
+                    <MessageBox message={message} type={messageType} onClose={handleCloseMessage} />
+                </div>
+            )}
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import {firebase} from '../firebase';
+import { firebase } from '../firebase';
 import { addDoc, collection, getDocs, query, where, orderBy, limit, deleteDoc, doc, getDoc, updateDoc, writeBatch } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
@@ -63,14 +63,14 @@ export const bulkAddData = async (dataArray, collectionName) => {
         return { 
             success: true, 
             startId: nextId, 
-            endId: nextId + dataArray.length - 1 
+            endId: nextId + dataArray.length - 1,
+            message: 'Attributes added successfully'
         };
     } catch (e) {
         console.error("Error adding documents: ", e);
         return { error: "Error adding documents." };
     }
 }
-
 
 export const getData = async (collectionName) => {
     const ref = collection(firebase, collectionName);
@@ -84,87 +84,84 @@ export const getData = async (collectionName) => {
     }
 }
 
-
 export const uploadImageToStorage = async (file) => {
     const storage = getStorage();
     const storageRef = ref(storage, `images/${file.name}`);
     await uploadBytes(storageRef, file);
     const downloadURL = await getDownloadURL(storageRef);
     return downloadURL;
-  };
-  
-  // Function to add media data to Firestore
-  export const addMedia = async (mediaData) => {
+};
+
+// Function to add media data to Firestore
+export const addMedia = async (mediaData) => {
     const ref = collection(firebase, 'media');
     try {
-      const docRef = await addDoc(ref, mediaData);
-      console.log("Media document written with ID: ", docRef.id);
-      return { success: true, id: docRef.id };
+        const docRef = await addDoc(ref, mediaData);
+        console.log("Media document written with ID: ", docRef.id);
+        return { success: true, id: docRef.id };
     } catch (e) {
-      console.error("Error adding media document: ", e);
-      return { error: "Error adding media document." };
+        console.error("Error adding media document: ", e);
+        return { error: "Error adding media document." };
     }
-  };
+};
 
-  export const getProductById = async (productId) => {
+export const getProductById = async (productId) => {
     const ref = collection(firebase, 'products');
     const q = query(ref, where("id", "==", productId));
     
     try {
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        return { success: false, error: "Product not found" };
-      }
-      const product = querySnapshot.docs[0].data();
-      return { success: true, data: product };
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return { success: false, error: "Product not found" };
+        }
+        const product = querySnapshot.docs[0].data();
+        return { success: true, data: product };
     } catch (error) {
-      console.error("Error fetching product: ", error);
-      return { success: false, error: error.message };
+        console.error("Error fetching product: ", error);
+        return { success: false, error: error.message };
     }
-  };
-  
-  
-  export const getAllMedia = async () => {
+};
+
+export const getAllMedia = async () => {
     const ref = collection(firebase, 'media');
     try {
-      const querySnapshot = await getDocs(ref);
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      return { success: true, data };
+        const querySnapshot = await getDocs(ref);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return { success: true, data };
     } catch (e) {
-      console.error("Error fetching media documents: ", e);
-      return { error: "Error fetching media documents." };
+        console.error("Error fetching media documents: ", e);
+        return { error: "Error fetching media documents." };
     }
-  };
+};
 
-  export const updateProduct = async (productId, productData) => {
+export const updateProduct = async (productId, productData) => {
     const ref = collection(firebase, 'products');
     const q = query(ref, where("id", "==", productId));
     
     try {
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        return { success: false, error: "Product not found" };
-      }
-      const docRef = querySnapshot.docs[0].ref;
-      await updateDoc(docRef, productData);
-      return { success: true };
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return { success: false, error: "Product not found" };
+        }
+        const docRef = querySnapshot.docs[0].ref;
+        await updateDoc(docRef, productData);
+        return { success: true };
     } catch (error) {
-      console.error("Error updating product: ", error);
-      return { success: false, error: error.message };
+        console.error("Error updating product: ", error);
+        return { success: false, error: error.message };
     }
-  };
-  
-  export const updateAttributes = async (attributeId, attributeData) => {
+};
+
+export const updateAttributes = async (attributeId, attributeData) => {
     const ref = doc(firebase, 'attributes', attributeId);
     try {
-      await updateDoc(ref, attributeData);
-      return { success: true };
+        await updateDoc(ref, attributeData);
+        return { success: true };
     } catch (error) {
-      console.error("Error updating attribute: ", error);
-      return { success: false, error: error.message };
+        console.error("Error updating attribute: ", error);
+        return { success: false, error: error.message };
     }
-  };
-
+};
 
 export const getAttributesbyCategory = async (categoryId) => {
     const ref = collection(firebase, 'attributes');
@@ -177,7 +174,7 @@ export const getAttributesbyCategory = async (categoryId) => {
         console.error("Error fetching documents: ", e);
         return { error: "Error fetching documents." };
     }
-}
+};
 
 export const deleteProductbyId = async (productId) => {
     const ref = collection(firebase, 'products');
@@ -204,7 +201,7 @@ export const deleteProductbyId = async (productId) => {
         console.error("Error deleting document: ", error);
         return { success: false, error: error.message };
     }
-}
+};
 
 //attributes
 
@@ -229,18 +226,16 @@ export const createAttribute = async (attributeData) => {
 }
 
 export const getAllAttributes = async () => {
+    const ref = collection(firebase, 'attributes');
     try {
-        const snapshot = await getData('attributes');
-        return snapshot;
+        const querySnapshot = await getDocs(ref);
+        const attributes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return { success: true, data: attributes };
     } catch (error) {
         console.error("Error fetching attributes: ", error);
-        return { 
-            success: false, 
-            message: 'Error fetching attributes',
-            error: error.message 
-        };
+        return { success: false, error: error.message };
     }
-}
+};
 
 export const getAttribute = async (attributeId) => {
     try {
@@ -319,9 +314,9 @@ export const fetchCategoryById = async (categoryId) => {
       console.error("Error fetching category: ", error);
       return { success: false, error: error.message };
     }
-  };
+};
 
-  export const getAllCategories = async () => {
+export const getAllCategories = async () => {
     const ref = collection(firebase, 'categories');
     try {
       const querySnapshot = await getDocs(ref);
@@ -331,9 +326,9 @@ export const fetchCategoryById = async (categoryId) => {
       console.error("Error fetching categories: ", e);
       return { error: "Error fetching categories." };
     }
-  };
+};
 
-  //colors
+//colors
 
 // Function to add a new color to the Colors collection
 export const addColor = async (colorData) => {
@@ -384,7 +379,7 @@ export const getAllColors = async () => {
       console.error("Error getting colors: ", error);
       return { success: false, error: error.message };
     }
-  };
+};
 
 export const getColorById = async (colorId) => {
   const docRef = doc(firebase, 'Colors', colorId);
@@ -398,5 +393,23 @@ export const getColorById = async (colorId) => {
   } catch (error) {
     console.error('Error fetching color:', error);
     throw error;
+  }
+};
+
+// Add the getCategoryById method
+export const getCategoryById = async (categoryId) => {
+  const ref = collection(firebase, 'categories');
+  const q = query(ref, where("id", "==", categoryId));
+  
+  try {
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+      return { success: false, error: "Category not found" };
+    }
+    const category = querySnapshot.docs[0].data();
+    return { success: true, data: category };
+  } catch (error) {
+    console.error("Error fetching category: ", error);
+    return { success: false, error: error.message };
   }
 };

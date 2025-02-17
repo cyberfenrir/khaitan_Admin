@@ -4,7 +4,7 @@ import viewIcon from '../assets/view.svg';
 import editIcon from '../assets/edit.svg';
 import deleteIcon from '../assets/delete.svg';
 import { deleteProduct } from '../../../Middlewares/data/productsapi';
-import { deleteProductbyId, getAllMedia } from '../../../Utils/service';
+import { deleteProductbyId, getAllMedia, getAllCategories, getCategoryById } from '../../../Utils/service';
 import { useState, useEffect } from 'react';
 
 const ProductTableHeader = () => {
@@ -33,7 +33,27 @@ const ProductTableHeader = () => {
   );
 };
 
-const ProductTableRow = ({ product, media, onDelete }) => {
+const ProductTableRow = ({ product, media, categories, onDelete }) => {
+  const [categoryName, setCategoryName] = useState('Unknown');
+
+  useEffect(() => {
+    const fetchCategoryName = async () => {
+      try {
+        const categoryId = parseInt(product.categoryId);
+        const categoryData = await getCategoryById(categoryId);
+        if (categoryData.success) {
+          setCategoryName(categoryData.data.name);
+        } else {
+          console.error('Failed to fetch category:', categoryData.error);
+        }
+      } catch (error) {
+        console.error('Error fetching category:', error);
+      }
+    };
+
+    fetchCategoryName();
+  }, [product.categoryId]);
+
   const actionIcons = [
     { src: viewIcon, bgColor: "bg-slate-100", action: "view" },
     { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
@@ -90,7 +110,7 @@ const ProductTableRow = ({ product, media, onDelete }) => {
         </div>
       </div>
       <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
-        <span className="text-sm text-slate-600">{product.categoryId}</span>
+        <span className="text-sm text-slate-600">{categoryName}</span>
       </div>
       <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
         <span className="text-sm font-medium text-slate-700">{product.price}</span>
@@ -105,6 +125,8 @@ const ProductTableRow = ({ product, media, onDelete }) => {
 const ProductTable = ({ productsList }) => {
   const [products, setProducts] = useState(productsList);
   const [media, setMedia] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [filter, setFilter] = useState('');
 
   useEffect(() => {
     const fetchMedia = async () => {
@@ -120,12 +142,33 @@ const ProductTable = ({ productsList }) => {
       }
     };
 
+    const fetchCategories = async () => {
+      try {
+        const categoriesData = await getAllCategories();
+        if (categoriesData.success) {
+          setCategories(categoriesData.data);
+          // console.log('Categories:', categoriesData.data);
+        } else {
+          console.error('Failed to fetch categories:', categoriesData.error);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
     fetchMedia();
+    fetchCategories();
   }, []);
 
   const handleDelete = (productId) => {
     setProducts(products.filter(product => product.id !== productId));
   };
+
+  const filteredProducts = products.filter(product => {
+    const categoryName = categories.find(category => category.id === parseInt(product.categoryId))?.name || '';
+    // console.log('Filtered:', categoryName);
+    return categoryName.toLowerCase().includes(filter.toLowerCase());
+  });
 
   return (
     <div className="w-full bg-white rounded-lg border border-slate-200 overflow-x-auto">
@@ -134,14 +177,24 @@ const ProductTable = ({ productsList }) => {
         <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent pointer-events-none z-10 hidden md:block" />
         <div className="overflow-auto">
           <div className="min-w-[1200px]">
+            <div className="p-4">
+              <input
+                type="text"
+                placeholder="Filter by category"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                className="w-1/2 px-3 py-2 border rounded-md"
+              />
+            </div>
             <div role="table" className="grid grid-cols-6">
               <ProductTableHeader />
               <div role="rowgroup" className="contents">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductTableRow 
                     key={product.id} 
                     product={product}
                     media={media}
+                    categories={categories}
                     onDelete={handleDelete}
                   />
                 ))}
@@ -160,6 +213,7 @@ ProductTable.propTypes = {
 ProductTableRow.propTypes = {
   product: PropTypes.object.isRequired,
   media: PropTypes.array.isRequired,
+  categories: PropTypes.array.isRequired,
   onDelete: PropTypes.func.isRequired
 };
 

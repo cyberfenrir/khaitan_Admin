@@ -3,12 +3,15 @@ import PropTypes from 'prop-types';
 import { Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { uploadImageToStorage, addMedia, getAllColors } from '../../../Utils/service';
+import MessageBox from '../../../Utils/message';
 
 const ImageDropZone = ({ onImageUpload, nextColor }) => {
   const [selectedColor, setSelectedColor] = useState('#000000');
   const [image, setImage] = useState(null);
   const [imageData, setImageData] = useState({ filePath: '', imageType: '' });
   const [colors, setColors] = useState([]);
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -59,10 +62,13 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
       const response = await addMedia(mediaData);
       console.log('Media uploaded:', response);
       nextColor(selectedColor);
-      alert('Product created');
+      setMessage('Product created successfully.');
+      setMessageType('success');
       navigate('/products/product-list', { replace: true });
     } catch (error) {
       console.error('Failed to upload media:', error);
+      setMessage('Failed to upload media.');
+      setMessageType('error');
     }
   };
 
@@ -79,6 +85,11 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
       setImage(null);
       setImageData({ filePath: '', imageType: '' });
     }
+  };
+
+  const handleCloseMessage = () => {
+    setMessage('');
+    setMessageType('');
   };
 
   return (
@@ -145,6 +156,11 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
         </div>
       </div>
 
+      {message && (
+        <div className="mt-4">
+          <MessageBox message={message} type={messageType} onClose={handleCloseMessage} />
+        </div>
+      )}
     </div>
   );
 };
