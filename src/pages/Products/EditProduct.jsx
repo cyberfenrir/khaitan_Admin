@@ -89,6 +89,7 @@ function EditProduct() {
     const attributesData = await getAttributesbyCategory(parseInt(value, 10));
     if (attributesData.success) {
       setAttributes(attributesData.data);
+      console.log(attributes);
       setUpdatedAttributes(attributesData.data);
     }
   };
@@ -215,8 +216,8 @@ function EditProduct() {
               <div key={attr.id} className="mb-4">
                 <label className="block mb-2">
                   {attr.name}:
-                  <div className="flex items-center">
-                    <input type="text" name="value" value={attr.value || ''} onChange={(e) => handleAttributesChange(e, attr.id)} className="block w-full mt-1 p-2 border rounded" />
+                  <div className="flex items-center w-1/3">
+                    <input type="text" name="value" value={attr.id || ''} onChange={(e) => handleAttributesChange(e, attr.id)} className="block w-full mt-1 p-2 border rounded" />
                     <span className="ml-2">{attr.unit}</span>
                   </div>
                 </label>
@@ -230,7 +231,9 @@ function EditProduct() {
             <input type="file" onChange={handleImageChange} className="block w-full mt-1 p-2 border rounded" />
             <button onClick={handleSaveImage} className="bg-orange-500 text-white rounded-xl p-2 hover:bg-orange-600 rounded mt-4 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors">Save Image</button>
           </div>
-          <button onClick={handleSaveAll} className="bg-green-500 text-white p-2 rounded mt-4">Save All Changes</button>
+          <div className='flex justify-center'>
+            <button onClick={handleSaveAll} className="bg-green-500 text-white p-2 w-1/2 rounded mt-4">Save All Changes</button>
+          </div>
         </div>
       </div>
       {message && (

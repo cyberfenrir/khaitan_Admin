@@ -6,6 +6,7 @@ import deleteIcon from '../assets/delete.svg';
 import { deleteProduct } from '../../../Middlewares/data/productsapi';
 import { deleteProductbyId, getAllMedia, getAllCategories, getCategoryById } from '../../../Utils/service';
 import { useState, useEffect } from 'react';
+import { getData } from '../../../Utils/service';
 
 const ProductTableHeader = () => {
   return (
@@ -87,7 +88,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const productMedia = media.find(m => m.productId === product.id);
 
   return (
-    <div role="row" className="contents group">
+    <div role="row" className="flex justify-center contents group">
       <div className="flex justify-center py-4 px-5 border-b border-slate-200 group-hover:bg-slate-50">
         <span className="text-sm text-slate-600">{product.id}</span>
       </div>
@@ -109,13 +110,13 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
           </div>
         </div>
       </div>
-      <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="py-4 px-3.5 flex items-center border-b border-slate-200 group-hover:bg-slate-50">
         <span className="text-sm text-slate-600">{categoryName}</span>
       </div>
-      <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="py-4 px-3.5 flex items-center border-b border-slate-200 group-hover:bg-slate-50">
         <span className="text-sm font-medium text-slate-700">{product.price}</span>
       </div>
-      <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="py-4 px-3.5 flex items-center border-b border-slate-200 group-hover:bg-slate-50">
         <Actions icons={actionIcons} onAction={handleAction} />
       </div>
     </div>
@@ -127,6 +128,29 @@ const ProductTable = ({ productsList }) => {
   const [media, setMedia] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState('');
+  // const [allProducts, setAllProducts] = useState([]);
+
+  // const fetchAllProducts = async () => {
+  //   try {
+  //     const productsData = await getData('products');
+  //     if(productsData.success) {
+  //       setAllProducts(productsData.data);
+  //     } else {
+  //       console.error('Failed to fetch products:', productsData.error);
+  //     }
+  //   }
+  //   catch(error) {
+  //     console.error('Error fetching products:', error);
+  //   }
+  // }
+
+  // useEffect(()=>{
+  //   fetchAllProducts();
+  // },[]);
+
+  useEffect(() => {
+    setProducts(productsList);
+  }, [productsList]);
 
   useEffect(() => {
     const fetchMedia = async () => {

@@ -5,28 +5,34 @@ import TablePagination from './utils/TablePagination';
 import { useState, useEffect } from 'react';
 import { getData } from '../../Utils/service';
 
-export default function ProductList({ currentPage, totalPages, onPageChange }) {
-
+export default function ProductList() {
+    const PAGE_SIZE = 5;
     const [allProducts, setAllProducts] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    // const [paginatedProducts, setPaginatedProducts] = useState([]);
 
     useEffect(() => {
         const getProductData = async () => {
             const response = await getData('products');
-            console.log(response.data); 
             setAllProducts(response.data);
         }
         getProductData();
     }, []);
 
-    useEffect(() => {
-        console.log(allProducts);
-    }, [allProducts]);
+    const onPageChange = (page) => {
+        setCurrentPage(page);
+    };
+    
+    const totalPages = Math.ceil(allProducts.length / PAGE_SIZE);
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const end = start + PAGE_SIZE;
+    const products = allProducts.slice(start, end);
 
     return (
         <main className="flex flex-col px-3">
             <section className="flex flex-col w-full bg-white rounded-xl shadow-sm">
                 <ProductHeader title="All Product List" addButtonText="Add Product" />
-                <ProductPage allProducts={allProducts} />
+                <ProductPage allProducts={allProducts} currentPage={currentPage} pageSize={PAGE_SIZE} /> 
                 <TablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
             </section>
         </main>

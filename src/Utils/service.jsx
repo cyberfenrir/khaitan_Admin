@@ -165,7 +165,7 @@ export const updateAttributes = async (attributeId, attributeData) => {
 
 export const getAttributesbyCategory = async (categoryId) => {
     const ref = collection(firebase, 'attributes');
-    const q = query(ref, where("categoryId", "==", categoryId));
+    const q = query(ref, where("categoryId", "==", Number(categoryId)));
     try {
         const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -301,7 +301,7 @@ export const deleteAttribute = async (attributeId) => {
 
 export const deleteCategory = async (categoryId) => {
     const ref = collection(firebase, 'categories');
-    const q = query(ref, where("id", "==", categoryId));
+    const q = query(ref, where("id", "==", Number(categoryId)));
     
     try {
       // First get the document reference
@@ -328,8 +328,9 @@ export const deleteCategory = async (categoryId) => {
   
   
   export const fetchCategoryById = async (categoryId) => {
+        console.log(typeof categoryId, categoryId);
       const ref = collection(firebase, 'categories');
-      const q = query(ref, where("id", "==", categoryId));
+      const q = query(ref, where("id", "==", Number(categoryId)));
       
       try {
         const querySnapshot = await getDocs(q);
