@@ -47,6 +47,7 @@ import CreateColor from './pages/Colors/CreateColor';
 import SignInPage from './pages/Login/LoginPage';
 import CreateAccountPage from './pages/Login/SignInPage';
 import CreateProduct from './pages/Products/CreateProduct';
+import EditColor from './pages/Colors/EditColor';
 
 import ProtectedLayout from './ProtectedLayout';
 import { AuthProvider } from './AuthContext';
@@ -102,10 +103,12 @@ function App() {
                 <Route path="colors/all-colors" element={<ColorsPage />} />
                 <Route path="/colors/create" element={<CreateColor />} />
                 <Route path="/colors/add-color" element={<CreateColor />} />
+                <Route path="/colors/edit/:colorId" element={<EditColor />} />
                 </Route>
                 <Route path="/" element={<SignInPage />} />
                 <Route path="/login" element={<SignInPage />} />
                 <Route path="/signin" element={<CreateAccountPage />} />
+                <Route path="/colors/edit/:slug" element={<EditProduct />} />
               </Routes>
             </ProductProvider>
           </div>

@@ -299,36 +299,133 @@ export const deleteAttribute = async (attributeId) => {
     }
 }
 
-
 export const deleteCategory = async (categoryId) => {
-  const ref = collection(firebase, 'categories');
-  const q = query(ref, where("id", "==", categoryId));
+    const ref = collection(firebase, 'categories');
+    const q = query(ref, where("id", "==", categoryId));
+    
+    try {
+      // First get the document reference
+      const querySnapshot = await getDocs(q);
+      
+      if (querySnapshot.empty) {
+        return { success: false, error: "Category not found" };
+      }
   
-  try {
-    // First get the document reference
-    const querySnapshot = await getDocs(q);
-    
-    if (querySnapshot.empty) {
-      return { success: false, error: "Category not found" };
+      // Get the first matching document (assuming 'id' is unique)
+      const docRef = querySnapshot.docs[0].ref;
+      
+      // Delete the document
+      await deleteDoc(docRef);
+      
+      console.log("Category deleted successfully");
+      return { success: true, categoryId };
+      
+    } catch (error) {
+      console.error("Error deleting category: ", error);
+      return { success: false, error: error.message };
     }
-
-    // Get the first matching document (assuming 'id' is unique)
-    const docRef = querySnapshot.docs[0].ref;
-    
-    // Delete the document
-    await deleteDoc(docRef);
-    
-    console.log("Category deleted successfully");
-    return { success: true, categoryId };
-    
-  } catch (error) {
-    console.error("Error deleting category: ", error);
-    return { success: false, error: error.message };
-  }
-};
-
-
-export const fetchCategoryById = async (categoryId) => {
+  };
+  
+  
+  export const fetchCategoryById = async (categoryId) => {
+      const ref = collection(firebase, 'categories');
+      const q = query(ref, where("id", "==", categoryId));
+      
+      try {
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+          return { success: false, error: "Category not found" };
+        }
+        const category = querySnapshot.docs[0].data();
+        return { success: true, data: category };
+      } catch (error) {
+        console.error("Error fetching category: ", error);
+        return { success: false, error: error.message };
+      }
+  };
+  
+  export const getAllCategories = async () => {
+      const ref = collection(firebase, 'categories');
+      try {
+        const querySnapshot = await getDocs(ref);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return { success: true, data };
+      } catch (e) {
+        console.error("Error fetching categories: ", e);
+        return { error: "Error fetching categories." };
+      }
+  };
+  
+  //colors
+  
+  // Function to add a new color to the Colors collection
+  export const addColor = async (colorData) => {
+    const ref = collection(firebase, 'Colors');
+    try {
+      const docRef = await addDoc(ref, colorData);
+      console.log("Color added with ID: ", docRef.id);
+      return { success: true, id: docRef.id };
+    } catch (error) {
+      console.error("Error adding color: ", error);
+      return { success: false, error: error.message };
+    }
+  };
+  
+  // Function to edit an existing color in the Colors collection
+  export const editColor = async (colorId, colorData) => {
+    const docRef = doc(firebase, 'Colors', colorId);
+    try {
+      await updateDoc(docRef, colorData);
+      console.log("Color updated with ID: ", colorId);
+      return { success: true };
+    } catch (error) {
+      console.error("Error updating color: ", error);
+      return { success: false, error: error.message };
+    }
+  };
+  
+  // Function to delete a color from the Colors collection
+  export const deleteColor = async (colorId) => {
+    const docRef = doc(firebase, 'Colors', colorId);
+    try {
+      await deleteDoc(docRef);
+      console.log("Color deleted with ID: ", colorId);
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting color: ", error);
+      return { success: false, error: error.message };
+    }
+  };
+  
+  export const getAllColors = async () => {
+      const ref = collection(firebase, 'Colors');
+      try {
+        const querySnapshot = await getDocs(ref);
+        const colors = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        return { success: true, data: colors };
+      } catch (error) {
+        console.error("Error getting colors: ", error);
+        return { success: false, error: error.message };
+      }
+  };
+  
+  export const getColorById = async (colorId) => {
+    const docRef = doc(firebase, 'Colors', colorId);
+    try {
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      } else {
+        throw new Error('Color not found');
+      }
+    } catch (error) {
+      console.error('Error fetching color:', error);
+      throw error;
+    }
+  };
+  
+  // Add the getCategoryById method
+  export const getCategoryById = async (categoryId) => {
     const ref = collection(firebase, 'categories');
     const q = query(ref, where("id", "==", categoryId));
     
@@ -343,102 +440,41 @@ export const fetchCategoryById = async (categoryId) => {
       console.error("Error fetching category: ", error);
       return { success: false, error: error.message };
     }
-};
+  };
 
-export const getAllCategories = async () => {
-    const ref = collection(firebase, 'categories');
+// Function to delete media data from Firestore
+export const deleteMedia = async (mediaId) => {
+    const ref = doc(firebase, 'media', mediaId);
     try {
-      const querySnapshot = await getDocs(ref);
-      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      return { success: true, data };
+      await deleteDoc(ref);
+      console.log("Media document deleted with ID: ", mediaId);
+      return { success: true };
     } catch (e) {
-      console.error("Error fetching categories: ", e);
-      return { error: "Error fetching categories." };
+      console.error("Error deleting media document: ", e);
+      return { error: "Error deleting media document." };
     }
-};
+  };
 
-//colors
+export const updateProductAttributes = async (productId, attributes) => {
+  const batch = writeBatch(firebase);
+  const ref = collection(firebase, 'productAttributes');
 
-// Function to add a new color to the Colors collection
-export const addColor = async (colorData) => {
-  const ref = collection(firebase, 'Colors');
+  attributes.forEach(attr => {
+    const docRef = doc(ref, attr.id.toString());
+    batch.set(docRef, {
+      productId,
+      attributeId: attr.id,
+      value: attr.value,
+      updatedAt: new Date(),
+      createdAt: attr.createdAt || new Date()
+    }, { merge: true });
+  });
+
   try {
-    const docRef = await addDoc(ref, colorData);
-    console.log("Color added with ID: ", docRef.id);
-    return { success: true, id: docRef.id };
-  } catch (error) {
-    console.error("Error adding color: ", error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to edit an existing color in the Colors collection
-export const editColor = async (colorId, colorData) => {
-  const docRef = doc(firebase, 'Colors', colorId);
-  try {
-    await updateDoc(docRef, colorData);
-    console.log("Color updated with ID: ", colorId);
+    await batch.commit();
     return { success: true };
   } catch (error) {
-    console.error("Error updating color: ", error);
-    return { success: false, error: error.message };
-  }
-};
-
-// Function to delete a color from the Colors collection
-export const deleteColor = async (colorId) => {
-  const docRef = doc(firebase, 'Colors', colorId);
-  try {
-    await deleteDoc(docRef);
-    console.log("Color deleted with ID: ", colorId);
-    return { success: true };
-  } catch (error) {
-    console.error("Error deleting color: ", error);
-    return { success: false, error: error.message };
-  }
-};
-
-export const getAllColors = async () => {
-    const ref = collection(firebase, 'Colors');
-    try {
-      const querySnapshot = await getDocs(ref);
-      const colors = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      return { success: true, data: colors };
-    } catch (error) {
-      console.error("Error getting colors: ", error);
-      return { success: false, error: error.message };
-    }
-};
-
-export const getColorById = async (colorId) => {
-  const docRef = doc(firebase, 'Colors', colorId);
-  try {
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return { id: docSnap.id, ...docSnap.data() };
-    } else {
-      throw new Error('Color not found');
-    }
-  } catch (error) {
-    console.error('Error fetching color:', error);
-    throw error;
-  }
-};
-
-// Add the getCategoryById method
-export const getCategoryById = async (categoryId) => {
-  const ref = collection(firebase, 'categories');
-  const q = query(ref, where("id", "==", categoryId));
-  
-  try {
-    const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-      return { success: false, error: "Category not found" };
-    }
-    const category = querySnapshot.docs[0].data();
-    return { success: true, data: category };
-  } catch (error) {
-    console.error("Error fetching category: ", error);
+    console.error("Error updating product attributes: ", error);
     return { success: false, error: error.message };
   }
 };

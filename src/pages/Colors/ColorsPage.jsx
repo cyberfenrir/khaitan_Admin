@@ -22,13 +22,8 @@ const ColorsPage = () => {
 
 
 
-  const handleEditColor = async (colorId, colorData) => {
-    const result = await editColor(colorId, colorData);
-    if (result.success) {
-      setColorsData(colorsData.map(color => color.id === colorId ? { id: colorId, ...colorData } : color));
-    } else {
-      console.error(result.error);
-    }
+  const handleEditColor = (colorId) => {
+    navigate(`/colors/edit/${colorId}`);
   };
 
   const handleDeleteColor = async (colorId) => {
