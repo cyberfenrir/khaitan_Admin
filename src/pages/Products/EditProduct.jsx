@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductById, getAttributesbyCategory, updateProduct, updateProductAttributes, getAllCategories, fetchCategoryById, getAllMedia, addMedia, deleteMedia, uploadImageToStorage } from '../../Utils/service';
+import { getProductById, getAttributesbyCategory, updateProduct, updateProductAttributes, getAllCategories, fetchCategoryById, getAllMedia, addMedia, deleteMedia, uploadImageToStorage, getAttributesforProduct } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
 
 function EditProduct() {
@@ -28,7 +28,7 @@ function EditProduct() {
         setProduct(productData.data);
         setUpdatedProduct(productData.data);
         
-        const attributesData = await getAttributesbyCategory(productData.data.categoryId);
+        const attributesData = await getAttributesforProduct(productData.data.id);
         console.log('Fetched attributes data:', attributesData);
         
         if (attributesData.success) {

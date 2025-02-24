@@ -89,7 +89,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
 
   return (
     <div role="row" className="flex justify-center contents group">
-      <div className="flex justify-center py-4 px-5 border-b border-slate-200 group-hover:bg-slate-50">
+      <div className="flex justify-center items-center py-4 px-5 border-b border-slate-200 group-hover:bg-slate-50">
         <span className="text-sm text-slate-600">{product.id}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">

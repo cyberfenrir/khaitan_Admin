@@ -168,6 +168,19 @@ export const getAttributesbyCategory = async (categoryId) => {
     const q = query(ref, where("categoryId", "==", Number(categoryId)));
     try {
         const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => doc.data());
+        return { success: true, data };
+    } catch (e) {
+        console.error("Error fetching documents: ", e);
+        return { error: "Error fetching documents." };
+    }
+};
+
+export const getAttributesforProduct = async (productId) => {
+    const ref = collection(firebase, 'productAttributes');
+    const q = query(ref, where("productId", "==", Number(productId)));
+    try {
+        const querySnapshot = await getDocs(q);
         const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         return { success: true, data };
     } catch (e) {

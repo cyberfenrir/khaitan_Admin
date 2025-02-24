@@ -11,7 +11,8 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
   const [selectedColors, setSelectedColors] = useState({});
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
-  const [rows, setRows] = useState(0);
+  const [rows, setRows] = useState(1);
+  const [disabledSaveButtons, setDisabledSaveButtons] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,6 +55,7 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
     }
 
     try {
+      setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
       const downloadURL = await uploadImageToStorage(imageData.file);
       const mediaData = {
         productId,
@@ -63,12 +65,13 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
       const response = await addMedia(mediaData);
       console.log('Media uploaded:', response);
       nextColor(selectedColors);
-      setMessage('Product created successfully.');
+      setMessage('Image uploaded successfully.');
       setMessageType('success');
     } catch (error) {
       console.error('Failed to upload media:', error);
       setMessage('Failed to upload media.');
       setMessageType('error');
+      setDisabledSaveButtons((prev) => ({ ...prev, [index]: false }));
     }
   };
 
@@ -165,7 +168,11 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
                   ></div>
                   
                   <div className="flex justify-end w-[55%] px-3">
-                    <button className="bg-orange-500 text-white py-2 px-4 rounded-lg justify-center" onClick={() => handleSave(`${n1}-${n}`)}>
+                    <button
+                      className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${disabledSaveButtons[`${n1}-${n}`] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => handleSave(`${n1}-${n}`)}
+                      disabled={disabledSaveButtons[`${n1}-${n}`]}
+                    >
                       Save
                     </button>
                   </div>
@@ -181,16 +188,16 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
       <div className='flex justify-between w-full'>
         <button className='bg-orange-700 text-white py-2 px-4 rounded-lg justify-center' onClick={handleAddNewRow}>+ Add Row</button>
         <button
-          className={`bg-orange-700 text-white py-2 px-4 rounded-lg justify-center ${rows === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
+          className={`bg-orange-700 text-white py-2 px-4 rounded-lg justify-center ${rows === 1 ? 'cursor-not-allowed opacity-50' : ''}`}
           onClick={handleDeleteRow}
-          disabled={rows === 0}
+          disabled={rows === 1}
         >
           - Delete Row
         </button>
       </div>
 
       <div className='flex justify-center w-full mt-4'>
-        <button className='bg-orange-700 text-white py-2 px-4 rounded-lg' onClick={() => navigate('/products/product-list')}>
+        <button className='bg-orange-500 text-white py-2 px-4 rounded-lg' onClick={() => navigate('/products/product-list')}>
           Go to Product List
         </button>
       </div>
