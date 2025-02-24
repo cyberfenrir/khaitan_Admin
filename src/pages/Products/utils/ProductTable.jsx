@@ -86,6 +86,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   };
 
   const productMedia = media.find(m => m.productId === product.id);
+  console.log(media);
 
   return (
     <div role="row" className="flex justify-center contents group">
@@ -158,6 +159,7 @@ const ProductTable = ({ productsList }) => {
         const mediaData = await getAllMedia();
         if (mediaData.success) {
           setMedia(mediaData.data);
+          console.log(mediaData);
         } else {
           console.error('Failed to fetch media:', mediaData.error);
         }

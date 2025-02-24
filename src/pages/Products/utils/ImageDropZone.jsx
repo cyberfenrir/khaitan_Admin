@@ -58,7 +58,7 @@ const ImageDropZone = ({ onImageUpload, nextColor }) => {
       setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
       const downloadURL = await uploadImageToStorage(imageData.file);
       const mediaData = {
-        productId,
+        productId: Number(productId),
         colorId: selectedColors[index],
         imageUrl: downloadURL,
       };

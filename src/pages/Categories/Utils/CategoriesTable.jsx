@@ -88,7 +88,7 @@ const CategoriesTableRow = ({ category, onDelete }) => {
         <div className="py-1 px-1 border-b border-slate-200 group-hover:bg-slate-50">
           &nbsp;
         </div>
-        <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
+        <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
           <div className="flex items-center gap-3">
             <div className="flex flex-col">
               <h2 className="text-sm font-medium text-slate-700">{category.name}</h2>
