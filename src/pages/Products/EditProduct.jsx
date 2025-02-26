@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductById, getAttributesbyCategory, updateProduct, updateProductAttributes, getAllCategories, fetchCategoryById, getAllMedia, addMedia, deleteMedia, uploadImageToStorage, getAttributesforProduct } from '../../Utils/service';
+import { getProductById, getAttributesbyCategory, updateProduct, updateProductAttributes, getAllCategories, fetchCategoryById, getAllMedia, addMedia, deleteMedia, uploadImageToStorage, getAttributesforProduct, getAllAttributes } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
 
 function EditProduct() {
   const { slug } = useParams();
   const [product, setProduct] = useState(null);
   const [attributes, setAttributes] = useState([]);
+  const [allAttr, setAllAttr] = useState([]);
   const [updatedProduct, setUpdatedProduct] = useState({});
   const [updatedAttributes, setUpdatedAttributes] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -30,6 +31,23 @@ function EditProduct() {
         
         const attributesData = await getAttributesforProduct(productData.data.id);
         console.log('Fetched attributes data:', attributesData);
+        
+        const allAttributes = await getAllAttributes();
+        if(allAttributes.success) {
+          console.log("All Attributes: ", allAttributes.data);
+          const productAttr = allAttributes.data.filter((a) => Number(productData.data.categoryId) === Number(a.categoryId));
+          
+          const attributeMap = {};
+          productAttr.forEach(attr => {
+            const matchingAttr = attributesData.data.find(a => a.attributeId === attr.id);
+            if (matchingAttr) {
+              attributeMap[attr.name] = matchingAttr.value;
+            }
+          });
+          
+          setAllAttr(attributeMap);
+          console.log("Attribute Map: ", attributeMap);
+        }
         
         if (attributesData.success) {
           setAttributes(attributesData.data);

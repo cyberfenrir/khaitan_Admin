@@ -27,8 +27,8 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
   }, []);
 
   const handleAddAttribute = () => {
-    if (!attributeName.trim() || !attributeType.trim() || !attributeUnit.trim()) {
-      setErrorMessage('Please fill all fields');
+    if (!attributeName.trim() || !attributeType.trim()) {
+      setErrorMessage('Please fill all mandatory fields');
       return;
     }
 
@@ -41,7 +41,7 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
     const attributeData = {
       name: attributeName.trim(),
       type: attributeType.trim(),
-      unit: attributeUnit.trim(),
+      unit: attributeUnit.trim() || '',
       categoryId: categoryId,
       createdAt: new Date().toISOString()
     };
@@ -152,7 +152,7 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
             </div>
             
             <div>
-              <label className="mb-2 text-sm text-slate-500">Attribute Unit</label>
+              <label className="mb-2 text-sm text-slate-500">Attribute Unit (Optional)</label>
               <input
                 type="text"
                 value={attributeUnit}
