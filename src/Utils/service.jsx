@@ -33,43 +33,43 @@ export const addData = async (data, collectionName) => {
 }
 
 export const bulkAddData = async (dataArray, collectionName) => {
-    const ref = collection(firebase, collectionName);
+  const ref = collection(firebase, collectionName);
+  
+  // Get the last document to determine the next id
+  const lastDocQuery = query(ref, orderBy('id', 'desc'), limit(1));
+  const lastDocSnapshot = await getDocs(lastDocQuery);
+  let nextId = 1;
+  if (!lastDocSnapshot.empty) {
+    const lastDoc = lastDocSnapshot.docs[0];
+    nextId = lastDoc.data().id + 1;
+  }
+
+  try {
+    // Create a batch
+    const batch = writeBatch(firebase);
     
-    // Get the last document to determine the next id
-    const lastDocQuery = query(ref, orderBy('id', 'desc'), limit(1));
-    const lastDocSnapshot = await getDocs(lastDocQuery);
-    let nextId = 1;
-    if (!lastDocSnapshot.empty) {
-        const lastDoc = lastDocSnapshot.docs[0];
-        nextId = lastDoc.data().id + 1;
-    }
+    // Add each document to the batch with an incrementing ID
+    dataArray.forEach((data, index) => {
+      const newDocRef = doc(ref, (nextId + index).toString());
+      batch.set(newDocRef, { 
+        ...data, 
+        id: nextId + index 
+      });
+    });
 
-    try {
-        // Create a batch
-        const batch = writeBatch(firebase);
-        
-        // Add each document to the batch with an incrementing ID
-        dataArray.forEach((data, index) => {
-            const newDocRef = doc(ref);
-            batch.set(newDocRef, { 
-                ...data, 
-                id: nextId + index 
-            });
-        });
-
-        // Commit the batch
-        await batch.commit();
-        
-        return { 
-            success: true, 
-            startId: nextId, 
-            endId: nextId + dataArray.length - 1,
-            message: 'Attributes added successfully'
-        };
-    } catch (e) {
-        console.error("Error adding documents: ", e);
-        return { error: "Error adding documents." };
-    }
+    // Commit the batch
+    await batch.commit();
+    
+    return { 
+      success: true, 
+      startId: nextId, 
+      endId: nextId + dataArray.length - 1,
+      message: 'Documents added successfully'
+    };
+  } catch (e) {
+    console.error("Error adding documents: ", e);
+    return { error: "Error adding documents." };
+  }
 }
 
 export const getData = async (collectionName) => {
@@ -190,30 +190,51 @@ export const getAttributesforProduct = async (productId) => {
 };
 
 export const deleteProductbyId = async (productId) => {
-    const ref = collection(firebase, 'products');
-    const q = query(ref, where("id", "==", productId));
+  const productRef = collection(firebase, 'products');
+  const productQuery = query(productRef, where("id", "==", productId));
+  
+  try {
+    // First get the product document reference
+    const productSnapshot = await getDocs(productQuery);
     
-    try {
-        // First get the document reference
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) {
-            return { success: false, error: "Document not found" };
-        }
-
-        // Get the first matching document (assuming 'id' is unique)
-        const docRef = querySnapshot.docs[0].ref;
-        
-        // Delete the document
-        await deleteDoc(docRef);
-        
-        console.log("Document deleted successfully");
-        return { success: true, productId };
-        
-    } catch (error) {
-        console.error("Error deleting document: ", error);
-        return { success: false, error: error.message };
+    if (productSnapshot.empty) {
+      return { success: false, error: "Product not found" };
     }
+
+    // Get the first matching product document (assuming 'id' is unique)
+    const productDocRef = productSnapshot.docs[0].ref;
+    
+    // Delete the product document
+    await deleteDoc(productDocRef);
+
+    // Now delete the corresponding media documents
+    const mediaRef = collection(firebase, 'media');
+    const mediaQuery = query(mediaRef, where("productId", "==", productId));
+    const mediaSnapshot = await getDocs(mediaQuery);
+
+    const batch = writeBatch(firebase);
+    mediaSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    // Now delete the corresponding productAttributes documents
+    const attributesRef = collection(firebase, 'productAttributes');
+    const attributesQuery = query(attributesRef, where("productId", "==", productId));
+    const attributesSnapshot = await getDocs(attributesQuery);
+
+    attributesSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    console.log("Product and corresponding media and attributes deleted successfully");
+    return { success: true, productId };
+    
+  } catch (error) {
+    console.error("Error deleting product and related documents: ", error);
+    return { success: false, error: error.message };
+  }
 };
 
 //attributes
@@ -313,31 +334,43 @@ export const deleteAttribute = async (attributeId) => {
 }
 
 export const deleteCategory = async (categoryId) => {
-    const ref = collection(firebase, 'categories');
-    const q = query(ref, where("id", "==", Number(categoryId)));
-    
-    try {
-      // First get the document reference
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        return { success: false, error: "Category not found" };
-      }
+  const categoryRef = collection(firebase, 'categories');
+  const categoryQuery = query(categoryRef, where("id", "==", Number(categoryId)));
   
-      // Get the first matching document (assuming 'id' is unique)
-      const docRef = querySnapshot.docs[0].ref;
-      
-      // Delete the document
-      await deleteDoc(docRef);
-      
-      console.log("Category deleted successfully");
-      return { success: true, categoryId };
-      
-    } catch (error) {
-      console.error("Error deleting category: ", error);
-      return { success: false, error: error.message };
+  try {
+    // First get the category document reference
+    const categorySnapshot = await getDocs(categoryQuery);
+    
+    if (categorySnapshot.empty) {
+      return { success: false, error: "Category not found" };
     }
-  };
+
+    // Get the first matching category document (assuming 'id' is unique)
+    const categoryDocRef = categorySnapshot.docs[0].ref;
+    
+    // Delete the category document
+    await deleteDoc(categoryDocRef);
+    
+    // Now delete the corresponding attributes
+    const attributesRef = collection(firebase, 'attributes');
+    const attributesQuery = query(attributesRef, where("categoryId", "==", Number(categoryId)));
+    const attributesSnapshot = await getDocs(attributesQuery);
+
+    const batch = writeBatch(firebase);
+    attributesSnapshot.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+
+    console.log("Category and corresponding attributes deleted successfully");
+    return { success: true, categoryId };
+    
+  } catch (error) {
+    console.error("Error deleting category and attributes: ", error);
+    return { success: false, error: error.message };
+  }
+};
   
   
   export const fetchCategoryById = async (categoryId) => {
