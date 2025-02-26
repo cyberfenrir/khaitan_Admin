@@ -31,10 +31,21 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
       setErrorMessage('Please fill all fields');
       return;
     }
+    // Check if attribute with the same name, type, and unit already exists for the same categoryId
+    const isDuplicate = existingAttributes.some(attr => 
+      attr.name.trim().toLowerCase() === attributeName.trim().toLowerCase() &&
+      attr.type.trim().toLowerCase() === attributeType.trim().toLowerCase() &&
+      attr.unit.trim().toLowerCase() === attributeUnit.trim().toLowerCase() &&
+      String(attr.categoryId) === String(categoryId)
+    ) || attributes.some(attr => 
+      attr.name.trim().toLowerCase() === attributeName.trim().toLowerCase() &&
+      attr.type.trim().toLowerCase() === attributeType.trim().toLowerCase() &&
+      attr.unit.trim().toLowerCase() === attributeUnit.trim().toLowerCase() &&
+      String(attr.categoryId) === String(categoryId)
+    );
 
-    // Check if attribute name already exists in the current list
-    if (attributes.some(attr => attr.name.toLowerCase() === attributeName.toLowerCase())) {
-      setErrorMessage('This attribute name has already been added');
+    if (isDuplicate) {
+      setErrorMessage('This attribute already exists for the same category');
       return;
     }
 
@@ -113,7 +124,7 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
                   className="px-4 py-2 bg-white rounded-lg border border-zinc-200 flex-grow"
                   defaultValue=""
                 >
-                  <option value="">Select an attribute to copy values</option>
+                  <option value="">Select Attribute for reference</option>
                   {existingAttributes.map((attr) => (
                     <option key={attr.id} value={attr.id}>
                       {attr.name} ({attr.type} - {attr.unit})

@@ -99,7 +99,7 @@ const CategoriesTableRow = ({ category, onDelete }) => {
           <span className="text-sm text-slate-600">{category.id}</span>
         </div>
         <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
-          <span className="text-sm text-slate-600">{category.description}</span>
+          <span className="text-sm text-slate-600 line-clamp-2">{category.description}</span>
         </div>
         <div className="py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
@@ -116,31 +116,38 @@ const CategoriesTableRow = ({ category, onDelete }) => {
       </div>
 
       {showPopup && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-lg p-6 w-1/2">
-            <h2 className="text-xl font-semibold mb-4">Attributes for {category.name}</h2>
-            <ul className="list-disc pl-5">
-            <ul className="list-none">
-              {attributes.map(attr => (
-                <li key={attr.id} className="mb-4">
-                  <ol className="list-decimal pl-5">
-                    <li><strong>Name:</strong> {attr.name}</li>
-                    <li><strong>DataType:</strong> {attr.type}</li>
-                    <li><strong>Unit:</strong> {attr.unit}</li>
-                  </ol>
-                </li>
-              ))}
-            </ul>
-            </ul>
-            <button
-              onClick={() => setShowPopup(false)}
-              className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white rounded-lg p-6 w-1/2 max-h-[80vh] overflow-auto">
+      <h2 className="text-xl font-semibold mb-4">
+        Attributes for {category.name}
+      </h2>
+      <ul className="list-none">
+        {attributes.map((attr) => (
+          <li key={attr.id} className="mb-4">
+            <ol className="list-decimal pl-5">
+              <li>
+                <strong>Name:</strong> {attr.name}
+              </li>
+              <li>
+                <strong>DataType:</strong> {attr.type}
+              </li>
+              <li>
+                <strong>Unit:</strong> {attr.unit}
+              </li>
+            </ol>
+          </li>
+        ))}
+      </ul>
+      <button
+        onClick={() => setShowPopup(false)}
+        className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
 
       {errorMessage && <MessageBox message={errorMessage} type="error" onClose={() => setErrorMessage('')} />}
     </>
