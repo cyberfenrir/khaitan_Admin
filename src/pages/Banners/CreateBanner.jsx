@@ -1,43 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addBanner, uploadBannerMedia } from '../../Utils/bannerService';
+import { addBanner } from '../../Utils/bannerService';
 import MessageBox from '../../Utils/message';
+import ImageDropZone from './ImageDropZoneforBanners';
 
 const CreateBanner = () => {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]);
-  const [previewFiles, setPreviewFiles] = useState([]);
+  const [mediaArray, setMediaArray] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
-  const handleMediaChange = (e) => {
-    const files = Array.from(e.target.files);
-    setMediaFiles(files);
-    setPreviewFiles(files.map(file => URL.createObjectURL(file)));
-  };
-
-  const handleRemoveMedia = (index) => {
-    const updatedMediaFiles = [...mediaFiles];
-    const updatedPreviewFiles = [...previewFiles];
-    updatedMediaFiles.splice(index, 1);
-    updatedPreviewFiles.splice(index, 1);
-    setMediaFiles(updatedMediaFiles);
-    setPreviewFiles(updatedPreviewFiles);
+  const handleSaveMedia = (media) => {
+    setMediaArray((prevMediaArray) => [...prevMediaArray, media]);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !description.trim() || mediaFiles.length === 0) {
+    if (!name.trim() || !description.trim() || mediaArray.length === 0) {
       setErrorMessage('Please fill all fields');
       return;
     }
 
     try {
-      const mediaURLs = await uploadBannerMedia(mediaFiles);
-      const newBanner = { name, description, media: mediaURLs };
+      const newBanner = { name, description };
       await addBanner(newBanner);
+
+      // for (const media of mediaArray) {
+      //   await addMedia(media);
+      // }
+
       setSuccessMessage('Banner created successfully');
       setTimeout(() => navigate('/banners/banner-list'), 2000);
     } catch (error) {
@@ -79,31 +72,7 @@ const CreateBanner = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="media" className="block text-sm font-medium text-gray-700 mb-1">
-              Media Files
-            </label>
-            <input
-              type="file"
-              id="media"
-              multiple
-              onChange={handleMediaChange}
-              className="w-full p-2 border border-gray-300 rounded"
-              required
-            />
-            <div className="flex flex-wrap gap-2 mt-2">
-              {previewFiles.map((file, index) => (
-                <div key={index} className="relative flex items-center mb-2">
-                  <img src={file} alt="Preview" className="w-32 h-32 object-cover rounded" />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveMedia(index)}
-                    className="ml-2 bg-red-500 text-white rounded-full p-1"
-                  >
-                    &times;
-                  </button>
-                </div>
-              ))}
-            </div>
+            <ImageDropZone utilityName={name} onSave={handleSaveMedia} />
           </div>
           <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Add Banner

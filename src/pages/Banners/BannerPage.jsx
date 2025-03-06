@@ -5,7 +5,7 @@ import { deleteBanner, getAllBanners } from '../../Utils/bannerService';
 import MessageBox from '../../Utils/message';
 
 const BannersPage = () => {
-  const [bannersData, setBannersData] = useState([]);
+  const [bannersData, setBannersData] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const BannersPage = () => {
     const fetchBanners = async () => {
       const result = await getAllBanners();
       if (result.success) {
+        console.log(result.data);
         setBannersData(result.data);
       } else {
         setErrorMessage(result.error);
@@ -31,7 +32,11 @@ const BannersPage = () => {
   const handleDeleteBanner = async (bannerId) => {
     const result = await deleteBanner(bannerId);
     if (result.success) {
-      setBannersData(bannersData.filter(banner => banner.id !== bannerId));
+      const updatedBannersData = { ...bannersData };
+      for (const utility in updatedBannersData) {
+        updatedBannersData[utility] = updatedBannersData[utility].filter(banner => banner.id !== bannerId);
+      }
+      setBannersData(updatedBannersData);
       setSuccessMessage('Banner deleted successfully');
     } else {
       setErrorMessage(result.error);
@@ -53,11 +58,16 @@ const BannersPage = () => {
         </header>
         {errorMessage && <MessageBox message={errorMessage} type="error" onClose={() => setErrorMessage('')} />}
         {successMessage && <MessageBox message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-        <BannersTable
-          bannersList={bannersData}
-          onEditBanner={handleEditBanner}
-          onDeleteBanner={handleDeleteBanner}
-        />
+        {Object.keys(bannersData).map(utility => (
+          <div key={utility}>
+            <h2 className="text-lg font-semibold text-slate-700">{utility}</h2>
+            <BannersTable
+              bannersList={bannersData[utility].slice(0, 1)}
+              onEditBanner={handleEditBanner}
+              onDeleteBanner={handleDeleteBanner}
+            />
+          </div>
+        ))}
       </div>
     </section>
   );

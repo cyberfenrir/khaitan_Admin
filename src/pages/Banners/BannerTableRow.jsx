@@ -33,13 +33,13 @@ const BannersTableRow = ({ banner, onEditBanner, onDeleteBanner }) => {
         <span className="text-sm text-slate-600">{banner.id}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
-        <span className="text-sm text-slate-600">{banner.name}</span>
+        <span className="text-sm text-slate-600">{banner.utility}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
         <span className="text-sm text-slate-600">{banner.description}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
-        <img src={banner.media} alt={banner.name} className="w-16 h-16 object-cover rounded" />
+        <img src={banner.url} alt={banner.name} className="w-16 h-16 object-cover rounded" />
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 space-x-2 flex justify-center">
         {actionIcons.map((icon) => (
@@ -59,9 +59,9 @@ const BannersTableRow = ({ banner, onEditBanner, onDeleteBanner }) => {
 BannersTableRow.propTypes = {
   banner: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
+    utility: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    media: PropTypes.string.isRequired,
+    url: PropTypes.string.isRequired,
   }).isRequired,
   onEditBanner: PropTypes.func.isRequired,
   onDeleteBanner: PropTypes.func.isRequired,

@@ -3,7 +3,7 @@ import { addDoc, collection, getDocs, deleteDoc, doc, getDoc, updateDoc } from '
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const addBanner = async (bannerData) => {
-  const ref = collection(firebase, 'Banners');
+  const ref = collection(firebase, 'media');
   try {
     const docRef = await addDoc(ref, bannerData);
     console.log("Banner added with ID: ", docRef.id);
@@ -44,11 +44,23 @@ export const deleteBanner = async (bannerId) => {
 };
 
 export const getAllBanners = async () => {
-  const ref = collection(firebase, 'Banners');
+  const ref = collection(firebase, 'media');
   try {
     const querySnapshot = await getDocs(ref);
-    const banners = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    return { success: true, data: banners };
+    const banners = querySnapshot.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .filter(banner => banner.utility);
+
+    const groupedBanners = banners.reduce((acc, banner) => {
+      const utility = banner.utility;
+      if (!acc[utility]) {
+        acc[utility] = [];
+      }
+      acc[utility].push(banner);
+      return acc;
+    }, {});
+
+    return { success: true, data: groupedBanners };
   } catch (error) {
     console.error("Error getting banners: ", error);
     return { success: false, error: error.message };
