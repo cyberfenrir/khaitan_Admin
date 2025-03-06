@@ -21,6 +21,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           items: ['Add-product', 'Product-list', 'Categories']
         },
         { 
+          name: 'Banners',
+          items: ['Banner-list', 'Add-banner']
+        },
+        { 
           name: 'Orders',
           items: ['Order-history']
         },

@@ -502,6 +502,42 @@ export const deleteMedia = async (mediaId) => {
     }
   };
 
+
+export const getMediaByProductId = async (productId) => {
+    const mediaRef = collection(firebase, 'media');
+    const mediaQuery = query(mediaRef, where("productId", "==", Number(productId)));
+    
+    try {
+      const querySnapshot = await getDocs(mediaQuery);
+      const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return { success: true, data };
+    } catch (e) {
+      console.error("Error fetching media documents: ", e);
+      return { error: "Error fetching media documents." };
+    }
+  };
+
+export const updateMedia = async (mediaId, mediaData) => {
+    const mediaRef = collection(firebase, 'media');
+    const mediaQuery = query(mediaRef, where("id", "==", mediaId));
+    
+    try {
+      const querySnapshot = await getDocs(mediaQuery);
+      
+      if (querySnapshot.empty) {
+        return { success: false, error: "Media not found" };
+      }
+      
+      const mediaDocRef = querySnapshot.docs[0].ref;
+      await updateDoc(mediaDocRef, mediaData);
+      
+      return { success: true };
+    } catch (e) {
+      console.error("Error updating media document: ", e);
+      return { error: "Error updating media document." };
+    }
+  };
+
 export const updateProductAttributes = async (productId, attributes) => {
   const batch = writeBatch(firebase);
   const ref = collection(firebase, 'productAttributes');
@@ -524,4 +560,28 @@ export const updateProductAttributes = async (productId, attributes) => {
     console.error("Error updating product attributes: ", error);
     return { success: false, error: error.message };
   }
+};
+
+export const getProductDetailsById = async (productId) => {
+    const productRef = collection(firebase, 'products');
+    const mediaRef = collection(firebase, 'media');
+    const productQuery = query(productRef, where("id", "==", productId));
+    const mediaQuery = query(mediaRef, where("productId", "==", productId));
+
+    try {
+        const productSnapshot = await getDocs(productQuery);
+        const mediaSnapshot = await getDocs(mediaQuery);
+
+        if (productSnapshot.empty) {
+            return { success: false, error: "Product not found" };
+        }
+
+        const product = productSnapshot.docs[0].data();
+        const media = mediaSnapshot.docs.map(doc => doc.data());
+
+        return { success: true, data: { product, media } };
+    } catch (error) {
+        console.error("Error fetching product details: ", error);
+        return { success: false, error: error.message };
+    }
 };

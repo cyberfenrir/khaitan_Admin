@@ -23,6 +23,8 @@ import SettingsPage from './pages/settings/settings';
 
 import ColorsPage from './pages/Colors/ColorsPage';
 
+import BannerPage from './pages/Banners/BannerPage';
+
 // import CreateProduct from './pages/Products/CreateProduct';
 
 import EditProduct from './pages/Products/EditProduct';
@@ -44,10 +46,15 @@ import CreateAttributesPage from './pages/Categories/CreateAttributesPage';
 
 
 import CreateColor from './pages/Colors/CreateColor';
+
+import CreateBanner from './pages/Banners/CreateBanner';
+
 import SignInPage from './pages/Login/LoginPage';
 import CreateAccountPage from './pages/Login/SignInPage';
 import CreateProduct from './pages/Products/CreateProduct';
 import EditColor from './pages/Colors/EditColor';
+
+import EditBanner from './pages/Banners/EditBanner';
 
 import ProtectedLayout from './ProtectedLayout';
 import { AuthProvider } from './AuthContext';
@@ -104,6 +111,11 @@ function App() {
                 <Route path="/colors/create" element={<CreateColor />} />
                 <Route path="/colors/add-color" element={<CreateColor />} />
                 <Route path="/colors/edit/:colorId" element={<EditColor />} />
+                <Route path="/banners/banner-list" element={<BannerPage />} />
+                <Route path="/banners/create" element={<CreateBanner />} />
+                <Route path="/banners/add-banner" element={<CreateBanner />} />
+                <Route path="/banners/edit/:bannerId" element={<EditBanner />} />
+
                 </Route>
                 <Route path="/" element={<SignInPage />} />
                 <Route path="/login" element={<SignInPage />} />

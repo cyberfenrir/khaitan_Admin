@@ -4,9 +4,11 @@ import viewIcon from '../assets/view.svg';
 import editIcon from '../assets/edit.svg';
 import deleteIcon from '../assets/delete.svg';
 import { deleteProduct } from '../../../Middlewares/data/productsapi';
-import { deleteProductbyId, getAllMedia, getAllCategories, getCategoryById } from '../../../Utils/service';
+import { deleteProductbyId, getAllMedia, getAllCategories, getCategoryById, getProductById } from '../../../Utils/service';
 import { useState, useEffect } from 'react';
-import { getData } from '../../../Utils/service';
+import { getData, getAttributesbyCategory, getAttributesforProduct } from '../../../Utils/service';
+import MessageBox from '../../../Utils/message';
+// import { useNavigate } from 'react-router-dom';
 
 const ProductTableHeader = () => {
   return (
@@ -36,6 +38,12 @@ const ProductTableHeader = () => {
 
 const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const [categoryName, setCategoryName] = useState('Unknown');
+  const [productDetails, setProductDetails] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
+  const [attributes, setAttributes] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  // const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCategoryName = async () => {
@@ -64,8 +72,58 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const handleAction = async(action) => {
     switch (action) {
       case 'view':
-        console.log(`View product ${product.id}`);
-        break;
+  try {
+    const response = await getProductById(parseInt(product.id));
+    if (!response.success || !response.data) {
+      throw new Error('Failed to fetch product details');
+    }
+    
+    console.log("Product Details:", response.data);
+
+    const attr = await getAttributesforProduct(parseInt(product.id));
+    if (!attr) {
+      throw new Error('Attributes for product not found');
+    }
+
+    console.log("Product Attributes:", attr);
+
+    const category = await getCategoryById(parseInt(response.data.categoryId));
+    if (!category.success || !category.data) {
+      throw new Error('Failed to fetch category details');
+    }
+
+    console.log("Category:", category.data);
+
+    const attributesData = await getAttributesbyCategory(category.data.id);
+    if (!attributesData.success || !Array.isArray(attributesData.data)) {
+      throw new Error('Failed to fetch attributes data');
+    }
+
+    console.log("Fetched Attributes Data:", attributesData.data);
+
+    const combinedAttributes = attributesData.data.map(attribute => {
+      const matchingAttr = attr?.data?.find(a => a.attributeId === attribute.id);
+      return {
+        categoryId: attribute.categoryId,
+        attributeId: attribute.id,
+        name: attribute.name,
+        type: attribute.type,
+        unit: attribute.unit,
+        value: matchingAttr ? matchingAttr.value : null,
+      };
+    });
+
+    console.log("Combined Attributes:", combinedAttributes);
+
+    setAttributes(combinedAttributes);
+    setProductDetails(response.data);
+    setShowPopup(true);
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    setErrorMessage('Error fetching product: ' + error.message);
+  }
+  break;
+
       case 'edit':
         window.location.href = `/products/edit-product/${product.id}`;
         break;
@@ -120,6 +178,74 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
       <div className="py-4 px-3.5 flex items-center border-b border-slate-200 group-hover:bg-slate-50">
         <Actions icons={actionIcons} onAction={handleAction} />
       </div>
+      {showPopup && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white rounded-lg p-6 w-1/2 max-h-[80vh] overflow-auto">
+
+    {/* 🖼️ Media Carousel */}
+    <h3 className="text-lg font-semibold mb-2">Product Images</h3>
+      {media.length > 0 ? (
+        <div className="relative w-full flex justify-center">
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev === 0 ? media.length - 1 : prev - 1))}
+            className="absolute left-0 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-gray-500 text-white rounded-l-lg"
+          >
+            ❮
+          </button>
+          <img
+            src={media[currentIndex].imageUrl}
+            alt="Product"
+            className="w-full max-h-60 object-contain rounded-md"
+          />
+          <button
+            onClick={() => setCurrentIndex((prev) => (prev === media.length - 1 ? 0 : prev + 1))}
+            className="absolute right-0 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-gray-500 text-white rounded-r-lg"
+          >
+            ❯
+          </button>
+        </div>
+      ) : (
+        <p className="text-gray-500">No images available</p>
+      )}
+      
+      <h2 className="text-xl font-semibold mb-4">Product Details</h2>
+      <div className="mb-4">
+        <strong>Title:</strong> {productDetails.title}
+      </div>
+      <div className="mb-4">
+        <strong>Description:</strong> {productDetails.description}
+      </div>
+      <div className="mb-4">
+        <strong>Price:</strong> {productDetails.price}
+      </div>
+      <div className="mb-4">
+        <strong>Category:</strong> {categoryName}
+      </div>
+
+      
+
+      {/* 🏷️ Attributes Grid */}
+      <h3 className="text-lg font-semibold mt-4 mb-2">Attributes</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {attributes.map((attr) => (
+          <div key={attr.id} className="border p-4 rounded-lg shadow-md bg-gray-100">
+            <p className="font-semibold text-gray-700">{attr.name}</p>
+            <p className="text-sm text-gray-600"><strong>Type:</strong> {attr.type}</p>
+            <p className="text-sm text-gray-600"><strong>Value:</strong> {attr.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <button
+        onClick={() => setShowPopup(false)}
+        className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-lg"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+      {errorMessage && <MessageBox message={errorMessage} onClose={() => setErrorMessage('')} />}
     </div>
   );
 };
