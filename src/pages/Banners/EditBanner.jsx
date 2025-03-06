@@ -7,11 +7,11 @@ const EditBanner = () => {
   const { bannerId } = useParams();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [media, setMedia] = useState(null);
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [newMediaFiles, setNewMediaFiles] = useState([]);
   const [originalData, setOriginalData] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
-  const [isMediaRemoved, setIsMediaRemoved] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ const EditBanner = () => {
       if (result) {
         setName(result.name);
         setDescription(result.description);
-        setMedia(result.media);
+        setMediaFiles(result.media || []);
         setOriginalData(result);
       } else {
         setErrorMessage('Failed to fetch banner details');
@@ -32,14 +32,20 @@ const EditBanner = () => {
     fetchBanner();
   }, [bannerId]);
 
-  const handleRemoveMedia = () => {
-    setMedia(null);
-    setIsMediaRemoved(true);
+  const handleRemoveMedia = (index) => {
+    const updatedMediaFiles = [...mediaFiles];
+    updatedMediaFiles.splice(index, 1);
+    setMediaFiles(updatedMediaFiles);
+  };
+
+  const handleMediaChange = (e) => {
+    const files = Array.from(e.target.files);
+    setNewMediaFiles(files);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !description.trim() || (!media && !isMediaRemoved)) {
+    if (!name.trim() || !description.trim() || (mediaFiles.length === 0 && newMediaFiles.length === 0)) {
       setErrorMessage('Please fill all fields');
       return;
     }
@@ -47,21 +53,16 @@ const EditBanner = () => {
     if (
       name === originalData.name &&
       description === originalData.description &&
-      media === originalData.media &&
-      !isMediaRemoved
+      mediaFiles === originalData.media &&
+      newMediaFiles.length === 0
     ) {
       setErrorMessage('No changes made');
       return;
     }
 
     try {
-      let mediaURL = media;
-      if (isMediaRemoved || (media && typeof media !== 'string')) {
-        mediaURL = media ? await uploadBannerMedia(media) : '';
-        setMedia(mediaURL); // Update the media state with the new URL
-      }
-      const updatedBanner = { name, description, media: mediaURL };
-      await editBanner(bannerId, updatedBanner);
+      const updatedBanner = { name, description, media: mediaFiles };
+      await editBanner(bannerId, updatedBanner, newMediaFiles);
       setSuccessMessage('Banner updated successfully');
       setTimeout(() => navigate('/banners/banner-list'), 2000);
     } catch (error) {
@@ -104,28 +105,29 @@ const EditBanner = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="media" className="block text-sm font-medium text-gray-700 mb-1">
-              Media File
+              Media Files
             </label>
-            {media && typeof media === 'string' && !isMediaRemoved ? (
-              <div className="relative flex items-center">
-                <img src={media} alt="Current Media" className="w-32 h-32 object-cover rounded" />
-                <button
-                  type="button"
-                  onClick={handleRemoveMedia}
-                  className="ml-2 bg-red-500 text-white rounded-full p-1"
-                >
-                  &times;
-                </button>
-              </div>
-            ) : (
-              <input
-                type="file"
-                id="media"
-                onChange={(e) => setMedia(e.target.files[0])}
-                className="w-full p-2 border border-gray-300 rounded"
-                required
-              />
-            )}
+            <div className="flex flex-wrap gap-2">
+              {mediaFiles && mediaFiles.length > 0 && mediaFiles.map((media, index) => (
+                <div key={index} className="relative flex items-center mb-2">
+                  <img src={typeof media === 'string' ? media : URL.createObjectURL(media)} alt="Current Media" className="w-32 h-32 object-cover rounded" />
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMedia(index)}
+                    className="ml-2 bg-red-500 text-white rounded-full p-1"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
+            <input
+              type="file"
+              id="media"
+              multiple
+              onChange={handleMediaChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
           </div>
           <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Update Banner

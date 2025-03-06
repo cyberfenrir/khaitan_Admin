@@ -1,7 +1,5 @@
 import { firebase } from '../firebase';
-import { addDoc, collection, getDocs,
-    //  query, where, 
-     deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, getDocs, deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export const addBanner = async (bannerData) => {
@@ -16,10 +14,15 @@ export const addBanner = async (bannerData) => {
   }
 };
 
-export const editBanner = async (bannerId, bannerData) => {
+export const editBanner = async (bannerId, bannerData, newMediaFiles) => {
   const docRef = doc(firebase, 'Banners', bannerId);
   try {
-    await updateDoc(docRef, bannerData);
+    let mediaURLs = bannerData.media;
+    if (newMediaFiles.length > 0) {
+      const newMediaURLs = await uploadBannerMedia(newMediaFiles);
+      mediaURLs = [...mediaURLs, ...newMediaURLs];
+    }
+    await updateDoc(docRef, { ...bannerData, media: mediaURLs });
     console.log("Banner updated with ID: ", bannerId);
     return { success: true };
   } catch (error) {
@@ -67,11 +70,15 @@ export const getBannerById = async (bannerId) => {
   }
 };
 
-export const uploadBannerMedia = async (file) => {
+export const uploadBannerMedia = async (files) => {
   const storage = getStorage();
-  const storageRef = ref(storage, `banners/${file.name}`);
-  await uploadBytes(storageRef, file);
-  const downloadURL = await getDownloadURL(storageRef);
-  return downloadURL;
+  const uploadPromises = Array.from(files).map(async (file) => {
+    const storageRef = ref(storage, `banners/${file.name}`);
+    await uploadBytes(storageRef, file);
+    const downloadURL = await getDownloadURL(storageRef);
+    return downloadURL;
+  });
+  const downloadURLs = await Promise.all(uploadPromises);
+  return downloadURLs;
 };
 
