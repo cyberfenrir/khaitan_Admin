@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import { addData, updateProduct, getData } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
+import { getAllCategories } from "../../../services/categoryService";
+import { createProduct } from "../../../services/productService";
 
 const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
     const [categories, setCategories] = useState([]);
@@ -42,8 +44,8 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
     useEffect(() => {
         const getCategories = async () => {
             try {
-                const result = await getData('categories');
-                if (result.success) {
+                const result = await getAllCategories();
+                if (result.sucess) {
                     setCategories(result.data);
                     console.log('Fetched categories:', result.data);
                 }
@@ -77,34 +79,34 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
         
         try {
             // Format data for submission
-            const dataToSubmit = {
-                ...formData,
-                price: parseFloat(formData.price),
-                categoryId: formData.categoryId ? parseInt(formData.categoryId) : null
-            };
+            // const dataToSubmit = {
+            //     ...formData,
+            //     price: parseFloat(formData.price),
+            //     categoryId: formData.categoryId ? parseInt(formData.categoryId) : null
+            // };
             
-            if (isEditing && productInfo.id) {
-                // Update existing product
-                await updateProduct(`products/${productInfo.id}`, dataToSubmit);
-                setMessage('Product updated successfully!');
-                setMessageType('success');
+            // if (isEditing && productInfo.id) {
+            //     // Update existing product
+            //     await updateProduct(`products/${productInfo.id}`, dataToSubmit);
+            //     setMessage('Product updated successfully!');
+            //     setMessageType('success');
                 
-                // Update parent state with new data
-                const updatedProduct = { ...productInfo, ...dataToSubmit };
-                setProductInfo(updatedProduct);
-                onNext(updatedProduct);
-            } else {
-                // Create new product
-                const firebaseResponse = await addData(dataToSubmit, 'products');
-                const newProductData = { ...dataToSubmit, id: firebaseResponse.id };
-                
-                // Store in localStorage and update parent state
-                localStorage.setItem('productData', JSON.stringify(newProductData));
-                setMessage('Product created successfully!');
-                setMessageType('success');
-                setProductInfo(newProductData);
-                onNext(newProductData);
-            }
+            //     // Update parent state with new data
+            //     const updatedProduct = { ...productInfo, ...dataToSubmit };
+            //     setProductInfo(updatedProduct);
+            //     onNext(updatedProduct);
+            // } else {
+            //     // Create new product
+            // }
+            const productResponse = await createProduct(formData.title, formData.description, formData.price, formData.categoryId);
+            console.log('Product created:', productResponse.data);
+            
+            // Store in localStorage and update parent state
+            localStorage.setItem('productData', JSON.stringify(productResponse.data));
+            setMessage('Product created successfully!');
+            setMessageType('success');
+            setProductInfo(productResponse.data);
+            onNext(productResponse.data);
         } catch (error) {
             console.error('Failed to save product:', error);
             setMessage('Failed to save product.');

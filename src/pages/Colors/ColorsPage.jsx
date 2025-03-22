@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ColorsTable from './ColorsTable';
-import { editColor, deleteColor, getAllColors } from '../../Utils/service';
+import { editColor, deleteColor } from '../../Utils/service';
+import { getAllColors } from '../../services/colorService';
 
 const ColorsPage = () => {
   const [colorsData, setColorsData] = useState([]);

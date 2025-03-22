@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Upload, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { uploadImageToStorage, addMedia, getAllColors, deleteMedia, getMediaByProductId } from '../../../Utils/service';
+import { getMediaByProductId } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
-// import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
-// import firebase from '../../../Utils/firebase'; // Adjust import path as necessary
+import { createMedia, deleteMedia } from '../../../services/mediaService';
+import { getAllColors } from '../../../services/colorService';
 
 const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" }) => {
   const [images, setImages] = useState({});
@@ -24,9 +24,9 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     const getColors = async () => {
       try {
         const colorsData = await getAllColors();
-        if (Array.isArray(colorsData?.data)) {
-          console.log('Colors:', colorsData?.data);
-          setColors(colorsData?.data);
+        if (colorsData.success) {
+          console.log('Colors:', colorsData.data);
+          setColors(colorsData.data);
         } else {
           console.error('Colors data is not an array:', colorsData);
         }
@@ -39,79 +39,54 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   }, []);
 
   // Fetch existing media if in edit mode
-  useEffect(() => {
-    if (mode === "edit" && productId) {
-      fetchExistingMedia(productId);
-    }
-  }, [mode, productId]);
+  // useEffect(() => {
+  //   if (mode === "edit" && productId) {
+  //     fetchExistingMedia(productId);
+  //   }
+  // }, [mode, productId]);
 
-  // Get all media for a specific product
-  
-
-  // Update existing media document
-  const updateMedia = async (mediaId, mediaData) => {
-    const mediaRef = collection(firebase, 'media');
-    const mediaQuery = query(mediaRef, where("id", "==", mediaId));
-    
-    try {
-      const querySnapshot = await getDocs(mediaQuery);
-      
-      if (querySnapshot.empty) {
-        return { success: false, error: "Media not found" };
-      }
-      
-      const mediaDocRef = querySnapshot.docs[0].ref;
-      await updateDoc(mediaDocRef, mediaData);
-      
-      return { success: true };
-    } catch (e) {
-      console.error("Error updating media document: ", e);
-      return { error: "Error updating media document." };
-    }
-  };
-
-  const fetchExistingMedia = async (productId) => {
-    try {
-      const mediaData = await getMediaByProductId(productId);
-      if (Array.isArray(mediaData?.data) && mediaData.data.length > 0) {
-        console.log('Existing Media:', mediaData?.data);
-        setExistingMedia(mediaData?.data);
+  // const fetchExistingMedia = async (productId) => {
+  //   try {
+  //     const mediaData = await getMediaByProductId(productId);
+  //     if (Array.isArray(mediaData?.data) && mediaData.data.length > 0) {
+  //       console.log('Existing Media:', mediaData?.data);
+  //       setExistingMedia(mediaData?.data);
         
-        // Calculate number of rows needed
-        const totalItems = mediaData?.data.length;
-        const requiredRows = Math.ceil(totalItems / 3);
-        setRows(requiredRows > 0 ? requiredRows : 1);
+  //       // Calculate number of rows needed
+  //       const totalItems = mediaData?.data.length;
+  //       const requiredRows = Math.ceil(totalItems / 3);
+  //       setRows(requiredRows > 0 ? requiredRows : 1);
         
-        // Map existing media to the grid
-        const imageMap = {};
-        const colorMap = {};
+  //       // Map existing media to the grid
+  //       const imageMap = {};
+  //       const colorMap = {};
         
-        mediaData?.data.forEach((media, index) => {
-          const rowIndex = Math.floor(index / 3);
-          const colIndex = index % 3;
-          const cellKey = `${rowIndex}-${colIndex}`;
+  //       mediaData?.data.forEach((media, index) => {
+  //         const rowIndex = Math.floor(index / 3);
+  //         const colIndex = index % 3;
+  //         const cellKey = `${rowIndex}-${colIndex}`;
           
-          imageMap[cellKey] = { 
-            filePath: media.imageUrl, 
-            imageType: 'image/*',
-            mediaId: media.id,
-            isExisting: true
-          };
+  //         imageMap[cellKey] = { 
+  //           filePath: media.imageUrl, 
+  //           imageType: 'image/*',
+  //           mediaId: media.id,
+  //           isExisting: true
+  //         };
           
-          colorMap[cellKey] = media.colorId;
-        });
+  //         colorMap[cellKey] = media.colorId;
+  //       });
         
-        setImages(imageMap);
-        setSelectedColors(colorMap);
-      } else {
-        console.log('No existing media found for product ID:', productId);
-      }
-    } catch (error) {
-      console.error('Failed to fetch media:', error);
-      setMessage('Failed to load existing media.');
-      setMessageType('error');
-    }
-  };
+  //       setImages(imageMap);
+  //       setSelectedColors(colorMap);
+  //     } else {
+  //       console.log('No existing media found for product ID:', productId);
+  //     }
+  //   } catch (error) {
+  //     console.error('Failed to fetch media:', error);
+  //     setMessage('Failed to load existing media.');
+  //     setMessageType('error');
+  //   }
+  // };
 
   const handleDrop = (e, index) => {
     e.preventDefault();
@@ -120,7 +95,7 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   };
 
   const handleSave = async (index) => {
-    const actualProductId = productId || JSON.parse(localStorage.getItem('productData'))?.productId;
+    const actualProductId = productId || JSON.parse(localStorage.getItem('productData'))?.id;
 
     if (!actualProductId) {
       console.error('Product ID not found');
@@ -146,51 +121,56 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     try {
       setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
       
-      // If it's an existing image that hasn't changed, just update the color if needed
-      if (imageData.isExisting && !imageData.file) {
-        const mediaData = {
-          productId: Number(actualProductId),
-          colorId: selectedColors[index],
-          imageUrl: imageData.filePath,
-        };
-        
-        if (imageData.mediaId) {
-          // Update existing media
-          const response = await updateMedia(imageData.mediaId, mediaData);
-          if (response.success) {
-            console.log('Media updated successfully');
-            setMessage('Image updated successfully.');
-            setMessageType('success');
-          } else {
-            throw new Error(response.error || 'Failed to update media');
-          }
-        }
+      // Find the actual color ID from the color object, since selectedColors currently stores hexCode
+      const selectedColor = colors.find(color => color.colorHex === selectedColors[index]);
+      const colorId = selectedColor ? selectedColor.id : null;
+      
+      if (!colorId) {
+        throw new Error('Color ID not found');
+      }
+      
+      // // If it's an existing image that hasn't changed, just update the color if needed
+      // if (imageData.isExisting && !imageData.file) {
+      //   if (imageData.mediaId) {
+      //     // Update existing media without changing the image
+      //     const response = await updateMedia(imageData.mediaId, actualProductId, colorId);
+      //     if (response) {
+      //       console.log('Media updated successfully');
+      //       setMessage('Image updated successfully.');
+      //       setMessageType('success');
+      //     } else {
+      //       throw new Error('Failed to update media');
+      //     }
+      //   }
+      // } else {
+      //   // Handle new image upload
+      //   if (imageData.mediaId) {
+      //     // Update existing media with new image
+      //     const response = await updateMedia(imageData.mediaId, actualProductId, colorId, imageData.file);
+      //     if (response) {
+      //       console.log('Media updated with new image');
+      //       setMessage('Image updated successfully.');
+      //       setMessageType('success');
+      //     } else {
+      //       throw new Error('Failed to update media');
+      //     }
+      //   } else {
+      //   }
+      // }
+      // Add new media
+      console.log("productId: ", actualProductId);
+      console.log("colorId: ", colorId);
+      console.log("ImageData: ", imageData.file);
+      
+      // Use createMedia service to upload the image
+      const response = await createMedia(actualProductId, colorId, imageData.file);
+      console.log("Image resp: ", response);
+      if (response) {
+        console.log('New media added successfully');
+        setMessage('Image uploaded successfully.');
+        setMessageType('success');
       } else {
-        // Upload new image
-        const downloadURL = await uploadImageToStorage(imageData.file);
-        const mediaData = {
-          productId: Number(actualProductId),
-          colorId: selectedColors[index],
-          imageUrl: downloadURL,
-        };
-        
-        if (imageData.mediaId) {
-          // Update existing media with new image
-          const response = await updateMedia(imageData.mediaId, mediaData);
-          if (response.success) {
-            console.log('Media updated with new image');
-            setMessage('Image updated successfully.');
-            setMessageType('success');
-          } else {
-            throw new Error(response.error || 'Failed to update media');
-          }
-        } else {
-          // Add new media
-          const response = await addMedia(mediaData);
-          console.log('New media added:', response);
-          setMessage('Image uploaded successfully.');
-          setMessageType('success');
-        }
+        throw new Error('Failed to create media');
       }
       
       nextColor(selectedColors);
@@ -265,35 +245,31 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     
     if (imageData?.mediaId) {
       try {
-        // Using Firebase directly to delete the document
-        const mediaRef = collection(firebase, 'media');
-        const mediaQuery = query(mediaRef, where("id", "==", imageData.mediaId));
-        const mediaSnapshot = await getDocs(mediaQuery);
+        // Delete media using the service method
+        const result = await deleteMedia(imageData.mediaId);
         
-        if (!mediaSnapshot.empty) {
-          const mediaDocRef = mediaSnapshot.docs[0].ref;
-          await deleteDoc(mediaDocRef);
-          console.log('Media deleted:', imageData.mediaId);
+        if (result) {
+          // Remove from state
+          setImages((prev) => {
+            const newImages = { ...prev };
+            delete newImages[index];
+            return newImages;
+          });
+          
+          setSelectedColors((prev) => {
+            const newColors = { ...prev };
+            delete newColors[index];
+            return newColors;
+          });
+          
+          setMessage('Image deleted successfully.');
+          setMessageType('success');
+        } else {
+          throw new Error('Failed to delete media');
         }
-        
-        // Remove from state
-        setImages((prev) => {
-          const newImages = { ...prev };
-          delete newImages[index];
-          return newImages;
-        });
-        
-        setSelectedColors((prev) => {
-          const newColors = { ...prev };
-          delete newColors[index];
-          return newColors;
-        });
-        
-        setMessage('Image deleted successfully.');
-        setMessageType('success');
       } catch (error) {
         console.error('Failed to delete media:', error);
-        setMessage('Failed to delete media.');
+        setMessage('Failed to delete media: ' + error.message);
         setMessageType('error');
       }
     } else {
@@ -373,8 +349,8 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                     >
                       <option value="" disabled>Select a color</option>
                       {colors.map((color) => (
-                        <option key={color.id} value={color.hexCode}>
-                          {color.name}
+                        <option key={color.id} value={color.colorHex}>
+                          {color.colorName}
                         </option>
                       ))}
                     </select>
@@ -400,7 +376,7 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
         </div>
       ))}
 
-<div className='flex justify-between w-full'>
+      <div className='flex justify-between w-full'>
         <button className='bg-orange-700 text-white py-2 px-4 rounded-lg justify-center' onClick={handleAddNewRow}>+ Add Row</button>
         <button
           className={`bg-orange-700 text-white py-2 px-4 rounded-lg justify-center ${rows === 1 ? 'cursor-not-allowed opacity-50' : ''}`}

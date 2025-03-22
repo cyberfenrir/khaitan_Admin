@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { bulkAddData, getAttributesbyCategory, getAttributesforProduct } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
+import { getAllAttributesForACategory } from '../../../services/categoryService';
+import { addAttrtoProductBulk } from '../../../services/productService';
 
 const ProductPricing = ({ productId, categoryId, onNext }) => {
   const [attributes, setAttributes] = useState([]);
@@ -11,9 +13,6 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
   const [messageType, setMessageType] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-
-  console.log('ProductPricing -> productId:', productId);
-  console.log('ProductPricing -> categoryId:', categoryId);
   
   useEffect(() => {
     setIsEditing(!!productId);
@@ -50,8 +49,8 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
     
     try {
       setIsLoading(true);
-      const attributesData = await getAttributesbyCategory(categoryIdInt);
-      if (attributesData.success) {
+      const attributesData = await getAllAttributesForACategory(categoryIdInt);
+      if (attributesData.sucess) {
         setAttributes(attributesData.data);
       }
     } catch (error) {
@@ -122,17 +121,16 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
       setIsLoading(true);
       
       // Filter out any attributes with empty values
-      const validPayload = attributes
-        .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
-        .map(attribute => ({
-          productId: parseInt(currentProductId),
-          attributeId: attribute.id,
-          value: formData[attribute.id],
-          createdAt: new Date(),
-          updatedAt: new Date()
-        }));
-
-      if (validPayload.length === 0) {
+      const validPayload = {
+        attributes: attributes
+          .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
+          .map(attribute => ({
+            attributeId: attribute.id,
+            value: formData[attribute.id],
+          }))
+      };
+      
+      if (validPayload.attributes.length === 0) {
         setMessage('No valid attributes to save.');
         setMessageType('error');
         return;
@@ -140,8 +138,8 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
 
       // Use bulkAddData for both creating and updating
       // This will replace existing attributes for the product
-      await bulkAddData(validPayload, 'productAttributes');
-      
+      const attrOfProduct = await addAttrtoProductBulk(productId, validPayload);
+      console.log(attrOfProduct.data);
       setMessage(isEditing ? 'Product attributes updated successfully!' : 'Product attributes added successfully!');
       setMessageType('success');
       

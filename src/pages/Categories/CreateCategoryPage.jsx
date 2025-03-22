@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import CreateAttributesPage from './CreateAttributesPage';
 import { X } from 'lucide-react';
-import { addData } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
+import { createCategory } from '../../services/categoryService';
 
 const FormField = ({ label, value, placeholder, onChange }) => (
   <div className="flex flex-col flex-1 px-3 text-sm text-slate-500 w-full">
@@ -93,9 +93,11 @@ function CreateCategoryPage() {
       description: categoryDescription,
     };
     console.log(categoryData);
-    const response = await addData(categoryData, 'categories');
-    if (response.success) {
-      setCategoryId(response.id);
+    // const response = await addData(categoryData, 'categories');
+    const response = await createCategory(categoryName, categoryDescription);
+    console.log("Create Category Response: ",response);
+    if (response.sucess) {
+      setCategoryId(response.data.id);
       setMessage('Category Created! Please assign Attributes.');
       setMessageType('success');
     } else {

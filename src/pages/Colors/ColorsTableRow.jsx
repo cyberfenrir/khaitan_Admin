@@ -33,10 +33,13 @@ const ColorsTableRow = ({ color, onEditColor, onDeleteColor }) => {
         <span className="text-sm text-slate-600">{color.id}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
-        <span className="text-sm text-slate-600">{color.name}</span>
+        <span className="text-sm text-slate-600">{color.colorName}</span>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 flex justify-center">
-        <span className="text-sm text-slate-600">{color.hexCode}</span>
+        <div className='flex space-x-2 justify-between items-center'>
+          <span className='w-4 h-4 rounded-full ring ring-offset-1 ring-gray-200' style={{backgroundColor: `${color.colorHex}`}}></span>
+          <span className="text-sm text-slate-600">{color.colorHex}</span>
+        </div>
       </div>
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50 space-x-2 flex justify-center">
         {actionIcons.map((icon) => (
@@ -56,8 +59,8 @@ const ColorsTableRow = ({ color, onEditColor, onDeleteColor }) => {
 ColorsTableRow.propTypes = {
   color: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
-    hexCode: PropTypes.string.isRequired,
+    colorName: PropTypes.string.isRequired,
+    colorHex: PropTypes.string.isRequired,
   }).isRequired,
   onEditColor: PropTypes.func.isRequired,
   onDeleteColor: PropTypes.func.isRequired,

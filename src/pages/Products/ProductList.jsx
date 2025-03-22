@@ -4,6 +4,7 @@ import ProductPage from './utils/ProductPage';
 import TablePagination from './utils/TablePagination';
 import { useState, useEffect } from 'react';
 import { getData } from '../../Utils/service';
+import { getAllProducts } from '../../services/productService';
 
 export default function ProductList() {
     const PAGE_SIZE = 5;
@@ -13,7 +14,7 @@ export default function ProductList() {
 
     useEffect(() => {
         const getProductData = async () => {
-            const response = await getData('products');
+            const response = await getAllProducts();
             setAllProducts(response.data);
         }
         getProductData();

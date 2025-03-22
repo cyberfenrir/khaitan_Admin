@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { bulkAddData, getAllAttributes } from '../../Utils/service';
 import { X } from 'lucide-react';
 import MessageBox from '../../Utils/message';
+import { createAttributes } from '../../services/categoryService';
 
 function CreateAttributesPage({ onSave, categoryName, categoryId }) {
   const [attributes, setAttributes] = useState([]);
@@ -84,13 +85,17 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
     
     setIsSubmitting(true);
     try {
-      const response = await bulkAddData(attributes, 'attributes');
-      if (response.success) {
+      const responses = await Promise.all(attributes.map(attr => 
+        createAttributes(attr.categoryId, attr.name, attr.type, attr.unit)
+      ));
+      const allSuccess = responses.every(response => response.success);
+      console.log(allSuccess);
+      if (allSuccess) {
         onSave(attributes);
         setAttributes([]);
         setSuccessMessage('Attributes saved successfully!');
       } else {
-        setErrorMessage('Failed to create attributes: ' + response.message);
+        setErrorMessage('Failed to create attributes: ');
       }
     } catch (error) {
       setErrorMessage('Error creating attributes: ' + error.message);

@@ -4,10 +4,12 @@ import viewIcon from '../assets/view.svg';
 import editIcon from '../assets/edit.svg';
 import deleteIcon from '../assets/delete.svg';
 import { deleteProduct } from '../../../Middlewares/data/productsapi';
-import { deleteProductbyId, getAllMedia, getAllCategories, getCategoryById, getProductById } from '../../../Utils/service';
+import { deleteProductbyId } from '../../../Utils/service';
 import { useState, useEffect } from 'react';
-import { getData, getAttributesbyCategory, getAttributesforProduct } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
+import { getAllAttributesForACategory, getAllCategories, getCategoryById } from '../../../services/categoryService';
+import { getAttributesForProduct, getProductById, getProductWithAttributeAndMedia } from '../../../services/productService';
+import { getAllMedias } from '../../../services/mediaService';
 // import { useNavigate } from 'react-router-dom';
 
 const ProductTableHeader = () => {
@@ -43,6 +45,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const [attributes, setAttributes] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [productMedia, setProductMedia] = useState(null);
   // const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,7 +53,8 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
       try {
         const categoryId = parseInt(product.categoryId);
         const categoryData = await getCategoryById(categoryId);
-        if (categoryData.success) {
+        console.log("Category Data:", categoryData);
+        if (categoryData.sucess) {
           setCategoryName(categoryData.data.name);
         } else {
           console.error('Failed to fetch category:', categoryData.error);
@@ -72,57 +76,47 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const handleAction = async(action) => {
     switch (action) {
       case 'view':
-  try {
-    const response = await getProductById(parseInt(product.id));
-    if (!response.success || !response.data) {
-      throw new Error('Failed to fetch product details');
-    }
-    
-    console.log("Product Details:", response.data);
+        try {
+          const response = await getProductWithAttributeAndMedia(parseInt(product.id));
+          if (!response.sucess || !response.data) {
+            throw new Error('Failed to fetch product details');
+          }
+          
+          console.log("Product Details:", response.data);
 
-    const attr = await getAttributesforProduct(parseInt(product.id));
-    if (!attr) {
-      throw new Error('Attributes for product not found');
-    }
+          const attr = response.data.attributes;
+          if (!attr) {
+            throw new Error('Attributes for product not found');
+          }
 
-    console.log("Product Attributes:", attr);
+          console.log("Product Attributes:", attr);
 
-    const category = await getCategoryById(parseInt(response.data.categoryId));
-    if (!category.success || !category.data) {
-      throw new Error('Failed to fetch category details');
-    }
+          const category = response.data.categoryName;
 
-    console.log("Category:", category.data);
+          console.log("Category:", category);
 
-    const attributesData = await getAttributesbyCategory(category.data.id);
-    if (!attributesData.success || !Array.isArray(attributesData.data)) {
-      throw new Error('Failed to fetch attributes data');
-    }
+          const combinedAttributes = attr.map(attribute => ({
+            categoryId: response.data.categoryId,
+            attributeId: attribute.id,
+            name: attribute.name,
+            type: attribute.dataType,
+            unit: attribute.unit,
+            value: attribute.value,
+          }));
 
-    console.log("Fetched Attributes Data:", attributesData.data);
+          console.log("Combined Attributes:", combinedAttributes);
 
-    const combinedAttributes = attributesData.data.map(attribute => {
-      const matchingAttr = attr?.data?.find(a => a.attributeId === attribute.id);
-      return {
-        categoryId: attribute.categoryId,
-        attributeId: attribute.id,
-        name: attribute.name,
-        type: attribute.type,
-        unit: attribute.unit,
-        value: matchingAttr ? matchingAttr.value : null,
-      };
-    });
-
-    console.log("Combined Attributes:", combinedAttributes);
-
-    setAttributes(combinedAttributes);
-    setProductDetails(response.data);
-    setShowPopup(true);
-  } catch (error) {
-    console.error("Error fetching product:", error);
-    setErrorMessage('Error fetching product: ' + error.message);
-  }
-  break;
+          const mediaFiles = response.data.media;
+          setProductMedia(mediaFiles);
+          
+          setAttributes(combinedAttributes);
+          setProductDetails(response.data);
+          setShowPopup(true);
+        } catch (error) {
+          console.error("Error fetching product:", error);
+          setErrorMessage('Error fetching product: ' + error.message);
+        }
+        break;
 
       case 'edit':
         window.location.href = `/products/edit-product/${product.id}`;
@@ -143,8 +137,6 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
     }
   };
 
-  const productMedia = media.find(m => m.productId === product.id);
-  console.log(media);
 
   return (
     <div role="row" className="flex justify-center contents group">
@@ -154,8 +146,8 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
       <div className="flex items-center py-4 px-3.5 border-b border-slate-200 group-hover:bg-slate-50">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            {productMedia ? (
-              <img src={productMedia.imageUrl} alt="Product" className="w-16 h-16 object-cover" />
+            {productMedia && productMedia.length > 0 ? (
+              <img src={productMedia[0].url} alt="Product" className="w-16 h-16 object-cover" />
             ) : (
               <span className="text-sm text-slate-600">No Image</span>
             )}
@@ -184,21 +176,21 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
 
     {/* 🖼️ Media Carousel */}
     <h3 className="text-lg font-semibold mb-2">Product Images</h3>
-      {media.length > 0 ? (
+      {productMedia.length > 0 ? (
         <div className="relative w-full flex justify-center">
           <button
-            onClick={() => setCurrentIndex((prev) => (prev === 0 ? media.length - 1 : prev - 1))}
+            onClick={() => setCurrentIndex((prev) => (prev === 0 ? productMedia.length - 1 : prev - 1))}
             className="absolute left-0 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-gray-500 text-white rounded-l-lg"
           >
             ❮
           </button>
           <img
-            src={media[currentIndex].imageUrl}
+            src={productMedia[currentIndex].url}
             alt="Product"
             className="w-full max-h-60 object-contain rounded-md"
           />
           <button
-            onClick={() => setCurrentIndex((prev) => (prev === media.length - 1 ? 0 : prev + 1))}
+            onClick={() => setCurrentIndex((prev) => (prev === productMedia.length - 1 ? 0 : prev + 1))}
             className="absolute right-0 top-1/2 transform -translate-y-1/2 px-2 py-1 bg-gray-500 text-white rounded-r-lg"
           >
             ❯
@@ -232,6 +224,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
             <p className="font-semibold text-gray-700">{attr.name}</p>
             <p className="text-sm text-gray-600"><strong>Type:</strong> {attr.type}</p>
             <p className="text-sm text-gray-600"><strong>Value:</strong> {attr.value}</p>
+            <p className="text-sm text-gray-600"><strong>Unit:</strong> {attr.unit}</p>
           </div>
         ))}
       </div>
@@ -282,7 +275,7 @@ const ProductTable = ({ productsList }) => {
   useEffect(() => {
     const fetchMedia = async () => {
       try {
-        const mediaData = await getAllMedia();
+        const mediaData = await getAllMedias();
         if (mediaData.success) {
           setMedia(mediaData.data);
           console.log(mediaData);
@@ -297,7 +290,7 @@ const ProductTable = ({ productsList }) => {
     const fetchCategories = async () => {
       try {
         const categoriesData = await getAllCategories();
-        if (categoriesData.success) {
+        if (categoriesData.sucess) {
           setCategories(categoriesData.data);
           // console.log('Categories:', categoriesData.data);
         } else {

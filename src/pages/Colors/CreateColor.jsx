@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addColor } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
+import { createColor } from '../../services/colorService';
 
 const CreateColor = () => {
   const [name, setName] = useState('');
@@ -18,7 +18,7 @@ const CreateColor = () => {
 
     const newColor = { name, hexCode };
     try {
-      await addColor(newColor);
+      const colorResp = await createColor(name, hexCode);
       navigate('/colors/colors');
     } catch (error) {
       console.error('Failed to create color:', error);

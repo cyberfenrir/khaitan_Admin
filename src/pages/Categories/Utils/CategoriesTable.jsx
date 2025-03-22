@@ -5,8 +5,8 @@ import editIcon from '../assets/edit.svg';
 import deleteIcon from '../assets/delete.svg';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getAttributesbyCategory, deleteCategory } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
+import { getAllAttributesForACategory, deleteCategory } from '../../../services/categoryService';
 
 const CategoriesTableHeader = () => {
   return (
@@ -49,8 +49,8 @@ const CategoriesTableRow = ({ category, onDelete }) => {
     switch (action) {
       case 'view':
         try {
-          const response = await getAttributesbyCategory(parseInt(category.id));
-          if (response.success) {
+          const response = await getAllAttributesForACategory(parseInt(category.id));
+          if (response.sucess) {
             setAttributes(response.data);
             setShowPopup(true);
           } else {
@@ -67,7 +67,7 @@ const CategoriesTableRow = ({ category, onDelete }) => {
         try {
           const catId = parseInt(category.id);
           const result = await deleteCategory(catId); 
-          if (result.success) {
+          if (result.sucess) {
             console.log('Category deleted:', catId);
             onDelete(category.id); 
           } else {
@@ -129,7 +129,7 @@ const CategoriesTableRow = ({ category, onDelete }) => {
                 <strong>Name:</strong> {attr.name}
               </li>
               <li>
-                <strong>DataType:</strong> {attr.type}
+                <strong>DataType:</strong> {attr.dataType}
               </li>
               <li>
                 <strong>Unit:</strong> {attr.unit}

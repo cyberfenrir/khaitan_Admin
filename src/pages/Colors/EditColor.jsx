@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getColorById, editColor } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
+import { colorById, updateColor } from '../../services/colorService';
 
 const EditColor = () => {
   const { colorId } = useParams();
@@ -13,11 +14,11 @@ const EditColor = () => {
   useEffect(() => {
     const fetchColor = async () => {
       console.log('Fetching color details for colorId:', colorId);
-      const result = await getColorById(colorId);
+      const result = await colorById(colorId);
       console.log('Fetched color data:', result);
       if (result) {
-        setName(result.name);
-        setHexCode(result.hexCode);
+        setName(result.data.colorName);
+        setHexCode(result.data.colorHex);
       } else {
         setErrorMessage('Failed to fetch color details');
       }
@@ -33,9 +34,8 @@ const EditColor = () => {
       return;
     }
 
-    const updatedColor = { name, hexCode };
     try {
-      await editColor(colorId, updatedColor);
+      await updateColor(colorId, hexCode);
       navigate('/colors/colors');
     } catch (error) {
       console.error('Failed to update color:', error);

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import CategoriesTable from './Utils/CategoriesTable';
 import CategoryGrid from './Utils/categoryList';
 import { useNavigate } from 'react-router-dom';
-import { getAllCategories } from '../../Utils/service';
+import { getAllCategories } from '../../services/categoryService';
 import MessageBox from '../../Utils/message';
 
 const CategoryPage = () => {
@@ -15,14 +15,10 @@ const CategoryPage = () => {
     const fetchCategories = async () => {
       try {
         const response = await getAllCategories();
-        if (response.success) {
-          const categoriesWithDefaults = response.data.map(category => ({
-            ...category,
-            id: category.id.toString(),
-            status: category.status || 'Active'
-          }));
-          setCategoriesData(categoriesWithDefaults);
-          console.log('Categories:', categoriesWithDefaults);
+        console.log("Categories response: ",response);
+        if (response.sucess) {
+          setCategoriesData(response.data);
+          console.log('Categories:', response.data);
         } else {
           setError('Failed to fetch categories');
         }

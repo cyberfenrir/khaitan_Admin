@@ -1,37 +1,41 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import GoogleLogo from './assets/GoogleLogo.png';
-import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth } from '../../firebase'
-import { login } from '../../Middlewares/data/authapi';
+import GoogleLogo from '../../assets/googleLogo.png';
+import { useAuth } from '../../AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const auth = useAuth();
   const navigate = useNavigate();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const data = await signInWithEmailAndPassword(auth, email, password);
-      console.log(data);
-      navigate('/dashboard/analytics');
-    } catch (error) {
-      console.error('Login failed:', error.message);
-      alert('Login failed');
-    }
+  const [forgotPassword, setforgotPassword] = useState(false);
+  const handleGoogleSignIn = () => {
+    // window.location.href = 'http://localhost:3001/api/v1/auth/google';
+    alert("Functionality under development. Please use email and password to login. Sorry for the inconvenience");
   };
 
-  const handleGoogleSignIn = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      const data = await signInWithPopup(auth, provider);
-      console.log(data);
-      navigate('/dashboard/analytics');
-    } catch (error) {
-      console.error('Google sign-in failed:', error.message);
-      alert('Google sign-in failed: ' + error.message);
+  const handleForgotPassword = () => {
+    // Functionality to be added later
+    setforgotPassword(true);
+  };
+
+  const handlePasswordReset = () => {
+    // Functionality to be added later
+    alert('Password reset link sent to your email.');
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (auth && auth.login) {
+      const response = await auth.login(email, password);
+      if (response.sucess == true && response.data.user.isRoleVerified) {
+        navigate('/dashboard/analytics');
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+    } else {
+      alert('Login function is not available.');
     }
   };
 
@@ -43,7 +47,7 @@ const LoginPage = () => {
         </div>
         <div className="bg-white shadow-md rounded-lg w-full max-w-md max-w-sm p-8">
           <h1 className="text-left font-sans text-3xl font-bold mb-6">Sign in</h1>
-          <form onSubmit={handleLogin}>
+          <form>
             <div className="text-left mb-6">
               <label htmlFor="email" className="block font-medium mb-4">
                 Email or mobile phone number
@@ -73,6 +77,7 @@ const LoginPage = () => {
             <button
               type="submit"
               className="bg-red-600 text-white font-medium py-2 px-4 rounded-md w-full"
+              onClick={handleSubmit}
             >
               Log In
             </button>
