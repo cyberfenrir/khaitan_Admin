@@ -1,18 +1,32 @@
 import { Eye, CheckCircle, XCircle } from 'lucide-react';
 import TablePagination from '../Products/utils/TablePagination';
 import { useState, useEffect } from 'react';
-import { getAllUnverifiedUsers, verifyRole } from '../../services/roleService';
+import { getAllRoles, getAllUnverifiedUsers, verifyRole } from '../../services/roleService';
+import { convertDateTime } from '../../Utils/timeConversion';
 
 function DataTable() {
   const [tableData, setTableData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [roles, setRoles] = useState([]);
 
   const fetchUnverifiedUsers = async () => {
     setLoading(true);
     try {
       const response = await getAllUnverifiedUsers();
       if(response.success) {
-        setTableData(response.data);
+        // Get the raw users
+        const users = response.data;
+        
+        const usersWithRoleData = users.map(user => {
+          const matchingRole = roles.find(role => role.id === user.roleId);
+          
+          return {
+            ...user,
+            roleData: matchingRole || null
+          };
+        });
+        
+        setTableData(usersWithRoleData);
       } else {
         console.error("Failed to fetch unverified users");
       }
@@ -24,12 +38,31 @@ function DataTable() {
   };
 
   useEffect(() => {
-    fetchUnverifiedUsers();
+    const allRoles = async () => {
+      try{
+        const data = await getAllRoles();
+        if(data.success){
+          setRoles(data.data);
+        }
+      }
+      catch (err) {
+        console.log("Error fetching the existing roles: ", err);
+      }
+    }
+    allRoles();
   }, []);
+
+  // Fetch unverified users after roles are loaded
+  useEffect(() => {
+    if (roles.length > 0) {
+      fetchUnverifiedUsers();
+    }
+  }, [roles]);
 
   const handleVerify = async (userId) => {
     try {
-      const response = await verifyRole(userId);
+      const response = await verifyRole(Number(userId));
+      console.log("User verified: ", response);
       if(response.success) {
         // Update the table data by removing the verified user
         setTableData(tableData.filter(user => user.id !== userId));
@@ -124,7 +157,7 @@ function TableHeader() {
 }
 
 function TableRow({ user, onVerify, onReject }) {
-  const { id, name, email, registrationDate, requestedRole } = user;
+  const { id, name, email, createdAt, requestedRole, roleData } = user;
   
   return (
     <tr className="hover:bg-gray-50">
@@ -142,22 +175,22 @@ function TableRow({ user, onVerify, onReject }) {
         {email}
       </td>
       <td className="w-64 p-4 text-sm text-slate-500 border-b border-slate-200">
-        {registrationDate}
+        {convertDateTime(createdAt)}
       </td>
       <td className="w-64 p-4 border-b border-slate-200">
-        <span className={`px-3 py-1.5 text-xs font-semibold rounded ${getRoleStyle(requestedRole)}`}>
-          {requestedRole}
+        <span className={`px-3 py-1.5 text-xs font-semibold rounded ${getRoleStyle(roleData.name)}`}>
+          {roleData ? roleData.name : 'N/A'}
         </span>
       </td>
       <td className="w-64 p-4 border-b border-slate-200">
         <div className="flex gap-3">
-          <button
+          {/* <button
             className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 transition-colors"
             aria-label="View Details"
             title="View Details"
           >
             <Eye className="w-4 h-4 text-slate-600" />
-          </button>
+          </button> */}
           <button
             className="p-2 rounded-lg bg-green-100 hover:bg-green-200 transition-colors"
             aria-label="Verify User"
@@ -170,7 +203,7 @@ function TableRow({ user, onVerify, onReject }) {
             className="p-2 rounded-lg bg-red-100 hover:bg-red-200 transition-colors"
             aria-label="Reject User"
             title="Reject User"
-            onClick={() => onReject(id)}
+            onClick={() => onReject && onReject(id)}
           >
             <XCircle className="w-4 h-4 text-red-600" />
           </button>

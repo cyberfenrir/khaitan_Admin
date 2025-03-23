@@ -68,7 +68,7 @@ export const addPermissionsToRoleBulk = async(roleId, permissionIds) => {
 export const verifyRole = async(userId) => {
     try{
         const data = await fetch(`${API_URL}/users/${userId}/verify/role`, {
-            method: "POST",
+            method: "PATCH",
             credentials: "include",
             headers: {
                 'Content-Type': 'application/json',
