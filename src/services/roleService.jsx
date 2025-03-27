@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:3001/api/v1";
+import API_URL from '../config';
+
 
 export const getAllRoles = async () => {
     try{
@@ -8,6 +9,7 @@ export const getAllRoles = async () => {
                 'Content-Type': 'application/json',
             }
         })
+        console.log(data.json());
         return data.json();
     }
     catch(err){

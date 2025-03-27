@@ -1,11 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Upload, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { uploadImageToStorage, addMedia, getAllColors, deleteMedia, getMediaByProductId } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
-import { collection, query, where, getDocs, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
-//import firebase from '../../Utils/'; // Adjust import path as necessary
+import { createMedia, deleteMedia, getAllMedias } from '../../services/mediaService';
 
 const ImageDropZone = ({ utilityName, onSave }) => {
   const [images, setImages] = useState({});
@@ -23,21 +21,29 @@ const ImageDropZone = ({ utilityName, onSave }) => {
   };
 
   const handleSave = async (index) => {
-    const productId = images[index]?.productId || 0;
+    const productId = images[index]?.productId || null;
     const imageData = images[index];
 
     try {
       setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
-
-      const downloadURL = await uploadImageToStorage(imageData.file);
+      
+      const mediaOptions = {
+        utilityName: utilityName || "",
+        productId: productId || null,
+        colorId: null
+      };
+      
+      const mediaResponse = await createMedia(mediaOptions.productId, mediaOptions.colorId, imageData.file, mediaOptions.utilityName);
+      // console.log('Media saved:', mediaResponse);
+      
       const utilityData = {
-        productId: Number(productId),
-        url: downloadURL,
-        utility: utilityName,
+        productId: productId ? Number(productId) : null,
+        url: mediaResponse.url || mediaResponse.path,
+        utility: utilityName || null,
+        mediaId: mediaResponse.id || mediaResponse._id
       };
 
-      await addMedia(utilityData);
-      console.log('Utility Data:', utilityData);
+      // console.log('Utility Data:', utilityData);
       setMessage('Image saved successfully.');
       setMessageType('success');
       onSave(utilityData);
@@ -46,7 +52,7 @@ const ImageDropZone = ({ utilityName, onSave }) => {
       setMessage('Failed to save media: ' + error.message);
       setMessageType('error');
     } finally {
-      setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
+      setDisabledSaveButtons((prev) => ({ ...prev, [index]: false }));
     }
   };
 
@@ -77,7 +83,7 @@ const ImageDropZone = ({ utilityName, onSave }) => {
   };
 
   const handleProductIdChange = (e, index) => {
-    const productId = e.target.value || 0;
+    const productId = e.target.value || '';  // Allow empty string for optional productId
     setImages((prevImages) => ({
       ...prevImages,
       [index]: {
@@ -114,15 +120,9 @@ const ImageDropZone = ({ utilityName, onSave }) => {
     
     if (imageData?.mediaId) {
       try {
-        const mediaRef = collection(firebase, 'media');
-        const mediaQuery = query(mediaRef, where("id", "==", imageData.mediaId));
-        const mediaSnapshot = await getDocs(mediaQuery);
-        
-        if (!mediaSnapshot.empty) {
-          const mediaDocRef = mediaSnapshot.docs[0].ref;
-          await deleteDoc(mediaDocRef);
-          console.log('Media deleted:', imageData.mediaId);
-        }
+        // Use deleteMedia from service
+        await deleteMedia(imageData.mediaId);
+        console.log('Media deleted:', imageData.mediaId);
         
         setImages((prev) => {
           const newImages = { ...prev };
@@ -242,7 +242,7 @@ const ImageDropZone = ({ utilityName, onSave }) => {
 };
 
 ImageDropZone.propTypes = {
-  utilityName: PropTypes.string.isRequired,
+  utilityName: PropTypes.string,
   onSave: PropTypes.func.isRequired,
 };
 

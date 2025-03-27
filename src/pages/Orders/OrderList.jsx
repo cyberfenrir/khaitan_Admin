@@ -2,8 +2,8 @@ import OrderStatusCard from './utils/StatusCard';
 import OrderTable from './utils/OrderTable';
 
 const orderStatuses = [
-  { title: 'Payment Refund', count: 490, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/2874344da3eeb8bbd3b35f144e1f1450596fe88e0476d3b22d7ad8d33d35e0fd?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
-  { title: 'Order Cancel', count: 241, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/728f8c8a474dd3ec5c37b8317edb830187cec6dac07863ee19b97d5551dd1770?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
+  // { title: 'Payment Refund', count: 490, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/2874344da3eeb8bbd3b35f144e1f1450596fe88e0476d3b22d7ad8d33d35e0fd?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
+  // { title: 'Order Cancel', count: 241, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/728f8c8a474dd3ec5c37b8317edb830187cec6dac07863ee19b97d5551dd1770?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
   { title: 'Order Shipped', count: 630, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/d96c55e967513fd74273d93053cca80c119726fc36da77e0a9153999295a9142?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
   { title: 'Order Delivering', count: 170, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/4898b9a411204486decf7b363078f6ff3cfc8dc0355c051ff388d73d04257344?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },
   { title: 'Pending Review', count: 210, icon: 'https://cdn.builder.io/api/v1/image/assets/TEMP/b26bab37a401ca8aaf6e6e48911ff9e6d54ccf062b2314d7a0abd3f521148fde?placeholderIfAbsent=true&apiKey=5dee21b4f50742c9b5c16494a624cb30' },

@@ -96,7 +96,7 @@ function App() {
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/roles/admin" element={<DashboardStats />} />
                 <Route path="/roles/create-role" element={<RolesInformation />} />
-                <Route path="/orders/randid" element={<OrderDetails />} />
+                <Route path="/orders/:id" element={<OrderDetails />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/chat" element={<Chat />} />

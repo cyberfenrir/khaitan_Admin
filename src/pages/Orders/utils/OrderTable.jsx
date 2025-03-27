@@ -1,54 +1,43 @@
+import { getAllOrders } from '../../../services/orderService';
+import { getAllUsers } from '../../../services/userService';
 import OrderTableRow from './OrderTableRow';
-
-const orders = [
-  {
-    id: '#583488/80',
-    createdAt: 'Oct 09 , 2024',
-    customer: 'Gail C. Anderson',
-    priority: 'Normal',
-    total: '$1,230.00',
-    paymentStatus: 'Unpaid',
-    items: '4',
-    deliveryNumber: '-',
-    orderStatus: 'Draft'
-  },
-  {
-    id: '#456754/80',
-    createdAt: 'Oct 09 , 2024',
-    customer: 'Jung S. Ayala',
-    priority: 'Normal',
-    total: '$987.00',
-    paymentStatus: 'Paid',
-    items: '2',
-    deliveryNumber: '-',
-    orderStatus: 'Packaging'
-  },
-  {
-    id: '#578246/80',
-    createdAt: 'Oct 09 , 2024',
-    customer: 'David A. Arnold',
-    priority: 'High',
-    total: '$1,478.00',
-    paymentStatus: 'Paid',
-    items: '5',
-    deliveryNumber: '#D-57837678',
-    orderStatus: 'Completed'
-  },
-  {
-    id: '#348930/80',
-    createdAt: 'Oct 09 , 2024',
-    customer: 'Cecile D. Gordon',
-    priority: 'Normal',
-    total: '$720.00',
-    paymentStatus: 'Refund',
-    items: '4',
-    deliveryNumber: '-',
-    orderStatus: 'Canceled'
-  },
-  // Add more sample orders here for testing
-];
+import { useState, useEffect } from 'react';
 
 function OrderTable() {
+  const [orders, setOrders] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchOrders = async () => {
+      const data = await getAllOrders();
+      setOrders(data.data);
+    };
+
+    const fetchUsers = async () => {
+      const result = await getAllUsers();
+      setUsers(result.data);
+    };
+
+    fetchOrders();
+    fetchUsers();
+  }, []);
+
+  const getCustomerName = (userId) => {
+    const customer = users.find(user => user.id === userId);
+    return customer ? customer.name : 'Unknown';
+  };
+
+  const ordersWithCustomerNames = orders.map(order => ({
+    ...order,
+    customer: getCustomerName(order.userId)
+  }));
+
+  // Calculate number of pages (rounding up)
+  const pageCount = Math.ceil(orders.length / 5);
+
+  // Generate page buttons dynamically
+  const pageButtons = Array.from({ length: pageCount }, (_, index) => index + 1);
+
   return (
     <div className="w-full overflow-x-auto">
       <table className="w-full min-w-[1000px] bg-white rounded-xl shadow-sm">
@@ -57,17 +46,15 @@ function OrderTable() {
             <th className="p-3 text-left">Order ID</th>
             <th className="p-3 text-left">Created at</th>
             <th className="p-3 text-left">Customer</th>
-            <th className="p-3 text-left">Priority</th>
             <th className="p-3 text-left">Total</th>
             <th className="p-3 text-left">Payment Status</th>
             <th className="p-3 text-left">Items</th>
-            <th className="p-3 text-left">Delivery Number</th>
             <th className="p-3 text-left">Order Status</th>
             <th className="p-3 text-left">Action</th>
           </tr>
         </thead>
         <tbody>
-          {orders.map((order, index) => (
+          {ordersWithCustomerNames.map((order, index) => (
             <OrderTableRow key={index} {...order} />
           ))}
         </tbody>
@@ -77,15 +64,18 @@ function OrderTable() {
           Previous
         </button>
         <div className="flex">
-          <button className="w-8 h-8 text-sm text-white bg-orange-500 border border-orange-500">
-            1
-          </button>
-          <button className="w-8 h-8 text-sm bg-white border border-slate-200">
-            2
-          </button>
-          <button className="w-8 h-8 text-sm bg-white border border-slate-200">
-            3
-          </button>
+          {pageButtons.map((page) => (
+            <button 
+              key={page} 
+              className={`w-8 h-8 text-sm ${
+                page === 1 
+                  ? 'text-white bg-orange-500 border border-orange-500' 
+                  : 'bg-white border border-slate-200'
+              }`}
+            >
+              {page}
+            </button>
+          ))}
         </div>
         <button className="px-3 py-1 text-sm bg-white rounded-xl border border-slate-200">
           Next

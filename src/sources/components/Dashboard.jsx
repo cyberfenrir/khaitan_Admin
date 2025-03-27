@@ -3,16 +3,47 @@ import { Users, ShoppingCart, DollarSign, TrendingUp } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AnalyticsCard from './AnalyticsCard';
 import RecentOrders from './RecentOrders';
+import { getAllOrders } from '../../services/orderService';
+import { getAllUsers } from '../../services/userService';
 
 const Dashboard = () => {
   const [salesData, setSalesData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [orderData, setOrderData] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  const fetchOrders = async () => {
+    try {
+      const data = await getAllOrders();
+      setOrderData(data.data);
+    }
+    catch(err){
+      console.log("Recent Orders Error: ",err);
+    }
+  }
+
+  const getUsers = async () => {
+    try {
+      const data = await getAllUsers();
+      setUsers(data.data);
+    }
+    catch(err){
+      console.log("Recent Orders Error: ",err);
+    }
+  };
+
+  useEffect(() => {
+    getUsers();
+    fetchOrders();
+  }, []);
+
+  const totalOrderPrice = orderData.reduce((total, order) => total + order.totalPrice, 0);
 
   const analyticsData = {
-    customers: { total: 1234, percentageChange: 5.2 },
-    orders: { total: 789, percentageChange: -2.1 },
-    revenue: { total: 50000, percentageChange: 7.8 },
-    growth: { rate: 12.5, percentageChange: 3.4 }
+    customers: { total: users.length, percentageChange: 5.2 },
+    orders: { total: orderData.length, percentageChange: -2.1 },
+    revenue: { total: totalOrderPrice, percentageChange: 7.8 },
+    // growth: { rate: 12.5, percentageChange: 3.4 }
   };
 
   const analyticsCards = [
@@ -40,14 +71,14 @@ const Dashboard = () => {
       detailsPath: '/revenue',
       colorScheme: 'purple'
     },
-    {
-      icon: TrendingUp,
-      title: 'Growth',
-      value: `${analyticsData.growth.rate}%`,
-      percentageChange: analyticsData.growth.percentageChange,
-      detailsPath: '/growth',
-      colorScheme: 'orange'
-    }
+    // {
+    //   icon: TrendingUp,
+    //   title: 'Growth',
+    //   value: `${analyticsData.growth.rate}%`,
+    //   percentageChange: analyticsData.growth.percentageChange,
+    //   detailsPath: '/growth',
+    //   colorScheme: 'orange'
+    // }
   ];
 
   useEffect(() => {

@@ -45,7 +45,7 @@ const CreateBanner = () => {
         <h1 className="text-2xl font-bold mb-4 text-slate-600">Add New Banner</h1>
         {errorMessage && <MessageBox message={errorMessage} type="error" onClose={() => setErrorMessage('')} />}
         {successMessage && <MessageBox message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-        <form onSubmit={handleSubmit}>
+        <form>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
               Banner Name
@@ -74,9 +74,9 @@ const CreateBanner = () => {
           <div className="mb-4">
             <ImageDropZone utilityName={name} onSave={handleSaveMedia} />
           </div>
-          <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
+          {/* <button type="submit" className="px-4 py-2 bg-orange-500 text-white rounded-lg">
             Add Banner
-          </button>
+          </button> */}
         </form>
       </div>
     </section>

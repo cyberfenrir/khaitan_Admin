@@ -1,12 +1,15 @@
-const API_URL = "http://localhost:3001/api/v1";
+import API_URL from '../config';
 
-export const createMedia = async (productId, colorId, file) => {
+export const createMedia = async (productId, colorId, file, utilityName) => {
     try {
         const formData = new FormData();
         formData.append('media', file);
         formData.append('type', 'product');
-        formData.append('productId', productId);
-        formData.append('colorId', colorId);
+        if(utilityName) {
+            formData.append('utility', utilityName);
+        }
+        if(productId!==null) formData.append('productId', productId);
+        if(colorId!==null) formData.append('colorId', colorId);
         
         const response = await fetch(`${API_URL}/media`, {
             method: "POST",
@@ -69,3 +72,7 @@ export const getAllMedias = async () => {
         throw err;
     }
 }
+
+// export const getMediaByUtility = async () => {
+
+// }
