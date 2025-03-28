@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         const response = await signIn(email, password);
         // console.log("Response from AuthContext: ", response);
         if (response.sucess) {
-            setUser(response.data.user.id);
+            setUser(response.data);
             localStorage.setItem('user', JSON.stringify(response.data.user.id));
             localStorage.setItem('token', response.data.token);
             setToken(response.data.token);

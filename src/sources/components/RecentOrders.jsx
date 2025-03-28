@@ -75,7 +75,6 @@ const RecentOrders = () => {
   const fetchUsers = async () => {
     const result = await getAllUsers();
     setUsers(result.data);
-    console.log(result.data);
   };
 
   useEffect(() => {
@@ -98,7 +97,6 @@ const RecentOrders = () => {
     email: getCustomerName(order.userId).email
   }));
 
-  console.log(ordersWithCustomerNames);
 
   const columnDefs = [
     { headerName: "Order ID", field: "id" },
@@ -137,12 +135,16 @@ const RecentOrders = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-lg font-semibold">Recent Orders</h2>
       </div>
-      <AgGridReact
-        rowData={ordersWithCustomerNames}
-        columnDefs={columnDefs}
-        pagination={true}
-        paginationPageSize={5}
-      />
+      {ordersWithCustomerNames.length === 0 ? (
+        <div className="text-center text-gray-500">No orders available</div>
+      ) : (
+        <AgGridReact
+          rowData={ordersWithCustomerNames}
+          columnDefs={columnDefs}
+          pagination={true}
+          paginationPageSize={5}
+        />
+      )}
     </div>
   );
 };

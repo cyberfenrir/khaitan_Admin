@@ -7,7 +7,8 @@ import deleteIcon from '../assets/delete.svg';
 import { useNavigate } from 'react-router-dom';
 import { convertDateTime } from '../../../Utils/timeConversion';
 
-function OrderTableRow({ id, createdAt, customer, totalPrice, status, products, deliveryStatus }) {
+function OrderTableRow({order}) {
+  const { id, createdAt, customer, totalPrice, status, products, deliveryStatus } = order;
   const navigate = useNavigate();
   const getPaymentStatusClass = (status) => {
     switch (status) {
@@ -35,26 +36,11 @@ function OrderTableRow({ id, createdAt, customer, totalPrice, status, products, 
   };
 
   const actionIcons = [
-    { src: viewIcon, bgColor: "bg-slate-100", action: "view" },
     { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
-    { src: deleteIcon, bgColor: "bg-red-400 bg-opacity-10", action: "delete" }
   ];
 
-  const handleAction = (action) => {
-    switch (action) {
-      case 'view':
-        console.log(`View order ${id}`);
-        navigate(`/orders/${id}`);
-        break;
-      case 'edit':
-        console.log(`Edit order ${id}`);
-        break;
-      case 'delete':
-        console.log(`Delete order ${id}`);
-        break;
-      default:
-        break;
-    }
+  const handleAction = () => {
+    navigate(`/orders/${id}`, { state: { order } });
   };
 
   return (
@@ -75,20 +61,14 @@ function OrderTableRow({ id, createdAt, customer, totalPrice, status, products, 
         </span>
       </td>
       <td className="p-3">
-        <Actions icons={actionIcons} onAction={(action) => handleAction(action)} />
+        <Actions icons={actionIcons} onAction={() => handleAction()} />
       </td>
     </tr>
   );
 }
 
 OrderTableRow.propTypes = {
-  id: PropTypes.string.isRequired,
-  createdAt: PropTypes.string.isRequired,
-  customer: PropTypes.string.isRequired,
-  totalPrice: PropTypes.number.isRequired,
-  status: PropTypes.string.isRequired,
-  products: PropTypes.array.isRequired,
-  deliveryStatus: PropTypes.string.isRequired,
+  order: PropTypes.object.isRequired
 };
 
 export default OrderTableRow;

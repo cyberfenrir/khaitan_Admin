@@ -3,13 +3,13 @@ import PaymentInfo from './PaymentInfo';
 import CustomerDetails from './CustomerDetails';
 import MapView from './MapView';
 
-function OrderSummary() {
+function OrderSummary({orderData, userData}) {
   return (
     <main className="flex flex-col px-3 mx-auto w-full max-w-[480px]">
-      <SummaryTable />
-      <PaymentInfo />
-      <CustomerDetails />
-      <MapView />
+      <SummaryTable order = {orderData} />
+      {/* <PaymentInfo /> */}
+      <CustomerDetails order = {orderData} user = {userData} />
+      {/* <MapView /> */}
     </main>
   );
 }

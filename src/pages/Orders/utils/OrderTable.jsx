@@ -55,7 +55,7 @@ function OrderTable() {
         </thead>
         <tbody>
           {ordersWithCustomerNames.map((order, index) => (
-            <OrderTableRow key={index} {...order} />
+            <OrderTableRow key={index} order={order} />
           ))}
         </tbody>
       </table>
