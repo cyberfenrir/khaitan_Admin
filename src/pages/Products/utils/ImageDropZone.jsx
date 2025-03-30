@@ -11,6 +11,7 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   const [images, setImages] = useState({});
   const [colors, setColors] = useState([]);
   const [selectedColors, setSelectedColors] = useState({});
+  const [selectedMediaTypes, setSelectedMediaTypes] = useState({});
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [rows, setRows] = useState(1);
@@ -18,6 +19,13 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   const [existingMedia, setExistingMedia] = useState([]);
   const [deletedMedia, setDeletedMedia] = useState([]);
   const navigate = useNavigate();
+
+  // Available media types
+  const mediaTypes = [
+    { value: 'image/jpeg', label: 'JPG' },
+    { value: 'image/png', label: 'PNG' },
+    { value: 'video/mp4', label: 'MP4' }
+  ];
 
   // Fetch colors on component mount
   useEffect(() => {
@@ -37,56 +45,6 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
 
     getColors();
   }, []);
-
-  // Fetch existing media if in edit mode
-  // useEffect(() => {
-  //   if (mode === "edit" && productId) {
-  //     fetchExistingMedia(productId);
-  //   }
-  // }, [mode, productId]);
-
-  // const fetchExistingMedia = async (productId) => {
-  //   try {
-  //     const mediaData = await getMediaByProductId(productId);
-  //     if (Array.isArray(mediaData?.data) && mediaData.data.length > 0) {
-  //       console.log('Existing Media:', mediaData?.data);
-  //       setExistingMedia(mediaData?.data);
-        
-  //       // Calculate number of rows needed
-  //       const totalItems = mediaData?.data.length;
-  //       const requiredRows = Math.ceil(totalItems / 3);
-  //       setRows(requiredRows > 0 ? requiredRows : 1);
-        
-  //       // Map existing media to the grid
-  //       const imageMap = {};
-  //       const colorMap = {};
-        
-  //       mediaData?.data.forEach((media, index) => {
-  //         const rowIndex = Math.floor(index / 3);
-  //         const colIndex = index % 3;
-  //         const cellKey = `${rowIndex}-${colIndex}`;
-          
-  //         imageMap[cellKey] = { 
-  //           filePath: media.imageUrl, 
-  //           imageType: 'image/*',
-  //           mediaId: media.id,
-  //           isExisting: true
-  //         };
-          
-  //         colorMap[cellKey] = media.colorId;
-  //       });
-        
-  //       setImages(imageMap);
-  //       setSelectedColors(colorMap);
-  //     } else {
-  //       console.log('No existing media found for product ID:', productId);
-  //     }
-  //   } catch (error) {
-  //     console.error('Failed to fetch media:', error);
-  //     setMessage('Failed to load existing media.');
-  //     setMessageType('error');
-  //   }
-  // };
 
   const handleDrop = (e, index) => {
     e.preventDefault();
@@ -118,6 +76,14 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
       return;
     }
 
+    // Get the selected media type or use the detected image type
+    const mediaType = selectedMediaTypes[index] || imageData.imageType;
+    if (!mediaType) {
+      setMessage('Please select a media type.');
+      setMessageType('error');
+      return;
+    }
+
     try {
       setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
       
@@ -129,45 +95,17 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
         throw new Error('Color ID not found');
       }
       
-      // // If it's an existing image that hasn't changed, just update the color if needed
-      // if (imageData.isExisting && !imageData.file) {
-      //   if (imageData.mediaId) {
-      //     // Update existing media without changing the image
-      //     const response = await updateMedia(imageData.mediaId, actualProductId, colorId);
-      //     if (response) {
-      //       console.log('Media updated successfully');
-      //       setMessage('Image updated successfully.');
-      //       setMessageType('success');
-      //     } else {
-      //       throw new Error('Failed to update media');
-      //     }
-      //   }
-      // } else {
-      //   // Handle new image upload
-      //   if (imageData.mediaId) {
-      //     // Update existing media with new image
-      //     const response = await updateMedia(imageData.mediaId, actualProductId, colorId, imageData.file);
-      //     if (response) {
-      //       console.log('Media updated with new image');
-      //       setMessage('Image updated successfully.');
-      //       setMessageType('success');
-      //     } else {
-      //       throw new Error('Failed to update media');
-      //     }
-      //   } else {
-      //   }
-      // }
-      // Add new media
       console.log("productId: ", actualProductId);
       console.log("colorId: ", colorId);
       console.log("ImageData: ", imageData.file);
+      console.log("MediaType: ", mediaType);
       
       // Use createMedia service to upload the image
-      const response = await createMedia(actualProductId, colorId, imageData.file);
+      const response = await createMedia(actualProductId, colorId, imageData.file, null, mediaType);
       console.log("Image resp: ", response);
       if (response) {
         console.log('New media added successfully');
-        setMessage('Image uploaded successfully.');
+        setMessage('Media uploaded successfully.');
         setMessageType('success');
       } else {
         throw new Error('Failed to create media');
@@ -184,29 +122,40 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   };
 
   const handleFile = (file, index) => {
-    if (file && file.type.substr(0, 5) === "image") {
-      const filePath = URL.createObjectURL(file);
-      const imageType = file.type;
-      // Preserve the mediaId if it's an existing image being replaced
-      const mediaId = images[index]?.mediaId;
+    if (file) {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
       
-      setImages((prevImages) => ({ 
-        ...prevImages, 
-        [index]: { 
-          filePath, 
-          imageType, 
-          file,
-          ...(mediaId && { mediaId }),
-          isExisting: false
-        } 
-      }));
-      
-      if (onImageUpload) {
-        onImageUpload({ filePath, imageType });
+      if (isImage || isVideo) {
+        const filePath = URL.createObjectURL(file);
+        const imageType = file.type;
+        // Preserve the mediaId if it's an existing image being replaced
+        const mediaId = images[index]?.mediaId;
+        
+        setImages((prevImages) => ({ 
+          ...prevImages, 
+          [index]: { 
+            filePath, 
+            imageType, 
+            file,
+            ...(mediaId && { mediaId }),
+            isExisting: false
+          } 
+        }));
+        
+        // Auto-select the media type based on file type
+        setSelectedMediaTypes((prevTypes) => ({
+          ...prevTypes,
+          [index]: imageType
+        }));
+        
+        if (onImageUpload) {
+          onImageUpload({ filePath, imageType });
+        }
+      } else {
+        setMessage('Please select a valid image or video file.');
+        setMessageType('error');
       }
-    } else if (file) {
-      setMessage('Please select an image file.');
-      setMessageType('error');
     } else {
       setImages((prevImages) => ({ ...prevImages, [index]: null }));
     }
@@ -215,6 +164,11 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   const handleColorChange = (e, index) => {
     const colorId = e.target.value;
     setSelectedColors((prevColors) => ({ ...prevColors, [index]: colorId }));
+  };
+
+  const handleMediaTypeChange = (e, index) => {
+    const mediaType = e.target.value;
+    setSelectedMediaTypes((prevTypes) => ({ ...prevTypes, [index]: mediaType }));
   };
 
   const handleCloseMessage = () => {
@@ -262,7 +216,13 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
             return newColors;
           });
           
-          setMessage('Image deleted successfully.');
+          setSelectedMediaTypes((prev) => {
+            const newTypes = { ...prev };
+            delete newTypes[index];
+            return newTypes;
+          });
+          
+          setMessage('Media deleted successfully.');
           setMessageType('success');
         } else {
           throw new Error('Failed to delete media');
@@ -284,6 +244,12 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
         const newColors = { ...prev };
         delete newColors[index];
         return newColors;
+      });
+      
+      setSelectedMediaTypes((prev) => {
+        const newTypes = { ...prev };
+        delete newTypes[index];
+        return newTypes;
       });
     }
   };
@@ -307,11 +273,15 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                     type="file"
                     className="hidden"
                     onChange={(e) => handleFile(e.target.files[0], cellKey)}
-                    accept="image/*"
+                    accept="image/*,video/mp4"
                   />
                   {images[cellKey] ? (
                     <>
-                      <img src={images[cellKey].filePath} alt="Uploaded" className="max-w-full max-h-full object-contain" />
+                      {images[cellKey].imageType.startsWith('image/') ? (
+                        <img src={images[cellKey].filePath} alt="Uploaded" className="max-w-full max-h-full object-contain" />
+                      ) : (
+                        <video src={images[cellKey].filePath} className="max-w-full max-h-full object-contain" controls />
+                      )}
                       <button
                         className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-700"
                         onClick={(e) => {
@@ -327,47 +297,69 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                       <Upload className="w-12 h-12 text-gray-400 mb-2" />
                       <div>
                         <p className="text-gray-500 font-bold">
-                          Drop your images here or <span className="text-orange-500 font-bold">click to browse</span>
+                          Drop your media here or <span className="text-orange-500 font-bold">click to browse</span>
                         </p>
                         <p className="text-gray-400 text-sm">
-                          Supported formats: JPG, PNG, GIF
+                          Supported formats: JPG, PNG, MP4
                         </p>
                       </div>
                     </>
                   )}
                 </div>
-                <div className="mt-4">
-                  <label htmlFor={`color-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    Color
-                  </label>
-                  <div className="flex items-center gap-3">
+                <div className="mt-4 space-y-3">
+                  <div>
+                    <label htmlFor={`color-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      Color
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <select
+                        id={`color-${cellKey}`}
+                        value={selectedColors[cellKey] || ''}
+                        onChange={(e) => handleColorChange(e, cellKey)}
+                        className="w-full p-2 border border-gray-300 rounded"
+                      >
+                        <option value="" disabled>Select a color</option>
+                        {colors.map((color) => (
+                          <option key={color.id} value={color.colorHex}>
+                            {color.colorName}
+                          </option>
+                        ))}
+                      </select>
+                      <div
+                        className="w-12 h-8 border rounded"
+                        style={{ backgroundColor: selectedColors[cellKey] || '#ffffff' }}
+                      ></div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label htmlFor={`mediaType-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      Media Type
+                    </label>
                     <select
-                      id={`color-${cellKey}`}
-                      value={selectedColors[cellKey] || ''}
-                      onChange={(e) => handleColorChange(e, cellKey)}
+                      id={`mediaType-${cellKey}`}
+                      value={selectedMediaTypes[cellKey] || ''}
+                      onChange={(e) => handleMediaTypeChange(e, cellKey)}
                       className="w-full p-2 border border-gray-300 rounded"
+                      disabled={!images[cellKey]}
                     >
-                      <option value="" disabled>Select a color</option>
-                      {colors.map((color) => (
-                        <option key={color.id} value={color.colorHex}>
-                          {color.colorName}
+                      <option value="" disabled>Select type</option>
+                      {mediaTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
                         </option>
                       ))}
                     </select>
-                    <div
-                      className="w-12 h-8 border rounded"
-                      style={{ backgroundColor: selectedColors[cellKey] || '#ffffff' }}
-                    ></div>
-                    
-                    <div className="flex justify-end w-[55%] px-3">
-                      <button
-                        className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || !selectedColors[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={() => handleSave(cellKey)}
-                        disabled={!images[cellKey] || !selectedColors[cellKey] || disabledSaveButtons[cellKey]}
-                      >
-                        {images[cellKey]?.isExisting ? 'Update' : 'Save'}
-                      </button>
-                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end mt-2">
+                    <button
+                      className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || !selectedColors[cellKey] || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      onClick={() => handleSave(cellKey)}
+                      disabled={!images[cellKey] || !selectedColors[cellKey] || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey]}
+                    >
+                      {images[cellKey]?.isExisting ? 'Update' : 'Save'}
+                    </button>
                   </div>
                 </div>
               </div>

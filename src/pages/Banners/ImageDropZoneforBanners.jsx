@@ -14,6 +14,12 @@ const ImageDropZone = ({ utilityName, onSave }) => {
   const navigate = useNavigate();
   const [deletedMedia, setDeletedMedia] = useState([]);
 
+  const mediaTypes = [
+    { value: 'image/jpeg', label: 'JPG' },
+    { value: 'image/png', label: 'PNG' },
+    { value: 'video/mp4', label: 'MP4' }
+  ];
+
   const handleDrop = (e, index) => {
     e.preventDefault();
     const file = e.dataTransfer.files[0];
@@ -33,18 +39,23 @@ const ImageDropZone = ({ utilityName, onSave }) => {
         colorId: null
       };
       
-      const mediaResponse = await createMedia(mediaOptions.productId, mediaOptions.colorId, imageData.file, mediaOptions.utilityName);
-      // console.log('Media saved:', mediaResponse);
+      const mediaResponse = await createMedia(
+        mediaOptions.productId, 
+        mediaOptions.colorId, 
+        imageData.file, 
+        mediaOptions.utilityName,
+        imageData.mediaType || imageData.imageType // Send the selected media type to createMedia
+      );
       
       const utilityData = {
         productId: productId ? Number(productId) : null,
         url: mediaResponse.url || mediaResponse.path,
         utility: utilityName || null,
-        mediaId: mediaResponse.id || mediaResponse._id
+        mediaId: mediaResponse.id || mediaResponse._id,
+        mediaType: imageData.mediaType || imageData.imageType
       };
 
-      // console.log('Utility Data:', utilityData);
-      setMessage('Image saved successfully.');
+      setMessage('Media saved successfully.');
       setMessageType('success');
       onSave(utilityData);
     } catch (error) {
@@ -57,26 +68,33 @@ const ImageDropZone = ({ utilityName, onSave }) => {
   };
 
   const handleFile = (file, index) => {
-    if (file && file.type.substr(0, 5) === "image") {
-      const filePath = URL.createObjectURL(file);
-      const imageType = file.type;
-      const mediaId = images[index]?.mediaId;
-      const productId = images[index]?.productId;
+    if (file) {
+      const isImage = file.type.startsWith("image/");
+      const isVideo = file.type.startsWith("video/");
       
-      setImages((prevImages) => ({ 
-        ...prevImages, 
-        [index]: { 
-          filePath, 
-          imageType, 
-          file,
-          ...(mediaId && { mediaId }),
-          ...(productId && { productId }),
-          isExisting: false
-        } 
-      }));
-    } else if (file) {
-      setMessage('Please select an image file.');
-      setMessageType('error');
+      if (isImage || isVideo) {
+        const filePath = URL.createObjectURL(file);
+        const imageType = file.type;
+        const mediaId = images[index]?.mediaId;
+        const productId = images[index]?.productId;
+        const mediaType = images[index]?.mediaType || imageType;
+        
+        setImages((prevImages) => ({ 
+          ...prevImages, 
+          [index]: { 
+            filePath, 
+            imageType, 
+            mediaType,
+            file,
+            ...(mediaId && { mediaId }),
+            ...(productId && { productId }),
+            isExisting: false
+          } 
+        }));
+      } else {
+        setMessage('Please select a valid image or video file.');
+        setMessageType('error');
+      }
     } else {
       setImages((prevImages) => ({ ...prevImages, [index]: null }));
     }
@@ -89,6 +107,17 @@ const ImageDropZone = ({ utilityName, onSave }) => {
       [index]: {
         ...prevImages[index],
         productId,
+      },
+    }));
+  };
+
+  const handleMediaTypeChange = (e, index) => {
+    const mediaType = e.target.value;
+    setImages((prevImages) => ({
+      ...prevImages,
+      [index]: {
+        ...prevImages[index],
+        mediaType,
       },
     }));
   };
@@ -162,11 +191,15 @@ const ImageDropZone = ({ utilityName, onSave }) => {
                     type="file"
                     className="hidden"
                     onChange={(e) => handleFile(e.target.files[0], cellKey)}
-                    accept="image/*"
+                    accept="image/*,video/mp4"
                   />
                   {images[cellKey] ? (
                     <>
-                      <img src={images[cellKey].filePath} alt="Uploaded" className="max-w-full max-h-full object-contain" />
+                      {images[cellKey].imageType.startsWith('image/') ? (
+                        <img src={images[cellKey].filePath} alt="Uploaded" className="max-w-full max-h-full object-contain" />
+                      ) : (
+                        <video src={images[cellKey].filePath} className="max-w-full max-h-full object-contain" controls />
+                      )}
                       <button
                         className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-700"
                         onClick={(e) => {
@@ -182,20 +215,20 @@ const ImageDropZone = ({ utilityName, onSave }) => {
                       <Upload className="w-12 h-12 text-gray-400 mb-2" />
                       <div>
                         <p className="text-gray-500 font-bold">
-                          Drop your images here or <span className="text-orange-500 font-bold">click to browse</span>
+                          Drop your media here or <span className="text-orange-500 font-bold">click to browse</span>
                         </p>
                         <p className="text-gray-400 text-sm">
-                          Supported formats: JPG, PNG, GIF
+                          Supported formats: JPG, PNG, MP4
                         </p>
                       </div>
                     </>
                   )}
                 </div>
-                <div className="mt-4">
-                  <label htmlFor={`productId-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
-                    Product ID (optional)
-                  </label>
-                  <div className="flex items-center gap-3">
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  <div>
+                    <label htmlFor={`productId-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      Product ID (optional)
+                    </label>
                     <input
                       id={`productId-${cellKey}`}
                       type="text"
@@ -204,16 +237,35 @@ const ImageDropZone = ({ utilityName, onSave }) => {
                       className="w-full p-2 border border-gray-300 rounded"
                       placeholder="Enter Product ID"
                     />
-                    <div className="flex justify-end w-[55%] px-3">
-                      <button
-                        className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        onClick={() => handleSave(cellKey)}
-                        disabled={!images[cellKey] || disabledSaveButtons[cellKey]}
-                      >
-                        {images[cellKey]?.isExisting ? 'Update' : 'Save'}
-                      </button>
-                    </div>
                   </div>
+                  <div>
+                    <label htmlFor={`mediaType-${cellKey}`} className="block text-sm font-medium text-gray-700 mb-1">
+                      Media Type
+                    </label>
+                    <select
+                      id={`mediaType-${cellKey}`}
+                      value={images[cellKey]?.mediaType || ''}
+                      onChange={(e) => handleMediaTypeChange(e, cellKey)}
+                      className="w-full p-2 border border-gray-300 rounded"
+                      disabled={!images[cellKey]}
+                    >
+                      <option value="" disabled>Select type</option>
+                      {mediaTypes.map((type) => (
+                        <option key={type.value} value={type.value}>
+                          {type.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="mt-2 flex justify-end">
+                  <button
+                    className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onClick={() => handleSave(cellKey)}
+                    disabled={!images[cellKey] || disabledSaveButtons[cellKey]}
+                  >
+                    {images[cellKey]?.isExisting ? 'Update' : 'Save'}
+                  </button>
                 </div>
               </div>
             );

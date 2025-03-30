@@ -1,10 +1,13 @@
 import API_URL from '../config';
 
-export const createMedia = async (productId, colorId, file, utilityName) => {
+export const createMedia = async (productId, colorId, file, utilityName, mediaType) => {
     try {
         const formData = new FormData();
         formData.append('media', file);
-        formData.append('type', 'product');
+        
+        // Use the provided mediaType if available, otherwise default to 'product'
+        formData.append('type', mediaType);
+        
         if(utilityName) {
             formData.append('utility', utilityName);
         }
