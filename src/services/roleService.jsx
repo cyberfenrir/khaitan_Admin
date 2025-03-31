@@ -9,7 +9,6 @@ export const getAllRoles = async () => {
                 'Content-Type': 'application/json',
             }
         })
-        console.log(data.json());
         return data.json();
     }
     catch(err){

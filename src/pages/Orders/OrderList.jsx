@@ -16,11 +16,11 @@ function OrderList() {
   return (
     <main className="px-4 md:px-10 pb-20">
       <section className="w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {orderStatuses.map((status, index) => (
             <OrderStatusCard key={index} {...status} />
           ))}
-        </div>
+        </div> */}
         <div className="mt-8">
           <OrderTable />
         </div>

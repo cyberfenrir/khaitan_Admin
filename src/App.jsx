@@ -58,6 +58,7 @@ import EditBanner from './pages/Banners/EditBanner';
 
 import ProtectedLayout from './ProtectedLayout';
 import { AuthProvider } from './AuthContext';
+import Careers from './pages/Careers/careers';
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -100,7 +101,7 @@ function App() {
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/reviews" element={<Reviews />} />
                 <Route path="/chat" element={<Chat />} />
-                <Route path="/deals" element={<Deals />} />
+                <Route path="/careers" element={<Careers />} />
                 <Route path="/purchases" element={<Purchases />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/profile/view-profile" element={<ProfilePage />} />

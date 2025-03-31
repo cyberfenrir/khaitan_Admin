@@ -27,11 +27,11 @@ const statsData = [
 function DashboardStats() {
   return (
     <main className="flex flex-col">
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-8 px-3">
+      {/* <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full mb-8 px-3">
         {statsData.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}
-      </section>
+      </section> */}
       <section className="flex flex-wrap justify-center w-full min-h-[758px] max-md:max-w-full">
         <DataTable />
       </section>

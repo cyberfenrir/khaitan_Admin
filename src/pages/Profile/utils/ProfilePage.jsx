@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, X, User } from 'lucide-react';
 import PermissionTable from './PermissionTable';
+import { getUser } from '../../../services/userService';
+import { getAllRoles } from '../../../services/roleService';
+import { convertDateTime } from '../../../Utils/timeConversion';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
+  const [roles, setRoles] = useState ({});
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     phone: '',
     department: '',
@@ -20,28 +23,26 @@ const ProfilePage = () => {
     postalCode: '',
   });
 
-  useEffect(() => {
-    // Mock API call to fetch user data
-    const fetchUserData = async () => {
-      // Replace with actual API call
-      const mockUserData = {
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john.doe@example.com',
-        phone: '+1 234 567 8900',
-        department: 'IT',
-        role: 'Senior Developer',
-        employeeId: 'EMP001',
-        joiningDate: '2023-01-15',
-        address: '123 Main St',
-        city: 'New York',
-        country: 'USA',
-        postalCode: '10001',
-      };
-      setFormData(mockUserData);
-    };
+  const fetchUserData = async () => {
+    const data = await getUser();
+    console.log(data.data);
+    setFormData(data.data);
+  };
 
-    fetchUserData();
+  const fetchAllRoles = async () => {
+    const data = await getAllRoles();
+    setRoles(data.data);
+  }
+  useEffect(() => {
+    if(roles.length>0){
+      fetchUserData();
+    }
+  }, []);
+  
+  useEffect(()=>{
+    fetchAllRoles();
+
+    return () => {};
   }, []);
 
   const handleInputChange = (e) => {
@@ -52,9 +53,10 @@ const ProfilePage = () => {
     }));
   };
 
+  const role = roles.length>0? roles.filter((role) => role.id === formData.roleId) : [{name: ""}];
+
   const handleSave = async () => {
     try {
-      // Replace with actual API call to update user data
       console.log('Saving user data:', formData);
       navigate('/dashboard');
     } catch (error) {
@@ -63,7 +65,7 @@ const ProfilePage = () => {
   };
 
   const handleCancel = () => {
-    // navigate('/dashboard');
+    navigate('/dashboard/analytics');
   };
 
   return (
@@ -79,23 +81,23 @@ const ProfilePage = () => {
                 <User size={32} className="text-gray-500" />
               </div>
               <div>
-                <h3 className="font-bold">{`${formData.firstName} ${formData.lastName}`}</h3>
-                <p className="text-gray-600">{formData.role}</p>
+                <h3 className="font-bold">{`${formData.name}`}</h3>
+                <p className="text-gray-600">{role[0]?.name}</p>
                 <p className="text-gray-600">{formData.email}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4 mt-4">
               <div>
-                <p className="text-sm text-gray-600">Department</p>
-                <p className="font-medium">{formData.department}</p>
+                <p className="text-sm text-gray-600">Contact</p>
+                <p className="font-medium">{formData.phoneNumber}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Employee ID</p>
-                <p className="font-medium">{formData.employeeId}</p>
+                <p className="font-medium">{formData.id}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Joining Date</p>
-                <p className="font-medium">{formData.joiningDate}</p>
+                <p className="font-medium">{convertDateTime(formData.createdAt)}</p>
               </div>
             </div>
           </div>
@@ -113,24 +115,12 @@ const ProfilePage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              First Name
+              Name
             </label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Last Name
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
+              name="name"
+              value={formData.name}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
@@ -154,12 +144,12 @@ const ProfilePage = () => {
             <input
               type="tel"
               name="phone"
-              value={formData.phone}
+              value={formData?.phoneNumber}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Department
             </label>
@@ -170,7 +160,7 @@ const ProfilePage = () => {
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
-          </div>
+          </div> */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Role
@@ -178,12 +168,12 @@ const ProfilePage = () => {
             <input
               type="text"
               name="role"
-              value={formData.role}
+              value={role[0]?.name}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
           </div>
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Address
             </label>
@@ -230,7 +220,7 @@ const ProfilePage = () => {
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             />
-          </div>
+          </div> */}
         </div>
       </div>
 

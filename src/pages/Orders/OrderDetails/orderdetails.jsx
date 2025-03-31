@@ -27,11 +27,10 @@ function OrderDetails() {
   }, []);
   
   const user = allUsers.find(user => user.id === order.userId);
-  console.log(user);
 
   const handleDeliveryUpdate = async () => {
     try{
-      const data = await updateOrderStatus(id);
+      const data = await updateOrderStatus(user.id);
       if(data.sucess){
         setShowDialog(true);
         setDialogMessage("Order Status Updated Successfully");

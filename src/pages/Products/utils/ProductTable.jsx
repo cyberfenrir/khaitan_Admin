@@ -48,6 +48,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const [productMedia, setProductMedia] = useState(null);
   // const navigate = useNavigate();
 
+  
   useEffect(() => {
     const fetchCategoryName = async () => {
       try {
@@ -63,8 +64,8 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         console.error('Error fetching category:', error);
       }
     };
-
     fetchCategoryName();
+    setProductMedia(media.filter((mediaFile) => mediaFile.productId == product.id));
   }, [product.categoryId]);
 
   const actionIcons = [

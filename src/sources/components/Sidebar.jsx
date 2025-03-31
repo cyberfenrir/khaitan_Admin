@@ -34,7 +34,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         },
         'Inventory',
         'Purchases',
-        'Deals',
+        'Careers',
         'Settings'
       ]
     },

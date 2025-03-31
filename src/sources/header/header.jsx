@@ -18,7 +18,7 @@ const Header = () => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const auth = getAuth();
-  const { isAuthenticated } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   // Function to handle logout
   const handleLogout = async () => {
@@ -34,9 +34,9 @@ const Header = () => {
 
   // Function to open the confirmation modal
   const handleProfileClick = () => {
-    if (!isAuthenticated) {
+    if (!isLoggedIn) {
       alert('please login first');
-      return <Navigate to="/login" />;
+      return <navigate to="/login" />;
     }
     setShowLogoutModal(true);
   };
@@ -53,16 +53,16 @@ const Header = () => {
       </h1>
       <nav className="flex items-center gap-4">
         <div className="flex gap-4 items-center">
-          {icons.map((icon, index) => (
+          {/* {icons.map((icon, index) => (
             <div key={index} className="relative">
               <IconButton src={icon.src} alt={icon.alt} />
             </div>
-          ))}
-          <div className="relative">
-            <IconButton src={profile} alt="Profile" onClick={handleProfileClick} />
-            <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
-              3
-            </div>
+          ))} */}
+          <div>
+              <IconButton src={profile} alt="Profile" onClick={handleProfileClick} />
+              {/* <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
+                3
+              </div> */}
           </div>
         </div>
         <SearchBar />
