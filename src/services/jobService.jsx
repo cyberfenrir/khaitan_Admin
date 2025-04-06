@@ -52,7 +52,7 @@ export const allJobApplications = async () => {
 
 export const allJobOpenings = async () => {
     try{
-        const data = await fetch(`${API_URL}/jobOpenings`,{
+        const data = await fetch(`${API_URL}/jobOpenings?jobStatus=Active`,{
             method: "GET",
             credentials: "include",
             headers: {

@@ -37,7 +37,6 @@ const Careers = () => {
       try {
         setLoading(prev => ({ ...prev, openings: true }));
         const openings = await allJobOpenings();
-        console.log(openings);
         setJobOpenings(openings.data);
       } catch (error) {
         console.error('Error fetching job openings:', error);
@@ -259,7 +258,7 @@ const Careers = () => {
                     <td className="py-3 px-6 text-left font-medium">{job.title}</td>
                     <td className="py-3 px-6 text-left">{job.department}</td>
                     <td className="py-3 px-6 text-left">{job.location}</td>
-                    <td className="py-3 px-6 text-left">{job.type}</td>
+                    <td className="py-3 px-6 text-left">{job.employmentType}</td>
                     <td className="py-3 px-6 text-left">{job.salaryRange}</td>
                     <td className="py-3 px-6 text-left">{formatDate(job.createdAt)}</td>
                     <td className="py-3 px-6 text-left">
@@ -300,25 +299,38 @@ const Careers = () => {
                   <th className="py-3 px-6 text-left">Position</th>
                   <th className="py-3 px-6 text-left">Date Applied</th>
                   <th className="py-3 px-6 text-left">Status</th>
+                  <th className="py-3 px-6 text-left truncate">Resume</th>
                 </tr>
               </thead>
               <tbody className="text-gray-600 text-sm">
                 {jobApplications.map((application, index) => (
                   <tr key={index} className="border-b border-gray-200 hover:bg-gray-50">
-                    <td className="py-3 px-6 text-left whitespace-nowrap font-medium">{application.name}</td>
-                    <td className="py-3 px-6 text-left">{application.email}</td>
-                    <td className="py-3 px-6 text-left">{application.position || 'N/A'}</td>
-                    <td className="py-3 px-6 text-left">{formatDate(application.dateApplied)}</td>
+                    <td className="py-3 px-6 text-left whitespace-nowrap font-medium">{application.applicantName}</td>
+                    <td className="py-3 px-6 text-left">{application.applicantEmail}</td>
+                    <td className="py-3 px-6 text-left">{(jobOpenings.find((job) => Number(job.id) === Number(application.jobOpeningId))?.department) || 'N/A'}</td>
+                    <td className="py-3 px-6 text-left">{formatDate(application.appliedDate)}</td>
                     <td className="py-3 px-6 text-left">
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        application.status === 'Reviewed' ? 'bg-blue-100 text-blue-800' :
-                        application.status === 'Interviewed' ? 'bg-purple-100 text-purple-800' :
-                        application.status === 'Accepted' ? 'bg-green-100 text-green-800' :
-                        application.status === 'Rejected' ? 'bg-red-100 text-red-800' :
+                        application.applicationStatus === 'Under Review' ? 'bg-blue-100 text-blue-800' :
+                        application.applicationStatus === 'Interviewed' ? 'bg-purple-100 text-purple-800' :
+                        application.applicationStatus === 'Accepted' ? 'bg-green-100 text-green-800' :
+                        application.applicationStatus === 'Rejected' ? 'bg-red-100 text-red-800' :
                         'bg-gray-100 text-gray-800'
                       }`}>
-                        {application.status || 'New'}
+                        {application.applicationStatus || 'New'}
                       </span>
+                    </td>
+                    <td className="py-3 px-6 text-left">
+                      <div className='truncate w-40'>
+                        <a 
+                          href={application.resumeURL} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="w-40 overflow-hidden text-ellipsis whitespace-nowrap hover:cursor-pointer hover:text-blue-600 hover:underline"
+                        >
+                          {application.resumeURL}
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -108,7 +108,7 @@ function ProductTable({ productsArray }) {
               >
                 <td className="px-4 py-4 flex items-center space-x-4">
                   <img 
-                    src={product.image} 
+                    src={product.url} 
                     alt={product.title} 
                     className="w-16 h-16 object-cover rounded-lg"
                   />
