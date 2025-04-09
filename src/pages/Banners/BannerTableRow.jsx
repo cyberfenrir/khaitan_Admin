@@ -1,24 +1,14 @@
 import PropTypes from 'prop-types';
 import Action from './Utils/actions';
-import viewIcon from './assets/view.svg';
-import editIcon from './assets/edit.svg';
 import deleteIcon from './assets/delete.svg';
 
 const actionIcons = [
-  { src: viewIcon, bgColor: "bg-slate-100", action: "view" },
-  { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
   { src: deleteIcon, bgColor: "bg-red-400 bg-opacity-10", action: "delete" }
 ];
 
 const BannersTableRow = ({ banner, onEditBanner, onDeleteBanner }) => {
   const handleAction = (action) => {
     switch (action) {
-      case 'view':
-        console.log(`View banner ${banner.id}`);
-        break;
-      case 'edit':
-        onEditBanner(banner.id, banner);
-        break;
       case 'delete':
         onDeleteBanner(banner.id);
         break;

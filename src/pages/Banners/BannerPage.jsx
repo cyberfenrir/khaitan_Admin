@@ -1,21 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BannersTable from './BannerTable';
-import { deleteBanner, getAllBanners } from '../../Utils/bannerService';
 import MessageBox from '../../Utils/message';
+import { deleteMedia, getMediaByUtility } from '../../services/mediaService';
 
 const BannersPage = () => {
-  const [bannersData, setBannersData] = useState({});
+  const [bannersData, setBannersData] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBanners = async () => {
-      const result = await getAllBanners();
+      const result = await getMediaByUtility("homepage");
       if (result.success) {
-        console.log(result.data);
-        setBannersData(result.data);
+        const data = Array.isArray(result.data) ? result.data : 
+                     (result.data && typeof result.data === 'object') ? Object.values(result.data) : [];
+        
+        setBannersData(data);
       } else {
         setErrorMessage(result.error);
         console.error(result.error);
@@ -30,13 +32,9 @@ const BannersPage = () => {
   };
 
   const handleDeleteBanner = async (bannerId) => {
-    const result = await deleteBanner(bannerId);
+    const result = await deleteMedia(bannerId);
     if (result.success) {
-      const updatedBannersData = { ...bannersData };
-      for (const utility in updatedBannersData) {
-        updatedBannersData[utility] = updatedBannersData[utility].filter(banner => banner.id !== bannerId);
-      }
-      setBannersData(updatedBannersData);
+      setBannersData(bannersData.filter(banner => banner.id !== bannerId));
       setSuccessMessage('Banner deleted successfully');
     } else {
       setErrorMessage(result.error);
@@ -58,16 +56,14 @@ const BannersPage = () => {
         </header>
         {errorMessage && <MessageBox message={errorMessage} type="error" onClose={() => setErrorMessage('')} />}
         {successMessage && <MessageBox message={successMessage} type="success" onClose={() => setSuccessMessage('')} />}
-        {Object.keys(bannersData).map(utility => (
-          <div key={utility}>
-            <h2 className="text-lg font-semibold text-slate-700">{utility}</h2>
-            <BannersTable
-              bannersList={bannersData[utility].slice(0, 1)}
-              onEditBanner={handleEditBanner}
-              onDeleteBanner={handleDeleteBanner}
-            />
-          </div>
-        ))}
+        <div className="p-5">
+          <h2 className="text-lg font-semibold text-slate-700 mb-4">Banners</h2>
+          <BannersTable
+            bannersList={bannersData}
+            onEditBanner={handleEditBanner}
+            onDeleteBanner={handleDeleteBanner}
+          />
+        </div>
       </div>
     </section>
   );

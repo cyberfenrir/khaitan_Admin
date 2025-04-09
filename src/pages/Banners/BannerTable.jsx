@@ -3,6 +3,17 @@ import BannersTableHeader from './BannerTableHeader';
 import BannersTableRow from './BannerTableRow';
 
 const BannersTable = ({ bannersList, onEditBanner, onDeleteBanner }) => {
+  
+  const isValidArray = Array.isArray(bannersList);
+  
+  if (!isValidArray || bannersList.length === 0) {
+    return (
+      <div className="w-full bg-white rounded-lg border border-slate-200 p-4 text-center">
+        <p className="text-slate-500">No banners available.</p>
+      </div>
+    );
+  }
+  
   return (
     <div className="w-full bg-white rounded-lg border border-slate-200">
       <div className="relative">
@@ -29,14 +40,7 @@ const BannersTable = ({ bannersList, onEditBanner, onDeleteBanner }) => {
 };
 
 BannersTable.propTypes = {
-  bannersList: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      description: PropTypes.string.isRequired,
-      media: PropTypes.string.isRequired,
-    })
-  ).isRequired,
+  bannersList: PropTypes.array,
   onEditBanner: PropTypes.func.isRequired,
   onDeleteBanner: PropTypes.func.isRequired,
 };

@@ -76,6 +76,24 @@ export const getAllMedias = async () => {
     }
 }
 
-// export const getMediaByUtility = async () => {
+export const getMediaByUtility = async (pageName) => {
+    try {
+        const response = await fetch(`${API_URL}/media?utility=${pageName}`, {
+            method: "GET",
+            credentials: "include"
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to fetch media by utility');
+        }
+        
+        const data = await response.json();
+        return data;
+    }
+    catch(err) {
+        console.log("GetMediaByUtility Service Error: ", err);
+        throw err;
+    }
+}
 
-// }
