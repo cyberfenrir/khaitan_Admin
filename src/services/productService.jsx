@@ -98,3 +98,19 @@ export const getAttributesForProduct = async (productId) => {
         console.log("GetAttributesForProduct Service Error: ",err);
     }
 }
+
+export const deleteProduct = async (productId) => {
+    try{
+        const data = await fetch (`${API_URL}/products/${productId}`,{
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+        return data.json();
+    }
+    catch(err){
+        console.log("DeleteProduct Service Error: ",err);
+    }
+}

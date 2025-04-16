@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import CategoriesTable from './Utils/CategoriesTable';
-import CategoryGrid from './Utils/categoryList';
 import { useNavigate } from 'react-router-dom';
 import { getAllCategories } from '../../services/categoryService';
 import MessageBox from '../../Utils/message';
@@ -15,10 +14,8 @@ const CategoryPage = () => {
     const fetchCategories = async () => {
       try {
         const response = await getAllCategories();
-        console.log("Categories response: ",response);
         if (response.sucess) {
           setCategoriesData(response.data);
-          console.log('Categories:', response.data);
         } else {
           setError('Failed to fetch categories');
         }

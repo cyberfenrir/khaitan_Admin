@@ -65,7 +65,7 @@ const RecentOrders = () => {
   const fetchOrders = async () => {
     try {
       const data = await getAllOrders();
-      setOrderData(data.data);
+      setOrderData(data.data || []);
     }
     catch(err){
       console.log("Recent Orders Error: ",err);
@@ -136,7 +136,7 @@ const RecentOrders = () => {
         <h2 className="text-lg font-semibold">Recent Orders</h2>
       </div>
       {ordersWithCustomerNames.length === 0 ? (
-        <div className="text-center text-gray-500">No orders available</div>
+        <div className="text-center text-gray-500 py-8 text-2xl font-bold">No orders available</div>
       ) : (
         <AgGridReact
           rowData={ordersWithCustomerNames}

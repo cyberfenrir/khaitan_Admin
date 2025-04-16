@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './sources/components/Sidebar';
 import Dashboard from './sources/components/Dashboard';
 import Header from './sources/header/header';
@@ -60,31 +60,37 @@ import ProtectedLayout from './ProtectedLayout';
 import { AuthProvider } from './AuthContext';
 import Careers from './pages/Careers/careers';
 
-function App() {
+// Create a layout wrapper component
+const AppLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const location = useLocation();
+  
+  // Check if current path is login or signup
+  const isAuthPage = location.pathname === '/' || 
+                     location.pathname === '/login' || 
+                     location.pathname === '/signin';
 
   return (
-    <AuthProvider>
-    <Router>
-      <div className="flex flex-col min-h-screen bg-gray-100"> {/* Change to flex-col to allow footer to stick at the bottom */}
-        {/* Header */}
-        <div className="fixed w-full z-10 bg-white shadow">
-          <Header />
-        </div>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {/* Header */}
+      <div className="fixed w-full z-10 bg-white shadow">
+        <Header />
+      </div>
 
-        {/* Sidebar */}
+      {/* Conditionally render Sidebar */}
+      {!isAuthPage && (
         <Sidebar 
           isOpen={isSidebarOpen} 
           setIsOpen={setIsSidebarOpen}
         />
-        
-        {/* Main Content */}
-        <main className={`flex-1 transition-all duration-300 md:ml-[250px] pt-[80px]`}>
-          <div className="p-8">
-            {/* Routes for different sections */}
-
-            <ProductProvider>
-              <Routes>
+      )}
+      
+      {/* Main Content - adjust margin left based on whether it's an auth page */}
+      <main className={`flex-1 transition-all duration-300 ${isAuthPage ? '' : 'md:ml-[250px]'} pt-[80px]`}>
+        <div className="p-8">
+          {/* Routes for different sections */}
+          <ProductProvider>
+            <Routes>
               <Route element={<ProtectedLayout />}>
                 <Route path="/dashboard/analytics" element={<Dashboard />} />
                 <Route path="/products/add-product" element={<CreateProduct/>} />
@@ -116,21 +122,28 @@ function App() {
                 <Route path="/banners/create" element={<CreateBanner />} />
                 <Route path="/banners/add-banner" element={<CreateBanner />} />
                 <Route path="/banners/edit/:bannerId" element={<EditBanner />} />
+              </Route>
+              <Route path="/" element={<SignInPage />} />
+              <Route path="/login" element={<SignInPage />} />
+              <Route path="/signin" element={<CreateAccountPage />} />
+              <Route path="/colors/edit/:slug" element={<EditProduct />} />
+            </Routes>
+          </ProductProvider>
+        </div>
+      </main>
 
-                </Route>
-                <Route path="/" element={<SignInPage />} />
-                <Route path="/login" element={<SignInPage />} />
-                <Route path="/signin" element={<CreateAccountPage />} />
-                <Route path="/colors/edit/:slug" element={<EditProduct />} />
-              </Routes>
-            </ProductProvider>
-          </div>
-        </main>
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+};
 
-        {/* Footer */}
-        <Footer />
-      </div>
-    </Router>
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppLayout />
+      </Router>
     </AuthProvider>
   );
 }

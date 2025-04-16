@@ -3,9 +3,9 @@ import { useParams } from 'react-router-dom';
 import ImageDropZone from './utils/ImageDropZone';
 import ProductInformation from './utils/ProductInformation';
 import ProductPricing from './utils/ProductPricing';
-// import { fetchColors } from '../../Middlewares/data/colorsapi';
-import { getProductById, getAllMedia, getAttributesforProduct, getAllAttributes }from '../../Utils/service';
-//  getAttributesbyCategory, updateProduct, updateProductAttributes, getAllCategories, fetchCategoryById, getAllMedia, addMedia, deleteMedia, uploadImageToStorage, getAttributesforProduct, getAllAttributes } from '../../Utils/service';
+import { getAttributesForProduct, getProductById } from '../../services/productService';
+import { getAllAttributesForACategory } from '../../services/categoryService';
+import { getAllMedias } from '../../services/mediaService';
 
 function EditProduct({ productId }) {
   const { slug } = useParams();
@@ -28,10 +28,10 @@ function EditProduct({ productId }) {
             setProductInfo(productData.data);
             // setUpdatedProduct(productData.data);
             
-            const attributesData = await getAttributesforProduct(productData.data.id);
+            const attributesData = await getAttributesForProduct(productData.data.id);
             console.log('Fetched attributes data:', attributesData);
             
-            const allAttributes = await getAllAttributes();
+            const allAttributes = await getAllAttributesForACategory();
             if(allAttributes.success) {
               console.log("All Attributes: ", allAttributes.data);
               const productAttr = allAttributes.data.filter((a) => Number(productData.data.categoryId) === Number(a.categoryId));
@@ -67,7 +67,7 @@ function EditProduct({ productId }) {
             //   setCategories(allCategories.data);
             // }
     
-            const mediaData = await getAllMedia();
+            const mediaData = await getAllMedias();
             console.log('Fetched media data:', mediaData);
             
             if (mediaData.success) {

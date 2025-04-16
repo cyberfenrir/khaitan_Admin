@@ -40,7 +40,7 @@ export default function TablePagination({ currentPage, totalPages, onPageChange 
 }
 
 TablePagination.propTypes = {
-  currentPage: PropTypes.number.isRequired,
-  totalPages: PropTypes.number.isRequired,
-  onPageChange: PropTypes.func.isRequired,
+  currentPage: PropTypes.number,
+  totalPages: PropTypes.number,
+  onPageChange: PropTypes.func,
 };

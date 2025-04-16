@@ -31,3 +31,20 @@ export const getUser = async () => {
         console.log("GetUser service error: ", err);
     }
 }
+
+export const updateUser = async (userId, payload) => {
+    try{
+        const data = await fetch(`${API_URL}/users`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload)
+        })
+        return data.json();
+    }
+    catch(err){
+        console.log("UpdateUser service error: ", err);
+    }
+}

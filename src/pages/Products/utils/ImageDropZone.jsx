@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Upload, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { getMediaByProductId } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
 import { createMedia, deleteMedia } from '../../../services/mediaService';
 import { getAllColors } from '../../../services/colorService';
@@ -33,7 +32,6 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
       try {
         const colorsData = await getAllColors();
         if (colorsData.success) {
-          console.log('Colors:', colorsData.data);
           setColors(colorsData.data);
         } else {
           console.error('Colors data is not an array:', colorsData);
@@ -102,7 +100,6 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
       
       // Use createMedia service to upload the image
       const response = await createMedia(actualProductId, colorId, imageData.file, null, mediaType);
-      console.log("Image resp: ", response);
       if (response) {
         console.log('New media added successfully');
         setMessage('Media uploaded successfully.');

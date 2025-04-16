@@ -2,13 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, X, User } from 'lucide-react';
 import PermissionTable from './PermissionTable';
-import { getUser } from '../../../services/userService';
+import { getUser, updateUser } from '../../../services/userService';
 import { getAllRoles } from '../../../services/roleService';
 import { convertDateTime } from '../../../Utils/timeConversion';
+import MessageBox from '../../../Utils/message';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-  const [roles, setRoles] = useState ({});
+  const [roles, setRoles] = useState ([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,10 +23,11 @@ const ProfilePage = () => {
     country: '',
     postalCode: '',
   });
+  const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState('');
 
   const fetchUserData = async () => {
     const data = await getUser();
-    console.log(data.data);
     setFormData(data.data);
   };
 
@@ -34,16 +36,14 @@ const ProfilePage = () => {
     setRoles(data.data);
   }
   useEffect(() => {
-    if(roles.length>0){
-      fetchUserData();
-    }
+    fetchAllRoles();
   }, []);
   
-  useEffect(()=>{
-    fetchAllRoles();
-
-    return () => {};
-  }, []);
+  useEffect(() => {
+    if (roles.length > 0) {
+      fetchUserData();
+    }
+  }, [roles]); 
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -57,10 +57,20 @@ const ProfilePage = () => {
 
   const handleSave = async () => {
     try {
-      console.log('Saving user data:', formData);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Error saving user data:', error);
+      const payload = {
+        name: formData.name,
+      }
+      const updatedUser = await updateUser(formData.id, payload);
+      if(updatedUser.sucess)
+        navigate('/dashboard/analytics');
+      else{
+        setMessage('Failed to update user data.');
+        setMessageType('error');
+      }
+    } 
+    catch (error) {
+      setMessage('Failed to update user data.');
+      setMessageType('error');      
     }
   };
 
@@ -134,7 +144,8 @@ const ProfilePage = () => {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              disabled = {true}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-not-allowed"
             />
           </div>
           <div>
@@ -146,7 +157,8 @@ const ProfilePage = () => {
               name="phone"
               value={formData?.phoneNumber}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              disabled = {true}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-not-allowed"
             />
           </div>
           {/* <div>
@@ -170,7 +182,8 @@ const ProfilePage = () => {
               name="role"
               value={role[0]?.name}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              disabled = {true}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md cursor-not-allowed"
             />
           </div>
           {/* <div>
@@ -241,6 +254,11 @@ const ProfilePage = () => {
           Save Changes
         </button>
       </div>
+      {message && (
+        <div className="mt-4">
+          <MessageBox message={message} type={messageType} onClose={() => setMessage('')} />
+        </div>
+      )}
     </div>
   );
 };

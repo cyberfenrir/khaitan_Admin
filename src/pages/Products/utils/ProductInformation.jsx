@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
-import { addData, updateProduct, getData } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
 import { getAllCategories } from "../../../services/categoryService";
 import { createProduct } from "../../../services/productService";
@@ -47,7 +46,6 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
                 const result = await getAllCategories();
                 if (result.sucess) {
                     setCategories(result.data);
-                    console.log('Fetched categories:', result.data);
                 }
             } catch (error) {
                 console.error('Failed to fetch categories:', error);
@@ -99,7 +97,6 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
             //     // Create new product
             // }
             const productResponse = await createProduct(formData.title, formData.description, formData.price, formData.categoryId);
-            console.log('Product created:', productResponse.data);
             
             // Store in localStorage and update parent state
             localStorage.setItem('productData', JSON.stringify(productResponse.data));

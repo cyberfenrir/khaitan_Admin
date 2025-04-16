@@ -3,7 +3,6 @@ import ProductHeader from './utils/ProductHeader';
 import ProductPage from './utils/ProductPage';
 import TablePagination from './utils/TablePagination';
 import { useState, useEffect } from 'react';
-import { getData } from '../../Utils/service';
 import { getAllProducts } from '../../services/productService';
 
 export default function ProductList() {

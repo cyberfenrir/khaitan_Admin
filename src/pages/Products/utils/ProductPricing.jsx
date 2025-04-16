@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { bulkAddData, getAttributesbyCategory, getAttributesforProduct } from '../../../Utils/service';
 import MessageBox from '../../../Utils/message';
 import { getAllAttributesForACategory } from '../../../services/categoryService';
-import { addAttrtoProductBulk } from '../../../services/productService';
+import { addAttrtoProductBulk, getAttributesForProduct } from '../../../services/productService';
 
 const ProductPricing = ({ productId, categoryId, onNext }) => {
   const [attributes, setAttributes] = useState([]);
@@ -69,14 +68,14 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
     try {
       setIsLoading(true);
       // Use the provided getAttributesforProduct service
-      const response = await getAttributesforProduct(prodId);
+      const response = await getAttributesForProduct(prodId);
       
       if (response.success && response.data) {
-        setExistingAttributes(response.data);
+        setExistingAttributes(response.data.attributes);
         
         // Convert to form data format
         const initialFormData = {};
-        response.data.forEach(attr => {
+        response.data.attributes.forEach(attr => {
           initialFormData[attr.attributeId] = attr.value;
         });
         

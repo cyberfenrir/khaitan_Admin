@@ -1,8 +1,8 @@
 import { Eye, CheckCircle, XCircle } from 'lucide-react';
-import TablePagination from '../Products/utils/TablePagination';
 import { useState, useEffect } from 'react';
 import { getAllRoles, getAllUnverifiedUsers, verifyRole } from '../../services/roleService';
 import { convertDateTime } from '../../Utils/timeConversion';
+import TablePagination from './TablePagination'
 
 function DataTable() {
   const [tableData, setTableData] = useState([]);
@@ -119,7 +119,7 @@ function DataTable() {
             </table>
           )}
         </div>
-        <TablePagination />
+        <TablePagination users = {tableData} />
       </div>
     </div>
   );

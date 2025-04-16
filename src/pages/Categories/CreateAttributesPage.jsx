@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { bulkAddData, getAllAttributes } from '../../Utils/service';
 import { X } from 'lucide-react';
 import MessageBox from '../../Utils/message';
-import { createAttributes } from '../../services/categoryService';
+import { createAttributes, getAllAttributesForACategory } from '../../services/categoryService';
 
 function CreateAttributesPage({ onSave, categoryName, categoryId }) {
   const [attributes, setAttributes] = useState([]);
@@ -17,7 +16,7 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
 
   useEffect(() => {
     const fetchAttributes = async () => {
-      const response = await getAllAttributes();
+      const response = await getAllAttributesForACategory();
       if (response.success) {
         setExistingAttributes(response.data);
       } else {
@@ -222,9 +221,9 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
 }
 
 CreateAttributesPage.propTypes = {
-  onSave: PropTypes.func.isRequired,
-  categoryName: PropTypes.string.isRequired,
-  categoryId: PropTypes.string.isRequired,
+  onSave: PropTypes.func,
+  categoryName: PropTypes.string,
+  categoryId: PropTypes.string,
 };
 
 export default CreateAttributesPage;

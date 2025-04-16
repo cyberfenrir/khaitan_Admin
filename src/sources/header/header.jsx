@@ -51,22 +51,22 @@ const Header = () => {
       <h1 className="text-lg font-bold leading-none uppercase text-slate-500">
         <span className="p-2 rounded-[36px]">Welcome!</span>
       </h1>
-      <nav className="flex items-center gap-4">
+      {/* <nav className="flex items-center gap-4">
         <div className="flex gap-4 items-center">
-          {/* {icons.map((icon, index) => (
+          {icons.map((icon, index) => (
             <div key={index} className="relative">
               <IconButton src={icon.src} alt={icon.alt} />
             </div>
-          ))} */}
+          ))}
           <div>
               <IconButton src={profile} alt="Profile" onClick={handleProfileClick} />
-              {/* <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
+              <div className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-red-400 rounded-full text-white text-xs">
                 3
-              </div> */}
+              </div>
           </div>
         </div>
         <SearchBar />
-      </nav>
+      </nav> */}
 
       {showLogoutModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

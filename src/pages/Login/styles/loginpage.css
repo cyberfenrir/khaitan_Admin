@@ -1,0 +1,47 @@
+/* styles/loginpage.css */
+/* Define the custom color if it's not in your Tailwind config */
+.bg-khaitan-red {
+    background-color: #e53e3e; /* You can adjust this to match your brand color */
+  }
+  
+  /* Animation keyframes */
+  @keyframes slideIn {
+    from { transform: translateX(-100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    70% { transform: scale(0.9); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  
+  /* Animation classes */
+  .animate-slide-in {
+    animation: slideIn 1s ease-out forwards;
+    display: block; /* Ensure the element is displayed */
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 2s ease-out 0.5s forwards;
+    opacity: 0;
+    display: block; /* Ensure the element is displayed */
+  }
+  
+  .animate-bounce-in {
+    animation: bounceIn 1s ease-out 1.5s forwards;
+    opacity: 0;
+    display: block; /* Ensure the element is displayed */
+  }
+  
+  .welcome-animation {
+    overflow: hidden;
+    width: 100%;
+    text-align: center;
+  }

@@ -192,7 +192,7 @@ const CategoriesTable = ({ categoriesList }) => {
 CategoriesTable.propTypes = {
   categoriesList: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
       name: PropTypes.string.isRequired,
       description: PropTypes.string.isRequired,
       status: PropTypes.oneOf(['Active', 'Inactive', 'Pending']).isRequired,

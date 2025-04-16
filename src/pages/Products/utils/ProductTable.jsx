@@ -3,12 +3,10 @@ import Actions from './actions';
 import viewIcon from '../assets/view.svg';
 import editIcon from '../assets/edit.svg';
 import deleteIcon from '../assets/delete.svg';
-import { deleteProduct } from '../../../Middlewares/data/productsapi';
-import { deleteProductbyId } from '../../../Utils/service';
 import { useState, useEffect } from 'react';
 import MessageBox from '../../../Utils/message';
 import { getAllAttributesForACategory, getAllCategories, getCategoryById } from '../../../services/categoryService';
-import { getAttributesForProduct, getProductById, getProductWithAttributeAndMedia } from '../../../services/productService';
+import { deleteProduct, getAttributesForProduct, getProductById, getProductWithAttributeAndMedia } from '../../../services/productService';
 import { getAllMedias } from '../../../services/mediaService';
 // import { useNavigate } from 'react-router-dom';
 
@@ -45,16 +43,24 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const [attributes, setAttributes] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [productMedia, setProductMedia] = useState(null);
+  const [productMedia, setProductMedia] = useState([]);
   // const navigate = useNavigate();
 
+  // Separate useEffect for setting productMedia to ensure it runs independently
+  useEffect(() => {
+    if (media && media.length > 0 && product) {
+      const filteredMedia = media.filter((mediaFile) => 
+        Number(mediaFile.productId) === Number(product.id)
+      );
+      setProductMedia(filteredMedia);
+    }
+  }, [media, product]);
   
   useEffect(() => {
     const fetchCategoryName = async () => {
       try {
         const categoryId = parseInt(product.categoryId);
         const categoryData = await getCategoryById(categoryId);
-        console.log("Category Data:", categoryData);
         if (categoryData.sucess) {
           setCategoryName(categoryData.data.name);
         } else {
@@ -64,13 +70,15 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         console.error('Error fetching category:', error);
       }
     };
-    fetchCategoryName();
-    setProductMedia(media.filter((mediaFile) => mediaFile.productId == product.id));
-  }, [product.categoryId]);
+    
+    if (product && product.categoryId) {
+      fetchCategoryName();
+    }
+  }, [product]);
 
   const actionIcons = [
     { src: viewIcon, bgColor: "bg-slate-100", action: "view" },
-    { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
+    // { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
     { src: deleteIcon, bgColor: "bg-red-400 bg-opacity-10", action: "delete" }
   ];
 
@@ -83,18 +91,12 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
             throw new Error('Failed to fetch product details');
           }
           
-          console.log("Product Details:", response.data);
-
           const attr = response.data.attributes;
           if (!attr) {
             throw new Error('Attributes for product not found');
           }
 
-          console.log("Product Attributes:", attr);
-
           const category = response.data.categoryName;
-
-          console.log("Category:", category);
 
           const combinedAttributes = attr.map(attribute => ({
             categoryId: response.data.categoryId,
@@ -104,8 +106,6 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
             unit: attribute.unit,
             value: attribute.value,
           }));
-
-          console.log("Combined Attributes:", combinedAttributes);
 
           const mediaFiles = response.data.media;
           setProductMedia(mediaFiles);
@@ -119,14 +119,12 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         }
         break;
 
-      case 'edit':
-        window.location.href = `/products/edit-product/${product.id}`;
-        break;
+      // case 'edit':
+      //   window.location.href = `/products/edit-product/${product.id}`;
+      //   break;
       case 'delete': {
-        deleteProduct(product.id);
-        const result = await deleteProductbyId(product.id);
-        if (result.success) {
-          console.log('Product deleted:', result.productId);
+        const result = await deleteProduct(product.id);
+        if (result.sucess) {
           onDelete(product.id);
         } else {
           console.error('Error:', result.error);
@@ -137,7 +135,6 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         break;
     }
   };
-
 
   return (
     <div role="row" className="flex justify-center contents group">
@@ -177,7 +174,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
 
     {/* 🖼️ Media Carousel */}
     <h3 className="text-lg font-semibold mb-2">Product Images</h3>
-      {productMedia.length > 0 ? (
+      {productMedia && productMedia.length > 0 ? (
         <div className="relative w-full flex justify-center">
           <button
             onClick={() => setCurrentIndex((prev) => (prev === 0 ? productMedia.length - 1 : prev - 1))}
@@ -215,8 +212,6 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         <strong>Category:</strong> {categoryName}
       </div>
 
-      
-
       {/* 🏷️ Attributes Grid */}
       <h3 className="text-lg font-semibold mt-4 mb-2">Attributes</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -249,25 +244,6 @@ const ProductTable = ({ productsList }) => {
   const [media, setMedia] = useState([]);
   const [categories, setCategories] = useState([]);
   const [filter, setFilter] = useState('');
-  // const [allProducts, setAllProducts] = useState([]);
-
-  // const fetchAllProducts = async () => {
-  //   try {
-  //     const productsData = await getData('products');
-  //     if(productsData.success) {
-  //       setAllProducts(productsData.data);
-  //     } else {
-  //       console.error('Failed to fetch products:', productsData.error);
-  //     }
-  //   }
-  //   catch(error) {
-  //     console.error('Error fetching products:', error);
-  //   }
-  // }
-
-  // useEffect(()=>{
-  //   fetchAllProducts();
-  // },[]);
 
   useEffect(() => {
     setProducts(productsList);
@@ -279,7 +255,6 @@ const ProductTable = ({ productsList }) => {
         const mediaData = await getAllMedias();
         if (mediaData.success) {
           setMedia(mediaData.data);
-          console.log(mediaData);
         } else {
           console.error('Failed to fetch media:', mediaData.error);
         }
@@ -293,7 +268,6 @@ const ProductTable = ({ productsList }) => {
         const categoriesData = await getAllCategories();
         if (categoriesData.sucess) {
           setCategories(categoriesData.data);
-          // console.log('Categories:', categoriesData.data);
         } else {
           console.error('Failed to fetch categories:', categoriesData.error);
         }
@@ -312,7 +286,6 @@ const ProductTable = ({ productsList }) => {
 
   const filteredProducts = products.filter(product => {
     const categoryName = categories.find(category => category.id === parseInt(product.categoryId))?.name || '';
-    // console.log('Filtered:', categoryName);
     return categoryName.toLowerCase().includes(filter.toLowerCase());
   });
 

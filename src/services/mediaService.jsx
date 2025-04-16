@@ -96,4 +96,3 @@ export const getMediaByUtility = async (pageName) => {
         throw err;
     }
 }
-

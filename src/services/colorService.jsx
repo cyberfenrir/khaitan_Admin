@@ -65,3 +65,19 @@ export const colorById = async (colorId) => {
         console.log("ColorById Service Error: ",err);
     }
 }
+
+export const deleteColor = async (colorId) => {
+    try{
+        const data = await fetch(`${API_URL}/colors/${colorId}`,{
+            method: "DELETE",
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        return data.json();
+    }
+    catch(err){
+        console.log("DeleteColor Service Error: ",err);
+    }
+}

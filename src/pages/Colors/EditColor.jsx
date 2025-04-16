@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getColorById, editColor } from '../../Utils/service';
 import MessageBox from '../../Utils/message';
 import { colorById, updateColor } from '../../services/colorService';
 

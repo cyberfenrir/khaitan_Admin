@@ -31,9 +31,9 @@ const ColorsTable = ({ colorsList, onEditColor, onDeleteColor }) => {
 ColorsTable.propTypes = {
   colorsList: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      hexCode: PropTypes.string.isRequired,
+      id: PropTypes.number.isRequired,
+      colorName: PropTypes.string.isRequired,
+      colorHex: PropTypes.string.isRequired,
     })
   ).isRequired,
   onEditColor: PropTypes.func.isRequired,
