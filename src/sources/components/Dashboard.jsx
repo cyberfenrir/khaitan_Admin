@@ -37,7 +37,7 @@ const Dashboard = () => {
     fetchOrders();
   }, []);
 
-  const totalOrderPrice = orderData.reduce((total, order) => total + order?.totalPrice, 0);
+  const totalOrderPrice = (orderData.length > 0) ? orderData.reduce((total, order) => total + order?.totalPrice, 0) : 0;
 
   const analyticsData = {
     customers: { total: users?.length || 0, percentageChange: 5.2 },

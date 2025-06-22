@@ -87,7 +87,7 @@ const RecentOrders = () => {
     return customer;
   };
 
-  const ordersWithCustomerNames = orderData.map(order => ({
+  const ordersWithCustomerNames = (orderData.length>0 )? orderData.map(order => ({
     ...order,
     items: order.products.length,
     createdAt: convertDateTime(order.createdAt),
@@ -95,7 +95,18 @@ const RecentOrders = () => {
     phone: getCustomerName(order.userId).phoneNumber,
     address: getCustomerName(order.userId).address,
     email: getCustomerName(order.userId).email
-  }));
+  })): [
+    {
+      id: '',
+      createdAt: '',
+      items: 0,
+      customer: '',
+      phone: '',
+      email: '',
+      deliveryStatus: '',
+      status: ''
+    }
+  ];
 
 
   const columnDefs = [
