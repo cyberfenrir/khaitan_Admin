@@ -96,3 +96,56 @@ export const getMediaByUtility = async (pageName) => {
         throw err;
     }
 }
+
+export const updateMedia = async (mediaId, productId, colorId, file, utilityName, url, mediaType) => {
+    try {
+        const formData = new FormData();
+        
+        // Add the file if provided
+        if (file) {
+            formData.append('media', file);
+        }
+        
+        // Add URL if provided
+        if (url) {
+            formData.append('url', url);
+        }
+        
+        // Use the provided mediaType if available
+        if (mediaType) {
+            formData.append('type', mediaType);
+        }
+        
+        // Add optional fields
+        if (utilityName) {
+            formData.append('utility', utilityName);
+        }
+        
+        if (productId !== null && productId !== undefined) {
+            formData.append('productId', productId);
+        }
+        
+        if (colorId !== null && colorId !== undefined) {
+            formData.append('colorId', colorId);
+        }
+
+        const response = await fetch(`${API_URL}/media/${mediaId}`, {
+            method: "PATCH",
+            credentials: "include",
+            // Remove Content-Type header to let the browser set it automatically for FormData
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to update media');
+        }
+        
+        const data = await response.json();
+        return data;
+    }
+    catch(err) {
+        console.log("UpdateMedia Service Error: ", err);
+        throw err;
+    }
+}

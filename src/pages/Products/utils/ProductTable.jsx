@@ -8,7 +8,7 @@ import MessageBox from '../../../Utils/message';
 import { getAllAttributesForACategory, getAllCategories, getCategoryById } from '../../../services/categoryService';
 import { deleteProduct, getAttributesForProduct, getProductById, getProductWithAttributeAndMedia } from '../../../services/productService';
 import { getAllMedias } from '../../../services/mediaService';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ProductTableHeader = () => {
   return (
@@ -44,7 +44,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
   const [productMedia, setProductMedia] = useState([]);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   // Separate useEffect for setting productMedia to ensure it runs independently
   useEffect(() => {
@@ -78,7 +78,7 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
 
   const actionIcons = [
     { src: viewIcon, bgColor: "bg-slate-100", action: "view" },
-    // { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
+    { src: editIcon, bgColor: "bg-orange-500 bg-opacity-10", action: "edit" },
     { src: deleteIcon, bgColor: "bg-red-400 bg-opacity-10", action: "delete" }
   ];
 
@@ -119,9 +119,9 @@ const ProductTableRow = ({ product, media, categories, onDelete }) => {
         }
         break;
 
-      // case 'edit':
-      //   window.location.href = `/products/edit-product/${product.id}`;
-      //   break;
+      case 'edit':
+        navigate(`/products/edit-product/${product.id}`);
+        break;
       case 'delete': {
         const result = await deleteProduct(product.id);
         if (result.sucess) {

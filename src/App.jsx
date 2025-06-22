@@ -126,7 +126,7 @@ const AppLayout = () => {
               <Route path="/" element={<SignInPage />} />
               <Route path="/login" element={<SignInPage />} />
               <Route path="/signin" element={<CreateAccountPage />} />
-              <Route path="/colors/edit/:slug" element={<EditProduct />} />
+              {/* <Route path="/colors/edit/:slug" element={<EditProduct />} /> */}
             </Routes>
           </ProductProvider>
         </div>

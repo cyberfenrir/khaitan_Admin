@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import MessageBox from '../../../Utils/message';
 import { getAllAttributesForACategory } from '../../../services/categoryService';
-import { addAttrtoProductBulk, getAttributesForProduct } from '../../../services/productService';
+import { addAttrtoProductBulk, getAttributesForProduct, updateAttributes } from '../../../services/productService';
 
-const ProductPricing = ({ productId, categoryId, onNext }) => {
+const ProductPricing = ({ productInfo, mode, productId, categoryId, onNext }) => {
   const [attributes, setAttributes] = useState([]);
   const [formData, setFormData] = useState({});
   const [existingAttributes, setExistingAttributes] = useState([]);
@@ -14,144 +14,158 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
   const [isEditing, setIsEditing] = useState(false);
   
   useEffect(() => {
-    setIsEditing(!!productId);
-    
-    // If editing, we'll load from productId
-    // If creating, we'll load from localStorage
-    if (!productId) {
-      const storedProductData = localStorage.getItem('productData');
-      if (storedProductData) {
-        const parsedData = JSON.parse(storedProductData);
-        if (parsedData.productId && parsedData.categoryId) {
-          loadAttributes(parsedData.categoryId);
-          loadExistingAttributeValues(parsedData.productId);
-        }
-      }
-    } else {
-      // We're in edit mode with direct props
-      if (categoryId) {
-        loadAttributes(categoryId);
-        loadExistingAttributeValues(productId);
-      }
-    }
-  }, [productId, categoryId]);
-
-  // Load attributes for the category
-  const loadAttributes = async (catId) => {
-    if (!catId) return;
-    
-    const categoryIdInt = parseInt(catId, 10);
-    if (isNaN(categoryIdInt)) {
-      console.error('Invalid category ID:', catId);
-      return;
-    }
-    
-    try {
+    const initialize = async () => {
       setIsLoading(true);
-      const attributesData = await getAllAttributesForACategory(categoryIdInt);
-      if (attributesData.sucess) {
-        setAttributes(attributesData.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch attributes:', error);
-      setMessage('Failed to load attributes.');
-      setMessageType('error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load existing attribute values if editing
-  const loadExistingAttributeValues = async (prodId) => {
-    if (!prodId) return;
-    
-    try {
-      setIsLoading(true);
-      // Use the provided getAttributesforProduct service
-      const response = await getAttributesForProduct(prodId);
+      setIsEditing(mode === 'edit');
       
-      if (response.success && response.data) {
-        setExistingAttributes(response.data.attributes);
-        
-        // Convert to form data format
-        const initialFormData = {};
-        response.data.attributes.forEach(attr => {
-          initialFormData[attr.attributeId] = attr.value;
-        });
-        
-        setFormData(initialFormData);
-        setIsEditing(true);
+      try {
+        // If editing with provided product info
+        if (mode == "edit" && productId && productInfo && productInfo.attributes) {
+          
+          // Set attributes from product info
+          setAttributes(productInfo.attributes || []);
+          
+          // Pre-fill form data from attributes
+          const initialFormData = {};
+          if (Array.isArray(productInfo.attributes)) {
+            productInfo.attributes.forEach(attr => {
+              initialFormData[attr.attributeId || attr.id] = attr.value;
+            });
+          }
+          
+          setFormData(initialFormData);
+        }   
+        else{
+          // If categoryId is provided, fetch attributes for that category
+          if (categoryId) {
+            // Fetch attributes for the category
+            const categoryAttributes = await getAllAttributesForACategory(categoryId);
+            setAttributes(categoryAttributes.data || []);
+          } 
+          else {
+            // If no productId or categoryId, reset attributes
+            setAttributes([]);
+          }
+        }
+        // If creating new product, load from localStorage
+      } catch (error) {
+        console.error("Error initializing component:", error);
+        setMessage('Failed to initialize. Please try again.');
+        setMessageType('error');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Failed to fetch existing attribute values:', error);
-    } finally {
-      setIsLoading(false);
+    };
+    
+    initialize();
+
+    return () => {
+      // Cleanup if needed
+      setAttributes([]);
+      setFormData({});
+      setExistingAttributes([]);
+      setMessage('');
+      setMessageType('');
     }
-  };
+  }, [productId, categoryId, productInfo]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    const currentProductId = productId || 
-      (JSON.parse(localStorage.getItem('productData'))?.productId);
-    
-    if (!currentProductId) {
-      setMessage('Product ID not found');
-      setMessageType('error');
-      return;
-    }
 
-    // Validate that all attribute values are numbers
-    for (const attribute of attributes) {
-      const value = formData[attribute.id];
-      if (value !== undefined && value !== '' && isNaN(value)) {
-        setMessage(`Value for ${attribute.name} must be a number.`);
-        setMessageType('error');
-        return;
-      }
-    }
-
-    try {
+    if(isEditing){
       setIsLoading(true);
+      try{
+        const response = await Promise.all(
+          attributes.map(attribute => {
+            const value = formData[attribute.id];
+            if (value !== undefined && value !== '') {
+              return updateAttributes(productId, attribute.id, value );
+            }
+            return null;
+          })
+        );
+        if(response){
+          setMessage('Product attributes updated successfully!');
+          setMessageType('success');
+          onNext(); 
+        }
+        else{
+          setMessage('Failed to update attributes.');
+          setMessageType('error');
+        }
+
+      }
+      catch(error){
+        console.error('Failed to save attributes:', error);
+        setMessage('Failed to save attributes.');
+        setMessageType('error');
+      }
+      finally{
+        setIsLoading(false);
+      }
+    }
+    else{
+      const currentProductId = productId || 
+        (JSON.parse(localStorage.getItem('productData'))?.productId);
       
-      // Filter out any attributes with empty values
-      const validPayload = {
-        attributes: attributes
-          .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
-          .map(attribute => ({
-            attributeId: attribute.id,
-            value: formData[attribute.id],
-          }))
-      };
-      
-      if (validPayload.attributes.length === 0) {
-        setMessage('No valid attributes to save.');
+      if (!currentProductId) {
+        setMessage('Product ID not found');
         setMessageType('error');
         return;
       }
-
-      // Use bulkAddData for both creating and updating
-      // This will replace existing attributes for the product
-      const attrOfProduct = await addAttrtoProductBulk(productId, validPayload);
-      console.log(attrOfProduct.data);
-      setMessage(isEditing ? 'Product attributes updated successfully!' : 'Product attributes added successfully!');
-      setMessageType('success');
-      
-      setTimeout(() => {
-        onNext();
-      }, 1000); // Brief delay to show success message
-      
-    } catch (error) {
-      console.error('Failed to save attributes:', error);
-      setMessage('Failed to save attributes.');
-      setMessageType('error');
-    } finally {
-      setIsLoading(false);
+  
+      // Validate that all attribute values are numbers
+      for (const attribute of attributes) {
+        const value = formData[attribute.id];
+        if (value !== undefined && value !== '' && isNaN(value)) {
+          setMessage(`Value for ${attribute.name} must be a number.`);
+          setMessageType('error');
+          return;
+        }
+      }
+  
+      try {
+        setIsLoading(true);
+        
+        // Filter out any attributes with empty values
+        const validPayload = {
+          attributes: attributes
+            .filter(attribute => formData[attribute.id] !== undefined && formData[attribute.id] !== '')
+            .map(attribute => ({
+              attributeId: attribute.id,
+              value: formData[attribute.id],
+            }))
+        };
+        
+        if (validPayload.attributes.length === 0) {
+          setMessage('No valid attributes to save.');
+          setMessageType('error');
+          return;
+        }
+  
+        // Use bulkAddData for both creating and updating
+        // This will replace existing attributes for the product
+        const attrOfProduct = await addAttrtoProductBulk(productId, validPayload);
+        setMessage('Product attributes added successfully!');
+        setMessageType('success');
+        
+        setTimeout(() => {
+          onNext();
+        }, 1000); // Brief delay to show success message
+        
+      } catch (error) {
+        console.error('Failed to save attributes:', error);
+        setMessage('Failed to save attributes.');
+        setMessageType('error');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -189,15 +203,15 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
                   {attribute.name}
                 </label>
                 <div className="flex items-center">
-                  <input
-                    id={attribute.id}
-                    name={attribute.id}
-                    type="text"
-                    value={formData[attribute.id] || ''}
-                    onChange={handleChange}
-                    placeholder={`Enter ${attribute.name}`}
-                    className="w-full px-3 py-2 border rounded-md"
-                  /> 
+                <input
+                  id={attribute.id}
+                  name={attribute.id}
+                  type="number"
+                  value={formData[attribute.id] || ''}
+                  onChange={handleChange}
+                  placeholder={`Enter ${attribute.name}`}
+                  className="w-full px-3 py-2 border rounded-md"
+                />
                   {attribute.unit && (
                     <span className="text-sm text-gray-500 whitespace-nowrap ml-2">
                       {attribute.unit}
@@ -229,6 +243,8 @@ const ProductPricing = ({ productId, categoryId, onNext }) => {
 };
 
 ProductPricing.propTypes = {
+  productInfo: PropTypes.object.isRequired,
+  mode: PropTypes.oneOf(['create', 'edit']).isRequired,
   productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   categoryId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   onNext: PropTypes.func.isRequired,

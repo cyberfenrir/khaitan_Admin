@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import PropTypes from 'prop-types';
 import MessageBox from '../../../Utils/message';
 import { getAllCategories } from "../../../services/categoryService";
-import { createProduct } from "../../../services/productService";
+import { createProduct, getProductWithAttributeAndMedia } from "../../../services/productService";
 
-const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
+const ProductInformation = ({ productInfo ,mode, setProductInfo, onNext }) => {
     const [categories, setCategories] = useState([]);
     const [formData, setFormData] = useState({
         title: '',
@@ -18,7 +18,9 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
 
     // Initialize form data when productInfo changes
     useEffect(() => {
-        if (productInfo) {
+        console.log(productInfo);
+        if (mode == "edit" && productInfo) {
+            console.log("Editing product with info:", productInfo);
             setIsEditing(true);
             // Ensure correct data types, especially for categoryId
             setFormData({
@@ -96,14 +98,23 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
             // } else {
             //     // Create new product
             // }
-            const productResponse = await createProduct(formData.title, formData.description, formData.price, formData.categoryId);
-            
-            // Store in localStorage and update parent state
-            localStorage.setItem('productData', JSON.stringify(productResponse.data));
-            setMessage('Product created successfully!');
-            setMessageType('success');
-            setProductInfo(productResponse.data);
-            onNext(productResponse.data);
+
+            if(isEditing){
+                onNext(productInfo);
+            }
+            else{
+                const productResponse = await createProduct(formData.title, formData.description, formData.price, formData.categoryId);
+                
+                // Store in localStorage and update parent state
+                localStorage.setItem('productData', JSON.stringify(productResponse.data));
+                setMessage('Product created successfully!');
+                setMessageType('success');
+                const productsData = await getProductWithAttributeAndMedia(productResponse.data.id);
+                console.log("Products Data: ", productsData);
+                setProductInfo(productsData.data);
+                console.log("Product created successfully:", productResponse.data);
+                onNext(productResponse.data);
+            }
         } catch (error) {
             console.error('Failed to save product:', error);
             setMessage('Failed to save product.');
@@ -201,6 +212,7 @@ const ProductInformation = ({ productInfo = null, setProductInfo, onNext }) => {
 
 ProductInformation.propTypes = {
     productInfo: PropTypes.object,
+    mode: PropTypes.string.isRequired,
     setProductInfo: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
 };

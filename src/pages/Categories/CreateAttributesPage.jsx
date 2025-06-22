@@ -84,11 +84,11 @@ function CreateAttributesPage({ onSave, categoryName, categoryId }) {
     
     setIsSubmitting(true);
     try {
+      console.log(attributes);
       const responses = await Promise.all(attributes.map(attr => 
         createAttributes(attr.categoryId, attr.name, attr.type, attr.unit)
       ));
       const allSuccess = responses.every(response => response.success);
-      console.log(allSuccess);
       if (allSuccess) {
         onSave(attributes);
         setAttributes([]);

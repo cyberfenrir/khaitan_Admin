@@ -3,19 +3,17 @@ import PropTypes from 'prop-types';
 import { Upload, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import MessageBox from '../../../Utils/message';
-import { createMedia, deleteMedia } from '../../../services/mediaService';
+import { createMedia, deleteMedia, updateMedia } from '../../../services/mediaService';
 import { getAllColors } from '../../../services/colorService';
 
-const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" }) => {
+const ImageDropZone = ({ onImageUpload, nextColor, colors, productInfo, mode }) => {
   const [images, setImages] = useState({});
-  const [colors, setColors] = useState([]);
   const [selectedColors, setSelectedColors] = useState({});
   const [selectedMediaTypes, setSelectedMediaTypes] = useState({});
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('');
   const [rows, setRows] = useState(1);
   const [disabledSaveButtons, setDisabledSaveButtons] = useState({});
-  const [existingMedia, setExistingMedia] = useState([]);
   const [deletedMedia, setDeletedMedia] = useState([]);
   const navigate = useNavigate();
 
@@ -26,23 +24,53 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     { value: 'video/mp4', label: 'MP4' }
   ];
 
-  // Fetch colors on component mount
   useEffect(() => {
-    const getColors = async () => {
-      try {
-        const colorsData = await getAllColors();
-        if (colorsData.success) {
-          setColors(colorsData.data);
-        } else {
-          console.error('Colors data is not an array:', colorsData);
-        }
-      } catch (error) {
-        console.error('Failed to fetch colors:', error);
+    if (mode === 'edit' && productInfo) {
+      console.log("Product Info: ", productInfo);
+      console.log("Colors: ", colors);
+      
+      // If in edit mode, use colors from productInfo
+      const initialMedia = productInfo.media || [];
+      
+      const initialImages = {};
+      const initialColors = {};
+      const initialMediaTypes = {};
+      
+      initialMedia.forEach((media, index) => {
+        // Calculate row and column based on index (3 columns per row)
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        const cellKey = `${row}-${col}`;
+        
+        initialImages[cellKey] = {
+          filePath: media.url,
+          imageType: media.type,
+          file: null,
+          mediaId: media.id,
+          isExisting: true
+        };
+        
+        // Store color as an object with colorHex and colorName
+        initialColors[cellKey] = {
+          colorHex: media.colorHex,
+          colorName: media.colorName
+        };
+        
+        // Set the initial media type
+        initialMediaTypes[cellKey] = media.type;
+      });
+      
+      const requiredRows = Math.ceil(initialMedia.length / 3);
+      if (requiredRows > 0) {
+        setRows(requiredRows);
       }
-    };
+      
+      setImages(initialImages);
+      setSelectedColors(initialColors);
+      setSelectedMediaTypes(initialMediaTypes);
 
-    getColors();
-  }, []);
+    }
+  }, [mode, productInfo]);
 
   const handleDrop = (e, index) => {
     e.preventDefault();
@@ -50,8 +78,8 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     handleFile(file, index);
   };
 
-  const handleSave = async (index) => {
-    const actualProductId = productId || JSON.parse(localStorage.getItem('productData'))?.id;
+const handleSave = async (index) => {
+    const actualProductId = productInfo.id || JSON.parse(localStorage.getItem('productData'))?.id;
 
     if (!actualProductId) {
       console.error('Product ID not found');
@@ -85,8 +113,9 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
     try {
       setDisabledSaveButtons((prev) => ({ ...prev, [index]: true }));
       
-      // Find the actual color ID from the color object, since selectedColors currently stores hexCode
-      const selectedColor = colors.find(color => color.colorHex === selectedColors[index]);
+      // Find the actual color ID from the color object
+      const selectedColorHex = selectedColors[index]?.colorHex || selectedColors[index];
+      const selectedColor = colors.find(color => color.colorHex === selectedColorHex);
       const colorId = selectedColor ? selectedColor.id : null;
       
       if (!colorId) {
@@ -98,14 +127,43 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
       console.log("ImageData: ", imageData.file);
       console.log("MediaType: ", mediaType);
       
-      // Use createMedia service to upload the image
-      const response = await createMedia(actualProductId, colorId, imageData.file, null, mediaType);
-      if (response) {
-        console.log('New media added successfully');
-        setMessage('Media uploaded successfully.');
-        setMessageType('success');
+      let response;
+      
+      // Use createMedia or updateMedia based on mode and existing media
+      if (mode === "create" || !imageData.mediaId) {
+        response = await createMedia(actualProductId, colorId, imageData.file, null, mediaType);
       } else {
-        throw new Error('Failed to create media');
+        // For update mode with existing media
+        response = await updateMedia(
+          imageData.mediaId, 
+          actualProductId, 
+          colorId, 
+          imageData.file, 
+          null, // utilityName
+          imageData.filePath, // url - let the backend handle this
+          mediaType
+        );
+      }
+      
+      if (response) {
+        const actionText = (mode === "create" || !imageData.mediaId) ? 'uploaded' : 'updated';
+        console.log(`Media ${actionText} successfully`, response);
+        setMessage(`Media ${actionText} successfully.`);
+        setMessageType('success');
+        
+        // Update the images state to reflect the new mediaId if it's a new upload
+        if (!imageData.mediaId && response.id) {
+          setImages((prevImages) => ({
+            ...prevImages,
+            [index]: {
+              ...prevImages[index],
+              mediaId: response.id,
+              isExisting: true
+            }
+          }));
+        }
+      } else {
+        throw new Error('Failed to save media');
       }
       
       nextColor(selectedColors);
@@ -159,8 +217,18 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
   };
 
   const handleColorChange = (e, index) => {
-    const colorId = e.target.value;
-    setSelectedColors((prevColors) => ({ ...prevColors, [index]: colorId }));
+    const colorHex = e.target.value;
+    const selectedColor = colors.find(color => color.colorHex === colorHex);
+    
+    if (selectedColor) {
+      setSelectedColors((prevColors) => ({ 
+        ...prevColors, 
+        [index]: {
+          colorHex: selectedColor.colorHex,
+          colorName: selectedColor.colorName
+        }
+      }));
+    }
   };
 
   const handleMediaTypeChange = (e, index) => {
@@ -311,11 +379,16 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                     <div className="flex items-center gap-3">
                       <select
                         id={`color-${cellKey}`}
-                        value={selectedColors[cellKey] || ''}
+                        value={selectedColors[cellKey]?.colorHex || ''}
                         onChange={(e) => handleColorChange(e, cellKey)}
                         className="w-full p-2 border border-gray-300 rounded"
                       >
-                        <option value="" disabled>Select a color</option>
+                        <option value="" disabled>
+                          {(mode === "edit" && selectedColors[cellKey]?.colorName) 
+                            ? selectedColors[cellKey].colorName 
+                            : "Select a color"}
+                        </option>
+                        {/* <option value="" disabled>Select a color</option> */}
                         {colors.map((color) => (
                           <option key={color.id} value={color.colorHex}>
                             {color.colorName}
@@ -324,7 +397,7 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                       </select>
                       <div
                         className="w-12 h-8 border rounded"
-                        style={{ backgroundColor: selectedColors[cellKey] || '#ffffff' }}
+                        style={{ backgroundColor: selectedColors[cellKey]?.colorHex || '#ffffff' }}
                       ></div>
                     </div>
                   </div>
@@ -351,9 +424,9 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
                   
                   <div className="flex justify-end mt-2">
                     <button
-                      className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || !selectedColors[cellKey] || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`bg-orange-500 text-white py-2 px-4 rounded-lg justify-center ${!images[cellKey] || !selectedColors[cellKey]?.colorHex || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey] ? 'opacity-50 cursor-not-allowed' : ''}`}
                       onClick={() => handleSave(cellKey)}
-                      disabled={!images[cellKey] || !selectedColors[cellKey] || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey]}
+                      disabled={!images[cellKey] || !selectedColors[cellKey]?.colorHex || !selectedMediaTypes[cellKey] || disabledSaveButtons[cellKey]}
                     >
                       {images[cellKey]?.isExisting ? 'Update' : 'Save'}
                     </button>
@@ -394,7 +467,8 @@ const ImageDropZone = ({ onImageUpload, nextColor, productId, mode = "create" })
 ImageDropZone.propTypes = {
   onImageUpload: PropTypes.func,
   nextColor: PropTypes.func.isRequired,
-  productId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  productInfo: PropTypes.object.isRequired,
+  colors: PropTypes.array.isRequired,
   mode: PropTypes.oneOf(['create', 'edit']),
 };
 

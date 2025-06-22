@@ -18,7 +18,7 @@ function CreateProduct() {
     const getColors = async () => {
       try {
         const colorsData = await fetchColors();
-        setColors(colorsData);
+        setColors(colorsData.data || []);
       } catch (error) {
         console.error('Failed to fetch colors:', error);
       }
@@ -61,17 +61,17 @@ function CreateProduct() {
       <div className="w-full flex flex-col gap-6 pl-5 pr-4 pb-5">
         {screen === 'details' && (
           <div className='bg-white rounded-lg'>
-            <ProductInformation setProductInfo={setProductInfo} onNext={handleNext} />
+            <ProductInformation setProductInfo={setProductInfo} mode = "create" onNext={handleNext} />
           </div>
         )}
         {screen === 'pricing' && (
           <div className='bg-white rounded-lg'>
-            <ProductPricing productId = {productInfo.id} categoryId={productInfo.categoryId} onNext={handlePricingNext} />
+            <ProductPricing productId = {productInfo.id} mode = "create" productInfo = {productInfo} categoryId={productInfo.categoryId} onNext={handlePricingNext} />
           </div>
         )}
         {screen === 'image' && (
           <div className='bg-white rounded-lg'>
-            <ImageDropZone setImage={setImage} productInfo={productInfo} pricing={pricing} colors={colors} nextColor={handleColorNext} />
+            <ImageDropZone setImage={setImage} mode = "create" productInfo={productInfo} pricing={pricing} colors={colors} nextColor={handleColorNext} />
           </div>
         )}
         {/* <div className="flex justify-end w-[55%] px-3 pt-6">

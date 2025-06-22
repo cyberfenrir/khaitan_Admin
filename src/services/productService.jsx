@@ -114,3 +114,20 @@ export const deleteProduct = async (productId) => {
         console.log("DeleteProduct Service Error: ",err);
     }
 }
+
+export const updateAttributes = async (productId, attributeId, value) => {
+    try{
+        const data = await fetch (`${API_URL}/products/${productId}/attributes/${attributeId}`, {
+            method: "PATCH",
+            credentials: "include",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({value: value}),
+        })
+        return data.json();
+    }
+    catch(err){
+        console.log("UpdateAttributes service error: ",err);
+    }
+}

@@ -3,9 +3,8 @@ import { useParams } from 'react-router-dom';
 import ImageDropZone from './utils/ImageDropZone';
 import ProductInformation from './utils/ProductInformation';
 import ProductPricing from './utils/ProductPricing';
-import { getAttributesForProduct, getProductById } from '../../services/productService';
-import { getAllAttributesForACategory } from '../../services/categoryService';
-import { getAllMedias } from '../../services/mediaService';
+import { getProductWithAttributeAndMedia } from '../../services/productService';
+import { fetchColors } from '../../Middlewares/data/colorsapi';
 
 function EditProduct({ productId }) {
   const { slug } = useParams();
@@ -19,34 +18,33 @@ function EditProduct({ productId }) {
   useEffect(() => {
     const fetchProductDetails = async () => {
           const intProductId = parseInt(slug, 10);
-          console.log('Fetching product details for productId:', intProductId);
           
-          const productData = await getProductById(intProductId);
+          const productData = await getProductWithAttributeAndMedia(intProductId);
           console.log('Fetched product data:', productData);
-          
-          if (productData.success) {
+          if (productData.sucess) {
             setProductInfo(productData.data);
             // setUpdatedProduct(productData.data);
+            const attributeMap = productData.data.attributes;
             
-            const attributesData = await getAttributesForProduct(productData.data.id);
-            console.log('Fetched attributes data:', attributesData);
+            // const attributesData = await getAttributesForProduct(productData.data.id);
+            // console.log('Fetched attributes data:', attributesData);
             
-            const allAttributes = await getAllAttributesForACategory();
-            if(allAttributes.success) {
-              console.log("All Attributes: ", allAttributes.data);
-              const productAttr = allAttributes.data.filter((a) => Number(productData.data.categoryId) === Number(a.categoryId));
+            // const allAttributes = await getAllAttributesForACategory();
+            // if(allAttributes.success) {
+            //   console.log("All Attributes: ", allAttributes.data);
+            //   const productAttr = allAttributes.data.filter((a) => Number(productData.data.categoryId) === Number(a.categoryId));
               
-              const attributeMap = {};
-              productAttr.forEach(attr => {
-                const matchingAttr = attributesData.data.find(a => a.attributeId === attr.id);
-                if (matchingAttr) {
-                  attributeMap[attr.name] = matchingAttr.value;
-                }
-              });
+
+            //   productAttr.forEach(attr => {
+            //     const matchingAttr = attributesData.data.find(a => a.attributeId === attr.id);
+            //     if (matchingAttr) {
+            //       attributeMap[attr.name] = matchingAttr.value;
+            //     }
+            //   });
               
-            //   setAllAttr(attributeMap);
-              console.log("Attribute Map: ", attributeMap);
-            }
+            // //   setAllAttr(attributeMap);
+            // }
+            // console.log("Attribute Map: ", attributeMap);
             
             // if (attributesData.success) {
             //   setAttributes(attributesData.data);
@@ -66,23 +64,47 @@ function EditProduct({ productId }) {
             // if (allCategories.success) {
             //   setCategories(allCategories.data);
             // }
-    
-            const mediaData = await getAllMedias();
-            console.log('Fetched media data:', mediaData);
+            setImage(productData.data.media);
+            // const mediaData = await getAllMedias();
+            // console.log('Fetched media data:', mediaData);
             
-            if (mediaData.success) {
-              const productImage = mediaData.data.find(media => media.productId === intProductId);
-              console.log('Found product image:', productImage);
+            // if (mediaData.success) {
+            //   const productImage = mediaData.data.find(media => media.productId === intProductId);
+            //   console.log('Found product image:', productImage);
               
-              if (productImage) {
-                setImage(productImage);
-              }
-            }
+            //   if (productImage) {
+            //     setImage(productImage);
+            //   }
+            // }
           }
         };
     
         fetchProductDetails();
+
+        return () => {
+          setProductInfo({});
+          setImage(null);
+          setSelectedColor(null);
+          setPricing({});
+          setScreen('details');
+        }
       }, [productId]);
+
+  useEffect(() => {
+    const getColors = async () => {
+      try {
+        const colorsData = await fetchColors();
+        setColors(colorsData.data || []);
+      } catch (error) {
+        console.error('Failed to fetch colors:', error);
+      }
+    }
+    getColors();
+  }, []);
+
+  useEffect (() => {
+    console.log(colors);
+  })
     
 
   const handleColorNext = (data) => {
@@ -106,17 +128,17 @@ function EditProduct({ productId }) {
       <div className="w-full flex flex-col gap-6 pl-5 pr-4 pb-5">
         {screen === 'details' && (
           <div className='bg-white rounded-lg'>
-            <ProductInformation productInfo={productInfo} setProductInfo={setProductInfo} onNext={handleNext} />
+            <ProductInformation productInfo = {productInfo} setProductInfo={setProductInfo} mode = "edit" onNext={handleNext} />
           </div>
         )}
         {screen === 'pricing' && (
           <div className='bg-white rounded-lg'>
-            <ProductPricing productId={productInfo.id} categoryId={productInfo.categoryId} onNext={handlePricingNext} />
+            <ProductPricing productInfo={productInfo} mode = "edit" productId={productInfo.id} categoryId={productInfo.categoryId} onNext={handlePricingNext} />
           </div>
         )}
         {screen === 'image' && (
           <div className='bg-white rounded-lg'>
-            <ImageDropZone setImage={setImage} productInfo={productInfo} pricing={pricing} colors={colors} nextColor={handleColorNext} />
+            <ImageDropZone setImage={setImage} mode = "edit" productInfo={productInfo} pricing={pricing} colors={colors} nextColor={handleColorNext} />
           </div>
         )}
       </div>
