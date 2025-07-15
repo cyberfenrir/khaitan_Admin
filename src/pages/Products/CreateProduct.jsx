@@ -4,6 +4,7 @@ import ProductInformation from './utils/ProductInformation';
 import ProductPricing from './utils/ProductPricing';
 import { fetchColors } from '../../Middlewares/data/colorsapi';
 import { data } from 'autoprefixer';
+import { getAllColors } from '../../services/colorService';
 // import { addData } from '../../Utils/service';
 
 function CreateProduct() {
@@ -17,7 +18,7 @@ function CreateProduct() {
   useEffect(() => {
     const getColors = async () => {
       try {
-        const colorsData = await fetchColors();
+        const colorsData = await getAllColors();
         setColors(colorsData.data || []);
       } catch (error) {
         console.error('Failed to fetch colors:', error);

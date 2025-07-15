@@ -27,13 +27,15 @@ function OrderTable() {
     return customer ? customer.name : 'Unknown';
   };
 
-  const ordersWithCustomerNames = orders.map(order => ({
+  const ordersWithCustomerNames = (orders.length>0)?orders.filter(order => {
+    return order.status !== 'pending';
+  }).map(order => ({
     ...order,
     customer: getCustomerName(order.userId)
-  }));
+  })):[];
 
   // Calculate number of pages (rounding up)
-  const pageCount = Math.ceil(orders.length / 5);
+  const pageCount = Math.ceil(ordersWithCustomerNames.length / 5);
 
   // Generate page buttons dynamically
   const pageButtons = Array.from({ length: pageCount }, (_, index) => index + 1);

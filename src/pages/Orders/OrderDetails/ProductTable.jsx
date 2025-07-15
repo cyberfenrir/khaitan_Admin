@@ -1,5 +1,8 @@
 // import { useEffect } from "react";
 
+import { useEffect, useState } from "react";
+import { getAllColors } from "../../../services/colorService";
+
 // function ProductTable( { productsArray } ) {
 
 //   const products = productsArray;
@@ -79,9 +82,32 @@
 
 // export default ProductTable;
 
-import React from 'react';
-
 function ProductTable({ productsArray }) {
+
+  const [colors, setColors] = useState([]);
+
+  const getColorNameFromColorMap = (colorHex) => {
+    if (!color || !colors.length) return 'Unknown';
+  
+    
+    const color = colors.find(c => c.colorHex.toLowerCase() === colorHex.toLowerCase());
+    return color ? color.colorName : colorHex;
+  };
+
+    const fetchColors = async () => {
+    try {
+      const colorsData = await getAllColors();
+      setColors(colorsData || []);
+    } catch (error) {
+      console.error('Error fetching colors:', error);
+      setColors([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchColors();
+  }, []);
+
   const calculateTotal = (price, quantity) => (price * quantity).toFixed(2);
 
   return (
@@ -96,6 +122,7 @@ function ProductTable({ productsArray }) {
             <tr className="text-gray-600 text-sm">
               <th className="px-4 py-3 text-left">Product</th>
               <th className="px-4 py-3 text-center">Quantity</th>
+              <th className="px-4 py-3 text-center">Color</th>
               <th className="px-4 py-3 text-center">Price</th>
               <th className="px-4 py-3 text-center">Total</th>
             </tr>
@@ -118,6 +145,9 @@ function ProductTable({ productsArray }) {
                 </td>
                 <td className="px-4 py-4 text-center text-gray-600">
                   {product.order_products.quantity}
+                </td>
+                <td className="px-4 py-4 text-center text-gray-600">
+                  {getColorNameFromColorMap(product.order_products.color)}
                 </td>
                 <td className="px-4 py-4 text-center text-gray-600">
                   ₹{product.price.toFixed(2)}

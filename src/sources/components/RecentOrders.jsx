@@ -83,30 +83,21 @@ const RecentOrders = () => {
   }, []);
 
   const getCustomerName = (userId) => {
-    const customer = users.find(user => user.id === userId);
+    const customer = users.find(user => user?.id === userId);
     return customer;
   };
 
-  const ordersWithCustomerNames = (orderData.length>0 )? orderData.map(order => ({
+  const ordersWithCustomerNames = (orderData.length>0 )? orderData.filter((order) => {
+    return order?.status != "pending";
+  }).map(order => ({
     ...order,
-    items: order.products.length,
-    createdAt: convertDateTime(order.createdAt),
-    customer: getCustomerName(order.userId).name,
-    phone: getCustomerName(order.userId).phoneNumber,
-    address: getCustomerName(order.userId).address,
-    email: getCustomerName(order.userId).email
-  })): [
-    {
-      id: '',
-      createdAt: '',
-      items: 0,
-      customer: '',
-      phone: '',
-      email: '',
-      deliveryStatus: '',
-      status: ''
-    }
-  ];
+    items: order?.products.length,
+    createdAt: convertDateTime(order?.createdAt),
+    customer: getCustomerName(order?.userId)?.name,
+    phone: getCustomerName(order?.userId)?.phoneNumber,
+    address: getCustomerName(order?.userId)?.address,
+    email: getCustomerName(order?.userId)?.email
+  })): [];
 
 
   const columnDefs = [

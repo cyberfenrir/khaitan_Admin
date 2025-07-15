@@ -1,6 +1,6 @@
 function SummaryTable({ order }) {
   const summaryItems = [
-    { label: "Sub Total :", value: `₹${order.totalPrice}` },
+    { label: "Sub Total :", value: `₹${order.totalPrice - (0.18 * order.totalPrice)}` },
     // { label: "Discount :", value: "-₹60.00" }, 
     { label: "Delivery Charge :", value: "₹00.00" },
     { label: "Estimated Tax (18%) :", value: `₹${0.18*order.totalPrice}` },
@@ -31,10 +31,7 @@ function SummaryTable({ order }) {
       <div className="flex gap-10 justify-between items-center px-6 py-5 mt-6 border border-y w-full bg-gray-50 text-slate-700">
         <div className="self-stretch my-auto">Total Amount</div>
         <div className="self-stretch my-auto">
-          ₹{summaryItems.reduce((total, item) => {
-            const numericValue = parseFloat(item.value.replace(/[₹,-]/g, '')) || 0;
-            return total + numericValue;
-          }, 0).toFixed(2)}
+          ₹{order.totalPrice.toFixed(2)}
         </div>
       </div>
     </section>
